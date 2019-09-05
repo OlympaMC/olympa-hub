@@ -1,0 +1,6 @@
+name: OlympaHUB
+version: 1.0-SNAPSHOT
+main: fr.olympahub.olympahub.OlympaHUB
+authors: [DylanMalandain]
+description: Olympa HUB PLugins
+website: https://dylan-malandain.me
