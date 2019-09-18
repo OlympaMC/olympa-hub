@@ -2,7 +2,7 @@ package fr.olympa.hub;
 
 import org.bukkit.plugin.PluginManager;
 
-import fr.olympa.hub.gui.GuiListener;
+import fr.olympa.hub.gui.GuiHubListener;
 import fr.olympa.hub.listeners.DamageListener;
 import fr.olympa.hub.listeners.PlayerJoinListener;
 import fr.olympa.hub.listeners.ProtectListener;
@@ -24,7 +24,7 @@ public final class OlympaHub extends OlympaPlugin {
 		pluginManager.registerEvents(new PlayerJoinListener(), this);
 		pluginManager.registerEvents(new ProtectListener(), this);
 		pluginManager.registerEvents(new DamageListener(), this);
-		pluginManager.registerEvents(new GuiListener(), this);
+		pluginManager.registerEvents(new GuiHubListener(), this);
 
 		this.sendMessage("§2" + this.getDescription().getName() + "§a by Tristiisch (" + this.getDescription().getVersion() + ") is activated.");
 	}

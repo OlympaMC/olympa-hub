@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
 
-import fr.olympa.hub.gui.GuiHub;
+import fr.olympa.hub.gui.GuisHub;
 import fr.tristiisch.olympa.api.title.Title;
 import fr.tristiisch.olympa.api.utils.SpigotUtils;
 
@@ -30,7 +30,7 @@ public class PlayerJoinListener implements Listener {
 		player.setFoodLevel(20);
 		player.setExp(0);
 		player.setCanPickupItems(false);
-		GuiHub.hotbar(player);
+		GuisHub.hotbar(player);
 		// player.teleport(OlympaSpigot.getSpawn());
 	}
 
