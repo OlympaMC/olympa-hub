@@ -19,7 +19,7 @@ public class DamageListener implements Listener {
 
 			final Player attacker = (Player) event.getDamager();
 
-			attacker.playSound(attacker.getLocation(), Sound.VILLAGER_NO, 1, 1);
+			attacker.playSound(attacker.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
 			event.setCancelled(true);
 		}
 	}

@@ -1,6 +1,8 @@
 package fr.olympa.hub.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,16 +11,21 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
 
+import fr.olympa.api.objects.OlympaServerSettings;
+import fr.olympa.api.title.Title;
+import fr.olympa.api.utils.SpigotUtils;
 import fr.olympa.hub.gui.GuisHub;
-import fr.tristiisch.olympa.api.title.Title;
-import fr.tristiisch.olympa.api.utils.SpigotUtils;
 
 public class PlayerJoinListener implements Listener {
 
-	public void init(final Player player) {
+	{
+		Bukkit.getOnlinePlayers().forEach(player -> this.join(player));
+	}
+
+	public void init(Player player) {
 		SpigotUtils.clearPlayer(player);
 		player.setGameMode(GameMode.ADVENTURE);
-		for (final PotionEffect effect : player.getActivePotionEffects()) {
+		for (PotionEffect effect : player.getActivePotionEffects()) {
 			player.removePotionEffect(effect.getType());
 		}
 		player.setMaxHealth(2);
@@ -31,26 +38,32 @@ public class PlayerJoinListener implements Listener {
 		player.setExp(0);
 		player.setCanPickupItems(false);
 		GuisHub.hotbar(player);
-		// player.teleport(OlympaSpigot.getSpawn());
+		Location spawn = OlympaServerSettings.getInstance().getSpawn();
+		if (spawn != null) {
+			player.teleport(spawn);
+		}
 	}
 
-	@EventHandler
-	public void onPlayerJoin(final PlayerJoinEvent event) {
-		final Player player = event.getPlayer();
-		Title.sendTitle(player, "&4[&cBETA&4] &6Olympa", "&eGta & PvPFaction", 0, 60, 10);
+	public void join(Player player) {
+		Title.sendTitle(player, "&4[&cBETA&4] &6Olympa", "&eZTA & PvPFaction", 0, 60, 10);
 		this.init(player);
 	}
 
 	@EventHandler
-	public void onPlayerQuit(final PlayerQuitEvent event) {
-		final Player player = event.getPlayer();
+	public void onPlayerJoin(PlayerJoinEvent event) {
+		Player player = event.getPlayer();
+		this.join(player);
+	}
+
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		Player player = event.getPlayer();
 		this.init(player);
 	}
 
 	@EventHandler
-	public void onPlayerRespawn(final PlayerRespawnEvent event) {
-		final Player player = event.getPlayer();
-		// event.setRespawnLocation(OlympaSpigot.getSpawn());
+	public void onPlayerRespawn(PlayerRespawnEvent event) {
+		Player player = event.getPlayer();
 		this.init(player);
 	}
 

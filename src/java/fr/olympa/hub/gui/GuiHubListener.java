@@ -7,9 +7,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-import fr.tristiisch.olympa.api.customevents.GuiClickEvent;
-import fr.tristiisch.olympa.api.gui.GuiHandler;
-import fr.tristiisch.olympa.api.gui.OlympaGuiBuild;
+import fr.olympa.api.customevents.GuiClickEvent;
+import fr.olympa.api.gui.GuiHandler;
+import fr.olympa.api.gui.OlympaGuiBuild;
 
 public class GuiHubListener implements Listener {
 

@@ -10,7 +10,7 @@ public class ProtectListener implements Listener {
 
 	@EventHandler
 	public void PlayerInteractEvent(final PlayerInteractEvent event) {
-		if (event.getAction().equals(Action.PHYSICAL) && event.getClickedBlock().getType().equals(Material.SOIL)) {
+		if (event.getAction().equals(Action.PHYSICAL) && event.getClickedBlock().getType().equals(Material.FARMLAND)) {
 			event.setCancelled(true);
 		}
 	}

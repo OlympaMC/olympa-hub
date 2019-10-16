@@ -2,7 +2,7 @@ package fr.olympa.hub.gui;
 
 import java.util.Arrays;
 
-import fr.tristiisch.olympa.api.plugin.OlympaPlugin;
+import fr.olympa.hub.OlympaHub;
 
 public enum GuiHub {
 
@@ -15,6 +15,6 @@ public enum GuiHub {
 
 	@Override
 	public String toString() {
-		return OlympaPlugin.getInstance().getDescription().getName() + "." + this.name();
+		return OlympaHub.getInstance().getDescription().getName() + "." + this.name();
 	}
 }
