@@ -8,10 +8,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import fr.olympa.OlympaCorePermissions;
 import fr.olympa.api.command.OlympaCommand;
 import fr.olympa.api.objects.OlympaServerSettings;
 import fr.olympa.api.utils.Prefix;
+import fr.olympa.hub.permission.OlympaHubPermissions;
 
 public class SpawnCommand extends OlympaCommand {
 
@@ -28,7 +28,7 @@ public class SpawnCommand extends OlympaCommand {
 			player.teleport(OlympaServerSettings.getInstance().getSpawn());
 		} else if (args[0].equalsIgnoreCase("set")) {
 
-			if (!OlympaCorePermissions.SPAWN_SPAWN_COMMAND_SET.hasPermission(player)) {
+			if (!OlympaHubPermissions.SPAWN_SPAWN_COMMAND_SET.hasPermission(player)) {
 				this.sendDoNotHavePermission();
 			}
 			OlympaServerSettings serverSettings = OlympaServerSettings.getInstance();
@@ -43,7 +43,6 @@ public class SpawnCommand extends OlympaCommand {
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

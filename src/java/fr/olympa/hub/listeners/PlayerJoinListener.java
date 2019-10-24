@@ -12,9 +12,8 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
 
 import fr.olympa.api.objects.OlympaServerSettings;
-import fr.olympa.api.title.Title;
 import fr.olympa.api.utils.SpigotUtils;
-import fr.olympa.hub.gui.GuisHub;
+import fr.olympa.hub.gui.ItemHotbar;
 
 public class PlayerJoinListener implements Listener {
 
@@ -37,7 +36,7 @@ public class PlayerJoinListener implements Listener {
 		player.setFoodLevel(20);
 		player.setExp(0);
 		player.setCanPickupItems(false);
-		GuisHub.hotbar(player);
+		ItemHotbar.set(player);
 		Location spawn = OlympaServerSettings.getInstance().getSpawn();
 		if (spawn != null) {
 			player.teleport(spawn);
@@ -45,7 +44,7 @@ public class PlayerJoinListener implements Listener {
 	}
 
 	public void join(Player player) {
-		Title.sendTitle(player, "&4[&cBETA&4] &6Olympa", "&eZTA & PvPFaction", 0, 60, 10);
+		player.sendTitle("&4[&cBETA&4] &6Olympa", "&eZTA & PvPFaction", 0, 60, 10);
 		this.init(player);
 	}
 
