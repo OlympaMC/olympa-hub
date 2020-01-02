@@ -11,13 +11,13 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 public class DamageListener implements Listener {
 
 	@EventHandler
-	public void EntityDamageByEntityEvent(final EntityDamageByEntityEvent event) {
+	public void EntityDamageByEntityEvent(EntityDamageByEntityEvent event) {
 		if (event.isCancelled() || !(event.getEntity() instanceof Player)) {
 			return;
 		}
 		if (event.getDamager() instanceof Player) {
 
-			final Player attacker = (Player) event.getDamager();
+			Player attacker = (Player) event.getDamager();
 
 			attacker.playSound(attacker.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
 			event.setCancelled(true);
@@ -25,7 +25,7 @@ public class DamageListener implements Listener {
 	}
 
 	@EventHandler
-	public void EntityDamageEvent(final EntityDamageEvent event) {
+	public void EntityDamageEvent(EntityDamageEvent event) {
 		if (event.isCancelled() || !(event.getEntity() instanceof Player)) {
 			return;
 		}
