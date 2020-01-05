@@ -14,13 +14,14 @@ public class GuiProfile extends OlympaGUI {
 	public GuiProfile(Player p) {
 		super("&6Olympa &f| &7Profile", 3);
 
-		OlympaPlayer olympaPlayer = AccountProvider.get(p);
+		OlympaPlayer olympaPlayer = AccountProvider.get(p.getUniqueId());
 		OlympaItemBuild item = new OlympaItemBuild("&7").lore("", "&6Grade: ").skullowner(p);
 		item.addName(p.getName());
 		item.setLore(1, olympaPlayer.getGroupsToHumainString());
-		inv.setItem(0, item.build());
+		this.inv.setItem(0, item.build());
 	}
 
+	@Override
 	public boolean onClick(Player p, ItemStack current, int slot, ClickType click) {
 		return true;
 	}
