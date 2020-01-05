@@ -18,7 +18,7 @@ public class GuiHubListener implements Listener {
 		}
 
 		if (item.equals(ItemHotbar.ITEM_COMPASS.build())) {
-			new GuiMenu().open(player);
+			new GuiMenu(player).create(player);
 		}
 	}
 }

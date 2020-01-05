@@ -11,19 +11,20 @@ import fr.olympa.hub.listeners.ProtectListener;
 
 public class OlympaHub extends OlympaPlugin {
 
+	private static OlympaHub instance;
 	public static OlympaHub getInstance() {
-		return (OlympaHub) instance;
+		return instance;
 	}
 
 	@Override
 	public void onDisable() {
-		this.disable();
-		this.sendMessage("§4" + this.getDescription().getName() + "§c by Tristiisch (" + this.getDescription().getVersion() + ") is disabled.");
+		super.disable();
 	}
 
 	@Override
 	public void onEnable() {
-		this.enable(this);
+		instance = this;
+		super.onEnable();
 		new SpawnCommand(this).register();
 
 		PluginManager pluginManager = this.getServer().getPluginManager();
@@ -31,7 +32,5 @@ public class OlympaHub extends OlympaPlugin {
 		pluginManager.registerEvents(new ProtectListener(), this);
 		pluginManager.registerEvents(new DamageListener(), this);
 		pluginManager.registerEvents(new GuiHubListener(), this);
-
-		this.sendMessage("§2" + this.getDescription().getName() + "§a by Tristiisch (" + this.getDescription().getVersion() + ") is activated.");
 	}
 }

@@ -1,6 +1,6 @@
 name: OlympaHub
 main: fr.olympa.hub.OlympaHub
-author: Tristiisch
+authors: [Tristiisch, SkytAsul]
 version: 0.1
 api-version: 1.13
 softdepend: [OlympaCore, OlympaAPI]

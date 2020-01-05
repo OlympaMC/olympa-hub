@@ -17,7 +17,7 @@
 		<dependency>
 			<groupId>fr.olympa</groupId>
 			<artifactId>olympa-api</artifactId>
-			<version>[0.0.1-SNAPSHOT,)</version>
+			<version>0.0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

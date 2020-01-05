@@ -4,33 +4,25 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
-import fr.olympa.api.gui.CustomInventory;
-import fr.olympa.api.gui.OlympaGui;
+import fr.olympa.api.gui.OlympaGUI;
 import fr.olympa.api.item.OlympaItemBuild;
 import fr.olympa.api.objects.OlympaPlayer;
 import fr.olympa.api.provider.AccountProvider;
 
-public class GuiProfile implements CustomInventory {
+public class GuiProfile extends OlympaGUI {
 
-	private OlympaItemBuild ITEM_INFO = new OlympaItemBuild("&7").lore("", "&6Grade: ");
+	public GuiProfile(Player p) {
+		super("&6Olympa &f| &7Profile", 3);
 
-	@Override
-	public boolean onClick(Player p, OlympaGui inv, ItemStack current, int slot, ClickType click) {
-		return false;
+		OlympaPlayer olympaPlayer = AccountProvider.get(p);
+		OlympaItemBuild item = new OlympaItemBuild("&7").lore("", "&6Grade: ").skullowner(p);
+		item.addName(p.getName());
+		item.addLore(1, olympaPlayer.getGroupsToHumainString());
+		inv.setItem(0, item.build());
 	}
 
-	public void open(Player player) {
-		OlympaGui gui = new OlympaGui("&6Olympa &f| &7Profile", 3);
-
-		OlympaItemBuild item = this.ITEM_INFO.skullowner(player);
-		OlympaPlayer olympaPlayer = AccountProvider.get(player);
-		item.addName(player.getName());
-		item.addLore(1, olympaPlayer.getGroupsToHumainString());
-		gui.setItem(gui.getFirstSlot(), item.build());
-
-		gui.openInventory(player);
-
-		this.create(player, gui);
+	public boolean onClick(Player p, ItemStack current, int slot, ClickType click) {
+		return true;
 	}
 
 }
