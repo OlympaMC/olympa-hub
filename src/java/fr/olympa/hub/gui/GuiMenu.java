@@ -27,7 +27,7 @@ public class GuiMenu extends OlympaGUI {
 		OlympaPlayer olympaPlayer = AccountProvider.get(p);
 		OlympaItemBuild item = new OlympaItemBuild("&7").lore("", "&6Grade: &e").skullowner(p);
 		item.addName(p.getName());
-		item.addLore(1, olympaPlayer.getGroupsToHumainString());
+		item.setLore(1, olympaPlayer.getGroupsToHumainString());
 		inv.setItem(inv.getSize() - 1, item.build());
 	}
 

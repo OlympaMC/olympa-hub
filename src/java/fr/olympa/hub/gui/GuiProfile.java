@@ -17,7 +17,7 @@ public class GuiProfile extends OlympaGUI {
 		OlympaPlayer olympaPlayer = AccountProvider.get(p);
 		OlympaItemBuild item = new OlympaItemBuild("&7").lore("", "&6Grade: ").skullowner(p);
 		item.addName(p.getName());
-		item.addLore(1, olympaPlayer.getGroupsToHumainString());
+		item.setLore(1, olympaPlayer.getGroupsToHumainString());
 		inv.setItem(0, item.build());
 	}
 

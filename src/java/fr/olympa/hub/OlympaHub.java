@@ -24,7 +24,7 @@ public class OlympaHub extends OlympaPlugin {
 	@Override
 	public void onEnable() {
 		instance = this;
-		super.onEnable();
+		super.enable();
 		new SpawnCommand(this).register();
 
 		PluginManager pluginManager = this.getServer().getPluginManager();
