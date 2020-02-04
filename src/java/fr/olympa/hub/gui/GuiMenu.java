@@ -6,14 +6,14 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
+import fr.olympa.api.bpmc.SpigotBPMC;
 import fr.olympa.api.gui.OlympaGUI;
 import fr.olympa.api.item.OlympaItemBuild;
-import fr.olympa.hub.OlympaHub;
 
 public class GuiMenu extends OlympaGUI {
 
-	private static ItemStack ITEM_ZTA = new OlympaItemBuild(Material.DIAMOND_SWORD, "&7&l■ &6&lZTA &7&l■").flag(ItemFlag.HIDE_ATTRIBUTES).lore("", "&7Description.", "", "&7 Status: &aOuvert","§7 Joueurs: §60" , "").build();
-	private static ItemStack ITEM_PVFAC = new OlympaItemBuild(Material.DIAMOND_SWORD, "&7&l■ &cPvP-Faction &7&l■").flag(ItemFlag.HIDE_ATTRIBUTES).lore("", "&7Description.", "", "&7 Status: &aOuvert","§7 Joueurs: §60" , "").build();
+	private static ItemStack ITEM_ZTA = new OlympaItemBuild(Material.DIAMOND_SWORD, "&7&l■ &6&lZTA &7&l■").flag(ItemFlag.HIDE_ATTRIBUTES).lore("", "&7Description.", "", "&7 Status: &aOuvert", "§7 Joueurs: §60", "").build();
+	private static ItemStack ITEM_PVFAC = new OlympaItemBuild(Material.DIAMOND_SWORD, "&7&l■ &cPvP-Faction &7&l■").flag(ItemFlag.HIDE_ATTRIBUTES).lore("", "&7Description.", "", "&7 Status: &aOuvert", "§7 Joueurs: §60", "").build();
 	private static ItemStack ITEM_SPAWN = new OlympaItemBuild(Material.RED_BED, "&eRetour au spawn").flag(ItemFlag.HIDE_ATTRIBUTES).lore("", "&7Pour retourner au spawn.", "").build();
 
 	public GuiMenu(Player p) {
@@ -36,12 +36,12 @@ public class GuiMenu extends OlympaGUI {
 		if (ITEM_ZTA.isSimilar(current)) {
 			p.sendMessage("§aTéléportation en cours ...");
 			p.closeInventory();
-			OlympaHub.getInstance().getMessageChannel().connectToServer(p, "zta1");
-			
+			SpigotBPMC.sendPlayer(p, "zta1");
+
 		} else if (ITEM_PVFAC.isSimilar(current)) {
 			p.sendMessage("§aTéléportation en cours ...");
 			p.closeInventory();
-			OlympaHub.getInstance().getMessageChannel().connectToServer(p, "pvpfac1");
+			SpigotBPMC.sendPlayer(p, "pvpfac1");
 		} else if (ITEM_SPAWN.isSimilar(current)) {
 			p.closeInventory();
 			p.performCommand("spawn");

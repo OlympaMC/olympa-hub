@@ -45,7 +45,7 @@ public class PlayerJoinListener implements Listener {
 	}
 
 	public void join(Player player) {
-		player.sendTitle("§4[§cBETA§4] §6Olympa", "§e§lZTA §7& §c§lPvPFaction", 0, 60, 0);
+		player.sendTitle("Â§4[Â§cBETAÂ§4] Â§6Olympa", "Â§eÂ§lZTA Â§7& Â§cÂ§lPvPFaction", 0, 60, 0);
 		this.init(player);
 	}
 
