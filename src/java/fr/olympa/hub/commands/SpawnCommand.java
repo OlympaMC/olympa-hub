@@ -11,6 +11,7 @@ import org.bukkit.plugin.Plugin;
 import fr.olympa.api.command.OlympaCommand;
 import fr.olympa.api.objects.OlympaServerSettings;
 import fr.olympa.api.utils.Prefix;
+import fr.olympa.hub.commonerrors.Messages;
 import fr.olympa.hub.permission.OlympaHubPermissions;
 
 public class SpawnCommand extends OlympaCommand {
@@ -25,7 +26,12 @@ public class SpawnCommand extends OlympaCommand {
 		Player player = this.player;
 		if (args.length == 0) {
 			this.sendMessage(Prefix.DEFAULT, "&7Tu es téléporté(e) au spawn.");
-			player.teleport(OlympaServerSettings.getInstance().getSpawn());
+			if (OlympaServerSettings.getInstance().getSpawn() == null) {
+				sender.sendMessage(Messages.SPAWN_NOT_FOUND.getErreur());
+				return true;
+			} else {
+				player.teleport(OlympaServerSettings.getInstance().getSpawn());
+			}
 		} else if (args[0].equalsIgnoreCase("set")) {
 
 			if (!OlympaHubPermissions.SPAWN_SPAWN_COMMAND_SET.hasPermission(player)) {

@@ -21,6 +21,7 @@ public class PlayerJoinListener implements Listener {
 		Bukkit.getOnlinePlayers().forEach(player -> this.join(player));
 	}
 
+	@SuppressWarnings("deprecation")
 	public void init(Player player) {
 		SpigotUtils.clearPlayer(player);
 		player.setGameMode(GameMode.ADVENTURE);
@@ -44,7 +45,7 @@ public class PlayerJoinListener implements Listener {
 	}
 
 	public void join(Player player) {
-		player.sendTitle("&4[&cBETA&4] &6Olympa", "&eZTA & PvPFaction", 0, 60, 10);
+		player.sendTitle("§4[§cBETA§4] §6Olympa", "§e§lZTA §7& §c§lPvPFaction", 0, 60, 0);
 		this.init(player);
 	}
 
@@ -52,6 +53,7 @@ public class PlayerJoinListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		this.join(player);
+		event.setJoinMessage(null);
 	}
 
 	@EventHandler

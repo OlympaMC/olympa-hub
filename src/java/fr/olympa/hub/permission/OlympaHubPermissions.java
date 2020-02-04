@@ -1,6 +1,6 @@
 package fr.olympa.hub.permission;
 
-import fr.olympa.api.objects.OlympaGroup;
+import fr.olympa.api.groups.OlympaGroup;
 import fr.olympa.api.permission.OlympaPermission;
 
 public class OlympaHubPermissions {
