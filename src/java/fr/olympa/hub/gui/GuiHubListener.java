@@ -6,8 +6,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class GuiHubListener implements Listener {
+import fr.olympa.hub.commonerrors.Messages;
 
+public class GuiHubListener
+		implements Listener {
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
@@ -17,8 +19,12 @@ public class GuiHubListener implements Listener {
 			return;
 		}
 
-		if (item.equals(ItemHotbar.ITEM_COMPASS.build())) {
+		if (item.equals(ItemHotbar.ITEM_COMPASS.build()))
 			new GuiMenu(player).create(player);
-		}
+		else if (item.getItemMeta().getDisplayName().contains(ItemHotbar.ITEM_PROFILE.getItemMeta().getDisplayName()))
+			new GuiProfile(player).create(player);
+		else if (item.equals(ItemHotbar.ITEM_AMIS.build()))
+			new GuiAmis(player).create(player);
+		else if (item.equals(ItemHotbar.ITEM_COSMETICS.build())) Messages.ITEM_NOT_AVAIBLE.send(player);
 	}
 }

@@ -1,11 +1,11 @@
 package fr.olympa.hub.commonerrors;
 
-import fr.olympa.api.utils.SpigotUtils;
+import org.bukkit.entity.Player;
 
 public enum Messages {
-
-	SERVER_NOT_FOUND("&c&lERREUR: &cIl semble qu'il y'a une erreur: &f(SERVER_NOT_FOUND)"),
-	SPAWN_NOT_FOUND("&c&lERREUR: &cIl semble qu'il y'a une erreur: &f(SPAWN_NOT_FOUND)");
+	SERVER_NOT_FOUND("�c�lERREUR: �cIl semble qu'il y'a une erreur: �f(SERVER_NOT_FOUND)"),
+	SPAWN_NOT_FOUND("�c�lERREUR: �cIl semble qu'il y'a une erreur: �f(SPAWN_NOT_FOUND)"),
+	ITEM_NOT_AVAIBLE("�c�lERREUR: �cIl semble qu'il y'a une erreur: �f(ITEM_NOT_AVAIBLE)");
 
 	private String erreur;
 
@@ -14,6 +14,10 @@ public enum Messages {
 	}
 
 	public String getErreur() {
-		return SpigotUtils.color(this.erreur);
+		return this.erreur;
+	}
+
+	public void send(Player p) {
+		p.sendMessage(getErreur());
 	}
 }

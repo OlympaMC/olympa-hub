@@ -13,7 +13,9 @@ import org.bukkit.potion.PotionEffect;
 
 import fr.olympa.api.objects.OlympaServerSettings;
 import fr.olympa.api.utils.SpigotUtils;
+import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.gui.ItemHotbar;
+import fr.olympa.hub.task.TitleTask;
 
 public class PlayerJoinListener implements Listener {
 
@@ -21,8 +23,12 @@ public class PlayerJoinListener implements Listener {
 		Bukkit.getOnlinePlayers().forEach(player -> this.join(player));
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings ("deprecation")
 	public void init(Player player) {
+
+		/*OlympaPlayer p = AccountProvider.get(player.getUniqueId());
+		
+		if (p.getLastConnection() == 0)FireWorkUtils.spawnWelcomeFireworks(player.getLocation());*/
 		SpigotUtils.clearPlayer(player);
 		player.setGameMode(GameMode.ADVENTURE);
 		for (PotionEffect effect : player.getActivePotionEffects()) {
@@ -45,7 +51,7 @@ public class PlayerJoinListener implements Listener {
 	}
 
 	public void join(Player player) {
-		player.sendTitle("§4[§cBETA§4] §6Olympa", "§e§lZTA §7& §c§lPvPFaction", 0, 60, 0);
+		new TitleTask(player).runTaskTimer(OlympaHub.getInstance(), 6, 6);
 		this.init(player);
 	}
 

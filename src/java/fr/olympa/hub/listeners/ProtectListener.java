@@ -27,7 +27,7 @@ public class ProtectListener implements Listener {
 		canceldrop = false;
 	}
 
-	@EventHandler(ignoreCancelled = false)
+	@EventHandler (ignoreCancelled = false)
 	private void BlockBreakEvent(BlockBreakEvent event) {
 		Player player = event.getPlayer();
 		if (!this.canI(player)) {
@@ -36,7 +36,7 @@ public class ProtectListener implements Listener {
 		}
 	}
 
-	@EventHandler(ignoreCancelled = false)
+	@EventHandler (ignoreCancelled = false)
 	private void BlockPlaceEvent(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
 		if (!this.canI(player)) {
@@ -49,7 +49,7 @@ public class ProtectListener implements Listener {
 		return player.getGameMode() == GameMode.CREATIVE;
 	}
 
-	@EventHandler(ignoreCancelled = false)
+	@EventHandler (ignoreCancelled = false)
 	private void EntityDamageByEntityEvent(EntityDamageByEntityEvent event) {
 		if (event.getDamager() instanceof Player) {
 			if (!(event.getEntity() instanceof Player)) {
@@ -58,22 +58,22 @@ public class ProtectListener implements Listener {
 					event.setCancelled(true);
 				}
 			}
-		} else if (!(event.getEntity() instanceof Player)) {
+		}else if (!(event.getEntity() instanceof Player)) {
 			event.setCancelled(true);
 		}
 	}
 
-	@EventHandler(ignoreCancelled = false)
+	@EventHandler (ignoreCancelled = false)
 	public void HangingBreakEvent(HangingBreakByEntityEvent event) {
 		event.setCancelled(!(event.getEntity() instanceof Player) || !this.canI((Player) event.getEntity()));
 	}
 
-	@EventHandler(ignoreCancelled = false)
+	@EventHandler (ignoreCancelled = false)
 	public void HangingPlaceEvent(HangingPlaceEvent event) {
 		event.setCancelled(!this.canI(event.getPlayer()));
 	}
 
-	@EventHandler(ignoreCancelled = false)
+	@EventHandler (ignoreCancelled = false)
 	private void PlayerDropItemEvent(PlayerDropItemEvent event) {
 		if (!canceldrop) {
 			return;
@@ -93,7 +93,7 @@ public class ProtectListener implements Listener {
 		}
 	}
 
-	@EventHandler(ignoreCancelled = false)
+	@EventHandler (ignoreCancelled = false)
 	private void PlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
 		if (!this.canI(event.getPlayer())) {
 			event.setCancelled(true);
@@ -107,7 +107,7 @@ public class ProtectListener implements Listener {
 		}
 	}
 
-	@EventHandler(ignoreCancelled = false)
+	@EventHandler (ignoreCancelled = false)
 	private void PlayerPickupItemEvent(EntityPickupItemEvent event) {
 		Entity entity = event.getEntity();
 		if (!(entity instanceof Player) || !canceldrop) {

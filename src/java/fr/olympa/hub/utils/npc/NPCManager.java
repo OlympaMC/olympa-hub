@@ -21,24 +21,23 @@ import net.minecraft.server.v1_15_R1.WorldServer;
 
 public class NPCManager {
 
-	//pas encore terminé
-    public void createNPC(Player player, String npcName) {
-        Location location = player.getLocation();
-        MinecraftServer nmsServer = ((CraftServer) Bukkit.getServer()).getServer();
-        WorldServer nmsWorld = ((CraftWorld) player.getWorld()).getHandle();
-        GameProfile gameProfile = new GameProfile(UUID.randomUUID(), npcName);
+	//pas encore terminï¿½
+	public void createNPC(Player player, String npcName) {
+		Location location = player.getLocation();
+		MinecraftServer nmsServer = ((CraftServer) Bukkit.getServer()).getServer();
+		WorldServer nmsWorld = ((CraftWorld) player.getWorld()).getHandle();
+		GameProfile gameProfile = new GameProfile(UUID.randomUUID(), npcName);
 
-        EntityPlayer npc = new EntityPlayer(nmsServer, nmsWorld, gameProfile, new PlayerInteractManager(nmsWorld));
-        Player npcPlayer = npc.getBukkitEntity().getPlayer();
-        npcPlayer.setPlayerListName("");
+		EntityPlayer npc = new EntityPlayer(nmsServer, nmsWorld, gameProfile, new PlayerInteractManager(nmsWorld));
+		Player npcPlayer = npc.getBukkitEntity().getPlayer();
+		npcPlayer.setPlayerListName("");
 
-        npc.setLocation(location.getX(), location.getY(), location.getZ(), player.getLocation().getYaw(), player.getLocation().getPitch());
+		npc.setLocation(location.getX(), location.getY(), location.getZ(), player.getLocation().getYaw(), player.getLocation().getPitch());
 
-        PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
-        connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npc));
-        connection.sendPacket(new PacketPlayOutNamedEntitySpawn(npc));
-        connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc));
+		PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
+		connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npc));
+		connection.sendPacket(new PacketPlayOutNamedEntitySpawn(npc));
+		connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc));
 
-
-    }
+	}
 }

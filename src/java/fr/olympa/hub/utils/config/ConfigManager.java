@@ -36,7 +36,9 @@ public class ConfigManager {
 		return this.name;
 	}
 
-	public Object getObject(String ValuePath) { return this.c.get(ValuePath); }
+	public Object getObject(String ValuePath) {
+		return this.c.get(ValuePath);
+	}
 
 	public void removeFile(String FileName) {
 		if (f.getAbsoluteFile().getName() != null) {
@@ -46,37 +48,49 @@ public class ConfigManager {
 		}
 	}
 
-	public void removeBuilder(String FilePath) { this.f.delete(); }
+	public void removeBuilder(String FilePath) {
+		this.f.delete();
+	}
 
-	public int getInt(String ValuePath) { return this.c.getInt(ValuePath); }
+	public int getInt(String ValuePath) {
+		return this.c.getInt(ValuePath);
+	}
 
-	public String getString(String ValuePath) { return this.c.getString(ValuePath); }
-//t
-	public long getLong(String ValuePath) { return this.c.getLong(ValuePath); }
+	public String getString(String ValuePath) {
+		return this.c.getString(ValuePath);
+	}
 
-	public boolean getBoolean(String ValuePath) { return this.c.getBoolean(ValuePath); }
+	//t
+	public long getLong(String ValuePath) {
+		return this.c.getLong(ValuePath);
+	}
 
-	public List<String> getStringList(String ValuePath) { return this.c.getStringList(ValuePath); }
+	public boolean getBoolean(String ValuePath) {
+		return this.c.getBoolean(ValuePath);
+	}
 
+	public List<String> getStringList(String ValuePath) {
+		return this.c.getStringList(ValuePath);
+	}
 
+	public Set<String> getKeys(boolean dep) {
+		return this.c.getKeys(dep);
+	}
 
-	public Set<String> getKeys(boolean dep) { return this.c.getKeys(dep); }
+	public ConfigurationSection getConfigurationSection(String section) {
+		return this.c.getConfigurationSection(section);
+	}
 
-
-
-	public ConfigurationSection getConfigurationSection(String section) { return this.c.getConfigurationSection(section); }
-
-
-
-	public boolean exist() { return this.f.exists(); }
-
+	public boolean exist() {
+		return this.f.exists();
+	}
 
 	public ConfigManager save() {
 		try {
 			this.c.save(this.f);
-		} catch (IOException e) {
+		}catch (IOException e) {
 			e.printStackTrace();
-		} 
+		}
 		return this;
 	}
 }
