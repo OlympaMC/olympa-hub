@@ -18,31 +18,31 @@ public class SpawnCommand extends OlympaCommand {
 
 	public SpawnCommand(Plugin plugin) {
 		super(plugin, "spawn");
-		this.setAllowConsole(false);
+		setAllowConsole(false);
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		Player player = this.player;
 		if (args.length == 0) {
-			this.sendMessage(Prefix.DEFAULT, "&7Tu es t�l�port�(e) au spawn.");
 			if (OlympaServerSettings.getInstance().getSpawn() == null) {
 				Messages.SPAWN_NOT_FOUND.send(player);
 				return true;
-			}else {
+			} else {
+				this.sendMessage(Prefix.DEFAULT, "&7Tu es téléporté(e) au spawn.");
 				player.teleport(OlympaServerSettings.getInstance().getSpawn());
 			}
-		}else if (args[0].equalsIgnoreCase("set")) {
+		} else if (args[0].equalsIgnoreCase("set")) {
 
-			if (!OlympaHubPermissions.SPAWN_SPAWN_COMMAND_SET.hasPermission(player)) {
-				this.sendDoNotHavePermission();
+			if (!OlympaHubPermissions.SPAWN_SPAWN_COMMAND_SET.hasSenderPermission(player)) {
+				sendDoNotHavePermission();
 			}
 			OlympaServerSettings serverSettings = OlympaServerSettings.getInstance();
 			Location location = player.getLocation().clone();
 			location.setYaw(180);
 			location.setPitch(0);
 			serverSettings.setSpawn(location);
-			this.sendMessage(Prefix.DEFAULT, "Le nouveau spawn a bien �t� modifi�.");
+			this.sendMessage(Prefix.DEFAULT, "Le nouveau spawn a bien été modifié.");
 		}
 		return true;
 	}
