@@ -11,6 +11,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import fr.olympa.api.customevents.WorldTrackingEvent;
@@ -24,11 +25,12 @@ import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.region.tracking.flags.FoodFlag;
 import fr.olympa.api.region.tracking.flags.GameModeFlag;
 import fr.olympa.api.region.tracking.flags.PhysicsFlag;
+import fr.olympa.api.region.tracking.flags.PlayerBlockInteractFlag;
 import fr.olympa.api.region.tracking.flags.PlayerBlocksFlag;
-import fr.olympa.api.region.tracking.flags.PlayerInteractFlag;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.gui.MenuGUI;
 import fr.olympa.hub.servers.ServerInfosListener;
+import net.md_5.bungee.api.ChatMessageType;
 
 public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
@@ -54,21 +56,12 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		OlympaCore.getInstance().registerRedisSub(serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), "sendServersInfos");
 		
-		OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag().setEntryExitDenied(false, true));
+		OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag().setMessages(null, "§cNe vous égarez pas !", ChatMessageType.ACTION_BAR).setEntryExitDenied(false, true));
 	}
 
 	@EventHandler
 	public void onWorldLoad(WorldTrackingEvent e) {
-		e.getRegion().registerFlags(new PlayerBlocksFlag(true), new PhysicsFlag(true), new FoodFlag(true), new GameModeFlag(GameMode.ADVENTURE), new DropFlag(true), new PlayerInteractFlag(false, true, true) {
-			@Override
-			public void interactEvent(PlayerInteractEvent event) {
-				Player player = event.getPlayer();
-				if (player.getInventory().getHeldItemSlot() == 4) {
-					new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player);
-				}
-				super.interactEvent(event);
-			}
-		}, new DamageFlag(false) {
+		e.getRegion().registerFlags(new PlayerBlocksFlag(true), new PhysicsFlag(true), new FoodFlag(true), new GameModeFlag(GameMode.ADVENTURE), new DropFlag(true), new PlayerBlockInteractFlag(false, true, true), new DamageFlag(false) {
 			@Override
 			public void damageEvent(EntityDamageEvent event) {
 				if (event.getCause() == DamageCause.VOID) {
@@ -77,6 +70,16 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 				super.damageEvent(event);
 			}
 		});
+	}
+
+	@EventHandler
+	public void onPlayerInteract(PlayerInteractEvent e) {
+		if (e.getHand() == EquipmentSlot.HAND) {
+			Player player = e.getPlayer();
+			if (player.getInventory().getHeldItemSlot() == 4) {
+				new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player);
+			}
+		}
 	}
 
 	@EventHandler

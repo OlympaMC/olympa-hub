@@ -3,7 +3,7 @@ servers:
     name: "Olympa ZTA"
     description: "Découvrez un monde au bord du chaos, meurtri par des hordes de zombies. Votre mission : survivre coûte que coûte, défendre votre clan et attaquer ceux des autres. Farmez et devenez l'homme le plus puissant de Greenfield !"
     item: FIREWORK_ROCKET
-  factions:
+  pvpfac1:
     name: "Factions"
     description: "Créez votre faction avec vos amis, fabriquez des usines, des équipements, les bases les plus impénétrables possible et attaquez celles des autres. Battez vos ennemis et construisez un véritable empire pour accumuler les richesses, et devenez la plus grand faction de ce monde !"
     item: GOLDEN_HELMET

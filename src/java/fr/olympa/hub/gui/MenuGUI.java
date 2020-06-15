@@ -2,7 +2,7 @@ package fr.olympa.hub.gui;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Map;
+import java.util.Locale;
 
 import org.bukkit.DyeColor;
 import org.bukkit.entity.Player;
@@ -38,7 +38,7 @@ public class MenuGUI extends OlympaGUI {
 		}
 		basicContents[0] = ItemUtils.skullCustom("§bTwitter", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2M3NDVhMDZmNTM3YWVhODA1MDU1NTkxNDllYTE2YmQ0YTg0ZDQ0OTFmMTIyMjY4MThjMzg4MWMwOGU4NjBmYyJ9fX0=");
 		basicContents[1] = ItemUtils.skullCustom("§5Discord", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTNiMTgzYjE0OGI5YjRlMmIxNTgzMzRhZmYzYjViYjZjMmMyZGJiYzRkNjdmNzZhN2JlODU2Njg3YTJiNjIzIn19fQ==");
-		basicContents[7] = ItemUtils.skullCustom("§§lewww.§6§lolympa§e§l.fr", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjM0N2EzOTQ5OWRlNDllMjRjODkyYjA5MjU2OTQzMjkyN2RlY2JiNzM5OWUxMTg0N2YzMTA0ZmRiMTY1YjZkYyJ9fX0=");
+		basicContents[7] = ItemUtils.skullCustom("§l§ewww.§6§lolympa§e§l.fr", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjM0N2EzOTQ5OWRlNDllMjRjODkyYjA5MjU2OTQzMjkyN2RlY2JiNzM5OWUxMTg0N2YzMTA0ZmRiMTY1YjZkYyJ9fX0=");
 		basicContents[8] = ItemUtils.skullCustom("§cYouTube", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTY3OWQ2MzBmODUxYzU4OTdkYTgzYTY0MjUxNzQzM2Y2NWRjZmIzMmIxYmFiYjFmZWMzMmRhNzEyNmE5ZjYifX19");
 
 		twitter = new TextComponent("Rejoins notre Twitter : ");
@@ -70,7 +70,7 @@ public class MenuGUI extends OlympaGUI {
 	private OlympaPlayer player;
 
 	public MenuGUI(OlympaPlayer player) {
-		super("Menu Olympa", 3);
+		super("Menu Olympa", 6);
 		this.player = player;
 		inv.setContents(basicContents);
 
@@ -78,15 +78,16 @@ public class MenuGUI extends OlympaGUI {
 				"§8> §7" + player.getName(),
 				"§8> §7" + player.getGroupName(),
 				"",
-				"§8> §7Membre depuis le " + DateFormat.getDateInstance().format(new Date(player.getFirstConnection())),
+				"§8> §7Membre depuis le " + DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.FRANCE).format(new Date(player.getFirstConnection())),
 				"",
-				"§8> §7" + (player.getEmail() == null ? "§omail non spécifié" : player.getEmail()),
-				"§8> §7compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
+				"§8> §7" + (player.getEmail() == null ? "§oMail non spécifié" : player.getEmail()),
+				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
 
-		Map<String, ServerInfo> servers = OlympaHub.getInstance().serversInfos.servers;
-		inv.setItem(29, servers.get("zta1").getMenuItem());
-		inv.setItem(31, servers.get("creatif").getMenuItem());
-		inv.setItem(33, servers.get("factions").getMenuItem());
+		int slot = 29;
+		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers) {
+			inv.setItem(slot, server.getMenuItem());
+			slot += 2;
+		}
 	}
 
 	@Override
@@ -96,23 +97,17 @@ public class MenuGUI extends OlympaGUI {
 			p.spigot().sendMessage(link);
 			return true;
 		}
-		String server = getSlotServer(slot);
+		ServerInfo server = OlympaHub.getInstance().serversInfos.servers.get((slot - 29) / 2);
 		if (server != null) {
-			ServerInfo serverInfo = OlympaHub.getInstance().serversInfos.servers.get(server);
-			if (serverInfo == null) {
-				Prefix.ERROR.sendMessage(p, "Une erreur est survenue lors du chargment des données du serveur.");
+			if (server.getStatus().getPermission().hasPermission(player)) {
+				Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", server.name);
+				ByteArrayDataOutput out = ByteStreams.newDataOutput();
+				out.writeUTF("Connect");
+				out.writeUTF(server.name);
+				p.sendPluginMessage(OlympaHub.getInstance(), "BungeeCord", out.toByteArray());
 			}else {
-				if (serverInfo.getStatus().getPermission().hasPermission(player)) {
-					Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", serverInfo.name);
-					ByteArrayDataOutput out = ByteStreams.newDataOutput();
-					out.writeUTF("Connect");
-					out.writeUTF(serverInfo.name);
-					p.sendPluginMessage(OlympaHub.getInstance(), "BungeeCord", out.toByteArray());
-				}else {
-					Prefix.DEFAULT_BAD.sendMessage(p, "Tu n'as pas la permission de te connecter à ce serveur.");
-				}
+				Prefix.DEFAULT_BAD.sendMessage(p, "Tu n'as pas la permission de te connecter à ce serveur.");
 			}
-			return true;
 		}
 		return true;
 	}
@@ -127,18 +122,6 @@ public class MenuGUI extends OlympaGUI {
 			return website;
 		case 8:
 			return yt;
-		}
-		return null;
-	}
-
-	private String getSlotServer(int slot) {
-		switch (slot) {
-		case 29:
-			return "zta";
-		case 31:
-			return "creatif";
-		case 33:
-			return "factions";
 		}
 		return null;
 	}

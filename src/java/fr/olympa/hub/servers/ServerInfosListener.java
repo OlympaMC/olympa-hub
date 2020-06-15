@@ -1,7 +1,7 @@
 package fr.olympa.hub.servers;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -11,23 +11,28 @@ import redis.clients.jedis.JedisPubSub;
 
 public class ServerInfosListener extends JedisPubSub {
 
-	public Map<String, ServerInfo> servers = new HashMap<>();
+	public List<ServerInfo> servers = new ArrayList<>();
 
 	public ServerInfosListener(ConfigurationSection serversConfig) {
 		for (String serverName : serversConfig.getKeys(false)) {
 			ConfigurationSection server = serversConfig.getConfigurationSection(serverName);
-			servers.put(serverName, new ServerInfo(serverName, server.getString("name"), server.getString("description"), Material.valueOf(server.getString("item"))));
+			servers.add(new ServerInfo(serverName, server.getString("name"), server.getString("description"), Material.valueOf(server.getString("item"))));
 		}
 	}
 
 	@Override
 	public void onMessage(String channel, String message) {
-		String[] serversInfos = message.split("\\|");
-		for (String server : serversInfos) {
-			String[] infos = server.split(":");
-			ServerInfo info = servers.get(infos[0]);
-			if (info == null) continue;
-			info.update(Integer.parseInt(infos[1]), Integer.parseInt(infos[2]), ServerStatus.get(Integer.parseInt(infos[3])));
+		String[] infos = message.split(":");
+		ServerInfo info = servers.stream().filter(x -> x.name.equals(infos[0])).findFirst().orElse(null);
+		if (info == null) return;
+		info.update(parseInt(infos[1]), parseInt(infos[2]), ServerStatus.get(Integer.parseInt(infos[3])));
+	}
+
+	private int parseInt(String str) {
+		try {
+			return Integer.parseInt(str);
+		}catch (NumberFormatException ex) {
+			return -1;
 		}
 	}
 }
