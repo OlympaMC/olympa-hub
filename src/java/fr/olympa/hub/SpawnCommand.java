@@ -17,7 +17,7 @@ public class SpawnCommand extends OlympaCommand {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		player.teleport(player.getWorld().getSpawnLocation());
+		player.teleport(OlympaHub.getInstance().spawn);
 		return false;
 	}
 

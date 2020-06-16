@@ -13,7 +13,7 @@ import fr.olympa.api.server.ServerStatus;
 
 public class ServerInfo {
 
-	private static final String SEPARATOR = "§8§m------------";
+	private static final String SEPARATOR = "§8§m------------------------------------";
 
 	public final String name;
 	public final String title;
@@ -43,7 +43,7 @@ public class ServerInfo {
 		lore.addAll(description);
 		lore.add(SEPARATOR);
 		lore.add("§7§l" + (online == -1 ? "§cx" : online) + " §7joueurs en ligne");
-		lore.add("§7Statut : " + status.getNameColored());
+		if (status != ServerStatus.OPEN) lore.add("§7Statut : " + status.getNameColored());
 		menuItem = ItemUtils.item(item, "§6§l" + title, lore.toArray(new String[0]));
 	}
 

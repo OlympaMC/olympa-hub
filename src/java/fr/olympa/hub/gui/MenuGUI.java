@@ -15,6 +15,7 @@ import com.google.common.io.ByteStreams;
 import fr.olympa.api.gui.OlympaGUI;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.player.OlympaPlayer;
+import fr.olympa.api.server.ServerStatus;
 import fr.olympa.api.utils.Prefix;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.servers.ServerInfo;
@@ -38,7 +39,7 @@ public class MenuGUI extends OlympaGUI {
 		}
 		basicContents[0] = ItemUtils.skullCustom("§bTwitter", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2M3NDVhMDZmNTM3YWVhODA1MDU1NTkxNDllYTE2YmQ0YTg0ZDQ0OTFmMTIyMjY4MThjMzg4MWMwOGU4NjBmYyJ9fX0=");
 		basicContents[1] = ItemUtils.skullCustom("§5Discord", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTNiMTgzYjE0OGI5YjRlMmIxNTgzMzRhZmYzYjViYjZjMmMyZGJiYzRkNjdmNzZhN2JlODU2Njg3YTJiNjIzIn19fQ==");
-		basicContents[7] = ItemUtils.skullCustom("§l§ewww.§6§lolympa§e§l.fr", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjM0N2EzOTQ5OWRlNDllMjRjODkyYjA5MjU2OTQzMjkyN2RlY2JiNzM5OWUxMTg0N2YzMTA0ZmRiMTY1YjZkYyJ9fX0=");
+		basicContents[7] = ItemUtils.skullCustom("§ewww.§6§lolympa§e.fr", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjM0N2EzOTQ5OWRlNDllMjRjODkyYjA5MjU2OTQzMjkyN2RlY2JiNzM5OWUxMTg0N2YzMTA0ZmRiMTY1YjZkYyJ9fX0=");
 		basicContents[8] = ItemUtils.skullCustom("§cYouTube", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTY3OWQ2MzBmODUxYzU4OTdkYTgzYTY0MjUxNzQzM2Y2NWRjZmIzMmIxYmFiYjFmZWMzMmRhNzEyNmE5ZjYifX19");
 
 		twitter = new TextComponent("Rejoins notre Twitter : ");
@@ -97,18 +98,24 @@ public class MenuGUI extends OlympaGUI {
 			p.spigot().sendMessage(link);
 			return true;
 		}
-		ServerInfo server = OlympaHub.getInstance().serversInfos.servers.get((slot - 29) / 2);
-		if (server != null) {
-			if (server.getStatus().getPermission().hasPermission(player)) {
-				Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", server.name);
-				ByteArrayDataOutput out = ByteStreams.newDataOutput();
-				out.writeUTF("Connect");
-				out.writeUTF(server.name);
-				p.sendPluginMessage(OlympaHub.getInstance(), "BungeeCord", out.toByteArray());
-			}else {
-				Prefix.DEFAULT_BAD.sendMessage(p, "Tu n'as pas la permission de te connecter à ce serveur.");
+		try {
+			ServerInfo server = OlympaHub.getInstance().serversInfos.servers.get((slot - 29) / 2);
+			if (server != null) {
+				if (server.getStatus() == ServerStatus.CLOSE) {
+					Prefix.DEFAULT_BAD.sendMessage(p, "Ce serveur est fermé. Réessaye plus tard !");
+				}else {
+					if (server.getStatus().getPermission() == null || server.getStatus().getPermission().hasPermission(player)) {
+						Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", server.name);
+						ByteArrayDataOutput out = ByteStreams.newDataOutput();
+						out.writeUTF("Connect");
+						out.writeUTF(server.name);
+						p.sendPluginMessage(OlympaHub.getInstance(), "BungeeCord", out.toByteArray());
+					}else {
+						Prefix.DEFAULT_BAD.sendMessage(p, "Tu n'as pas la permission de te connecter à ce serveur.");
+					}
+				}
 			}
-		}
+		}catch (IndexOutOfBoundsException ex) {}
 		return true;
 	}
 
