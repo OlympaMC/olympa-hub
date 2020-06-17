@@ -9,14 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-
 import fr.olympa.api.gui.OlympaGUI;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.player.OlympaPlayer;
-import fr.olympa.api.server.ServerStatus;
-import fr.olympa.api.utils.Prefix;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.servers.ServerInfo;
 import net.md_5.bungee.api.ChatColor;
@@ -68,11 +63,8 @@ public class MenuGUI extends OlympaGUI {
 		return component;
 	}
 
-	private OlympaPlayer player;
-
 	public MenuGUI(OlympaPlayer player) {
 		super("Menu Olympa", 6);
-		this.player = player;
 		inv.setContents(basicContents);
 
 		ItemUtils.skull(x -> inv.setItem(13, x), "§eMon profil", player.getName(),
@@ -101,19 +93,7 @@ public class MenuGUI extends OlympaGUI {
 		try {
 			ServerInfo server = OlympaHub.getInstance().serversInfos.servers.get((slot - 29) / 2);
 			if (server != null) {
-				if (server.getStatus() == ServerStatus.CLOSE) {
-					Prefix.DEFAULT_BAD.sendMessage(p, "Ce serveur est fermé. Réessaye plus tard !");
-				}else {
-					if (server.getStatus().getPermission() == null || server.getStatus().getPermission().hasPermission(player)) {
-						Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", server.name);
-						ByteArrayDataOutput out = ByteStreams.newDataOutput();
-						out.writeUTF("Connect");
-						out.writeUTF(server.name);
-						p.sendPluginMessage(OlympaHub.getInstance(), "BungeeCord", out.toByteArray());
-					}else {
-						Prefix.DEFAULT_BAD.sendMessage(p, "Tu n'as pas la permission de te connecter à ce serveur.");
-					}
-				}
+				if (server.connect(p)) p.closeInventory();
 			}
 		}catch (IndexOutOfBoundsException ex) {}
 		return true;

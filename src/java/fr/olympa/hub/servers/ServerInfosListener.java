@@ -3,7 +3,6 @@ package fr.olympa.hub.servers;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
 import fr.olympa.api.server.ServerStatus;
@@ -16,8 +15,12 @@ public class ServerInfosListener extends JedisPubSub {
 	public ServerInfosListener(ConfigurationSection serversConfig) {
 		for (String serverName : serversConfig.getKeys(false)) {
 			ConfigurationSection server = serversConfig.getConfigurationSection(serverName);
-			servers.add(new ServerInfo(serverName, server.getString("name"), server.getString("description"), Material.valueOf(server.getString("item"))));
+			servers.add(new ServerInfo(serverName, server));
 		}
+	}
+
+	public ServerInfo getServer(String name) {
+		return servers.stream().filter(x -> x.name.equals(name)).findFirst().orElse(null);
 	}
 
 	@Override

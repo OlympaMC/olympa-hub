@@ -4,10 +4,12 @@ import org.bukkit.Location;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
+import fr.olympa.api.holograms.HologramsManager;
 import fr.olympa.api.plugin.OlympaAPIPlugin;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
+import fr.olympa.hub.servers.ServerConfigCommand;
 import fr.olympa.hub.servers.ServerInfosListener;
 import net.md_5.bungee.api.ChatMessageType;
 
@@ -20,6 +22,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 	}
 
 	public ServerInfosListener serversInfos;
+	public HologramsManager holograms;
+
 	public Location spawn;
 
 	@Override
@@ -29,14 +33,24 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		spawn = getConfig().getLocation("spawn");
 
+		holograms = new HologramsManager();
+
 		getServer().getPluginManager().registerEvents(new HubListener(), this);
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
 		new SpawnCommand(this).register();
+		new ServerConfigCommand(this).register();
 
 		OlympaCore.getInstance().registerRedisSub(serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), "sendServersInfos");
 		
 		OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag().setMessages(null, "§cNe vous égarez pas !", ChatMessageType.ACTION_BAR).setEntryExitDenied(false, true));
+	}
+
+	@Override
+	public void onDisable() {
+		super.onDisable();
+
+		holograms.unload();
 	}
 
 }
