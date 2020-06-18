@@ -76,11 +76,14 @@ public class MenuGUI extends OlympaGUI {
 				"§8> §7" + (player.getEmail() == null ? "§oMail non spécifié" : player.getEmail()),
 				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
 
-		int slot = 29;
 		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers) {
-			inv.setItem(slot, server.getMenuItem());
-			slot += 2;
+			setServerItem(server);
+			server.observe("gui_" + hashCode(), () -> setServerItem(server));
 		}
+	}
+
+	private void setServerItem(ServerInfo server) {
+		inv.setItem(29 + OlympaHub.getInstance().serversInfos.servers.indexOf(server) * 2, server.getMenuItem());
 	}
 
 	@Override
@@ -97,6 +100,14 @@ public class MenuGUI extends OlympaGUI {
 			}
 		}catch (IndexOutOfBoundsException ex) {}
 		return true;
+	}
+
+	@Override
+	public boolean onClose(Player p) {
+		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers) {
+			server.unobserve("gui_" + hashCode());
+		}
+		return super.onClose(p);
 	}
 
 	private TextComponent getSlotLink(int slot) {

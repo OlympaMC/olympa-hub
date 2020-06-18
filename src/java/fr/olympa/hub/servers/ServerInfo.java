@@ -63,6 +63,7 @@ public class ServerInfo extends AbstractObservable {
 	}
 
 	public void update(int online, int max, ServerStatus status) {
+		if (this.online == online && this.max == max && this.status == status) return;
 		this.online = online;
 		this.max = max;
 		this.status = status;
@@ -127,7 +128,8 @@ public class ServerInfo extends AbstractObservable {
 					return super.enters(p, to);
 				}
 			});
-			this.hologram = new Hologram(holoLocation.add(0, 1, 0), new FixedLine<>("§e§l" + title), FixedLine.EMPTY_LINE, new DynamicLine<>((x) -> "§7§l" + (online == -1 ? "§cx" : online) + " §7joueurs en ligne"));
+			this.hologram = new Hologram(holoLocation.add(0, 1, 0), new FixedLine<>("§e§l" + title), FixedLine.EMPTY_LINE, new DynamicLine<>((x) -> "§7§l" + (online == -1 ? "§cx" : online) + " §7joueurs en ligne", ServerInfo.this));
+			OlympaHub.getInstance().holograms.addHologram(hologram);
 		}
 
 		public void destroy() {
