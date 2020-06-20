@@ -71,7 +71,7 @@ public class MenuGUI extends OlympaGUI {
 				"§8> §7" + player.getName(),
 				"§8> §7" + player.getGroupName(),
 				"",
-				"§8> §7Membre depuis le " + DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.FRANCE).format(new Date(player.getFirstConnection())),
+				"§8> §7Membre depuis le " + DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.FRANCE).format(new Date(player.getFirstConnection() * 1000)),
 				"",
 				"§8> §7" + (player.getEmail() == null ? "§oMail non spécifié" : player.getEmail()),
 				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));

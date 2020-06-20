@@ -24,7 +24,7 @@ public class ServerConfigCommand extends ComplexCommand {
 	public void setPortal(CommandContext cmd) {
 		ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(cmd.getArgument(0));
 		if (server == null) {
-			sendError("Le serveur %s n'existe pas.", cmd.getArgument(0));
+			sendError("Le serveur %s n'existe pas.", cmd.<String>getArgument(0));
 			return;
 		}
 

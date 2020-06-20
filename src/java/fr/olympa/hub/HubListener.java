@@ -36,6 +36,7 @@ public class HubListener implements Listener {
 		p.teleport(OlympaHub.getInstance().spawn);
 		p.setHealth(20);
 		p.setFoodLevel(20);
+		p.setRemainingAir(300);
 		p.setFlying(false);
 		p.setAllowFlight(false);
 		p.setCanPickupItems(false);
