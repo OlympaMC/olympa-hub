@@ -10,6 +10,9 @@ import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.servers.ServerConfigCommand;
 import fr.olympa.hub.servers.ServerInfosListener;
+import fr.olympa.hub.servers.ServerTrait;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.trait.TraitInfo;
 import net.md_5.bungee.api.ChatMessageType;
 
 public class OlympaHub extends OlympaAPIPlugin implements Listener {
@@ -40,6 +43,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		OlympaCore.getInstance().registerRedisSub(serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), "sendServersInfos");
 		
 		OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag().setMessages(null, "§cNe vous égarez pas !", ChatMessageType.ACTION_BAR).setEntryExitDenied(false, true));
+
+		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(ServerTrait.class).withName("server"));
 	}
 
 }

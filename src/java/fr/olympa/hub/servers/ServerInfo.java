@@ -13,9 +13,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.ChatPaginator;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-
 import fr.olympa.api.holograms.Hologram;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.lines.DynamicLine;
@@ -23,24 +20,24 @@ import fr.olympa.api.lines.FixedLine;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
+import fr.olympa.api.server.OlympaServer;
 import fr.olympa.api.server.ServerStatus;
 import fr.olympa.api.utils.Prefix;
 import fr.olympa.api.utils.observable.AbstractObservable;
 import fr.olympa.api.utils.spigot.SpigotUtils;
 import fr.olympa.core.spigot.OlympaCore;
+import fr.olympa.core.spigot.redis.RedisSpigotSend;
 import fr.olympa.hub.OlympaHub;
 
 public class ServerInfo extends AbstractObservable {
 
 	private static final String SEPARATOR = "§8§m------------------------------------";
 
-	public final String name;
-	public final String title;
+	private final OlympaServer server;
 	public final List<String> description;
 	public final Material item;
 
 	private int online;
-	private int max;
 	private ServerStatus status = ServerStatus.UNKNOWN;
 
 	private ItemStack menuItem = ItemUtils.error;
@@ -48,33 +45,39 @@ public class ServerInfo extends AbstractObservable {
 
 	private ConfigurationSection config;
 
-	public ServerInfo(String name, ConfigurationSection config) {
-		this.name = name;
+	public ServerInfo(OlympaServer server, ConfigurationSection config) {
+		this.server = server;
 		this.config = config;
-		this.title = config.getString("name");
 		this.description = Arrays.asList(ChatPaginator.wordWrap("§8> §7" + config.getString("description"), 40));
 		this.item = Material.valueOf(config.getString("item"));
 
 		if (config.contains("portal")) portal = new Portal(config.getConfigurationSection("portal"));
 	}
 
+	public OlympaServer getServer() {
+		return server;
+	}
+
+	public int getOnlinePlayers() {
+		return online;
+	}
+
 	public ServerStatus getStatus() {
 		return status;
 	}
 
-	public void update(int online, int max, ServerStatus status) {
-		if (this.online == online && this.max == max && this.status == status) return;
-		this.online = online;
-		this.max = max;
+	public void update(int online, ServerStatus status) {
+		if (this.online == online && this.status == status) return;
 		this.status = status;
+		this.online = status == ServerStatus.CLOSE ? -1 : online;
 
 		List<String> lore = new ArrayList<>();
 		lore.add(SEPARATOR);
 		lore.addAll(description);
 		lore.add(SEPARATOR);
-		lore.add("§7§l" + (online == -1 ? "§cx" : online) + " §7joueurs en ligne");
+		lore.add("§7§l" + (online == -1 ? "§cx" : online) + " §7joueur(s) en ligne");
 		if (status != ServerStatus.OPEN) lore.add("§7Statut : " + status.getNameColored());
-		menuItem = ItemUtils.item(item, "§6§l" + title, lore.toArray(new String[0]));
+		menuItem = ItemUtils.item(item, "§6§l" + getServer().getNameCaps(), lore.toArray(new String[0]));
 
 		update();
 	}
@@ -88,11 +91,8 @@ public class ServerInfo extends AbstractObservable {
 			Prefix.DEFAULT_BAD.sendMessage(p, "Ce serveur est fermé. Réessaye plus tard !");
 		}else {
 			if (status.getPermission() == null || status.getPermission().hasPermission(p.getUniqueId())) {
-				Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", name);
-				ByteArrayDataOutput out = ByteStreams.newDataOutput();
-				out.writeUTF("Connect");
-				out.writeUTF(name);
-				p.sendPluginMessage(OlympaHub.getInstance(), "BungeeCord", out.toByteArray());
+				Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", getServer().getNameCaps());
+				RedisSpigotSend.sendServerSwitch(p, getServer());
 				return true;
 			}else {
 				Prefix.DEFAULT_BAD.sendMessage(p, "Tu n'as pas la permission de te connecter à ce serveur.");
@@ -121,20 +121,20 @@ public class ServerInfo extends AbstractObservable {
 		}
 
 		public Portal(Region region, Location holoLocation) {
-			this.region = OlympaCore.getInstance().getRegionManager().registerRegion(region, "portal_" + name, EventPriority.HIGH, new Flag() {
+			this.region = OlympaCore.getInstance().getRegionManager().registerRegion(region, "portal_" + getServer().name(), EventPriority.HIGH, new Flag() {
 				@Override
 				public boolean enters(Player p, Set<TrackedRegion> to) {
 					connect(p);
 					return super.enters(p, to);
 				}
 			});
-			this.hologram = new Hologram(holoLocation.clone().add(0, 1, 0), new FixedLine<>("§e§l" + title), FixedLine.EMPTY_LINE, new DynamicLine<>((x) -> "§7§l" + (online == -1 ? "§cx" : online) + " §7joueurs en ligne", ServerInfo.this));
+			this.hologram = new Hologram(holoLocation.clone().add(0, 1, 0), new FixedLine<>("§e§l" + getServer().getNameCaps()), FixedLine.EMPTY_LINE, new DynamicLine<>((x) -> "§7§l" + (online == -1 ? "§cx" : online) + " §7joueurs en ligne", ServerInfo.this));
 			OlympaCore.getInstance().getHologramsManager().addHologram(hologram);
 		}
 
 		public void destroy() {
 			region.unregister();
-			hologram.destroy();
+			OlympaCore.getInstance().getHologramsManager().deleteHologram(hologram);
 		}
 
 	}

@@ -50,7 +50,7 @@ public class HubListener implements Listener {
 			@Override
 			public void damageEvent(EntityDamageEvent event) {
 				if (event.getCause() == DamageCause.VOID) {
-					event.getEntity().teleport(event.getEntity().getWorld().getSpawnLocation());
+					event.getEntity().teleport(OlympaHub.getInstance().spawn);
 				}
 				super.damageEvent(event);
 			}
