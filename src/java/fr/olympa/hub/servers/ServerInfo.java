@@ -75,7 +75,7 @@ public class ServerInfo extends AbstractObservable {
 		lore.add(SEPARATOR);
 		lore.addAll(description);
 		lore.add(SEPARATOR);
-		lore.add("§7§l" + (online == -1 ? "§cx" : online) + " §7joueur(s) en ligne");
+		lore.add("§7§l" + (this.online == -1 ? "§cx" : online) + " §7joueur(s) en ligne");
 		if (status != ServerStatus.OPEN) lore.add("§7Statut : " + status.getNameColored());
 		menuItem = ItemUtils.item(item, "§6§l" + getServer().getNameCaps(), lore.toArray(new String[0]));
 

@@ -56,7 +56,7 @@ public class ServerConfigCommand extends ComplexCommand {
 			return;
 		}
 		ServerTrait trait = npc.getTrait(ServerTrait.class);
-		npc.data().set(NPC.NAMEPLATE_VISIBLE_METADATA, false);
+		npc.data().setPersistent(NPC.NAMEPLATE_VISIBLE_METADATA, false);
 		ServerInfo server = cmd.getArgument(0);
 		trait.setServer(server);
 		sendSuccess("Le NPC %d est maintenant associé aux serveurs %s.", npc.getId(), server.getServer().getNameCaps());

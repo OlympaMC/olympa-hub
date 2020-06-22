@@ -62,13 +62,14 @@ public class ServerTrait extends Trait {
 
 	@EventHandler
 	public void onRightClick(NPCRightClickEvent e) {
+		if (e.getNPC() != npc) return;
 		if (server != null) server.connect(e.getClicker());
 	}
 
 	@Override
 	public void save(DataKey key) {
 		super.save(key);
-		key.setString("server", server.getServer().getNameCaps());
+		key.setString("server", server.getServer().name());
 	}
 
 	@Override
