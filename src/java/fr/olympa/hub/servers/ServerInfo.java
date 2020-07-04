@@ -36,6 +36,7 @@ public class ServerInfo extends AbstractObservable {
 	private final OlympaServer server;
 	public final List<String> description;
 	public final Material item;
+	public final int slot;
 
 	private int online;
 	private ServerStatus status = ServerStatus.UNKNOWN;
@@ -50,6 +51,7 @@ public class ServerInfo extends AbstractObservable {
 		this.config = config;
 		this.description = Arrays.asList(ChatPaginator.wordWrap("§8> §7" + config.getString("description"), 40));
 		this.item = Material.valueOf(config.getString("item"));
+		this.slot = config.getInt("slot");
 
 		if (config.contains("portal")) portal = new Portal(config.getConfigurationSection("portal"));
 	}

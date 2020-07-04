@@ -2,12 +2,15 @@ servers:
   ZTA:
     description: "Découvrez un monde au bord du chaos, meurtri par des hordes de zombies. Votre mission : survivre coûte que coûte, défendre votre clan et attaquer ceux des autres. Farmez et devenez l'homme le plus puissant de Greenfield !"
     item: FIREWORK_ROCKET
+    slot: 29
   PVPFAC:
     description: "Créez votre faction avec vos amis, fabriquez des usines, des équipements, les bases les plus impénétrables possible et attaquez celles des autres. Battez vos ennemis et construisez un véritable empire pour accumuler les richesses, et devenez la plus grande faction de ce monde !"
     item: GOLDEN_HELMET
+    slot: 31
   CREATIF:
     description: "Le créatif est un mode de jeux vous permettant d'exprimer au plus profond votre imagination. Créez des constructions toujours plus grandes et plus belles les unes que les autres, jouez avec vos amis en incarnant des personnages et en créant vos propres histoires."
     item: GRASS_BLOCK
+    slot: 33
     
 zone:
   ==: fr.olympa.api.region.shapes.Cuboid
@@ -20,3 +23,5 @@ zone:
   zMax: 1000
   
 spawn: world -5 29 5 0 0
+
+lightning: world 71 170 48

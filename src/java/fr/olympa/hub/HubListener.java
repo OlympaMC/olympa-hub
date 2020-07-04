@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import fr.olympa.api.customevents.OlympaPlayerLoadEvent;
 import fr.olympa.api.customevents.WorldTrackingEvent;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.provider.AccountProvider;
@@ -41,6 +42,13 @@ public class HubListener implements Listener {
 		p.setAllowFlight(false);
 		p.setCanPickupItems(false);
 		p.getInventory().setContents(inventoryContents);
+	}
+	
+	@EventHandler
+	public void onOlympaJoin(OlympaPlayerLoadEvent e) {
+		if (e.getOlympaPlayer().getGroup().isHighStaff()) {
+			OlympaHub.getInstance().lightning.getWorld().strikeLightningEffect(OlympaHub.getInstance().lightning);
+		}
 	}
 
 	@EventHandler

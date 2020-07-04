@@ -3,6 +3,7 @@ package fr.olympa.hub.gui;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.bukkit.DyeColor;
 import org.bukkit.entity.Player;
@@ -83,7 +84,7 @@ public class MenuGUI extends OlympaGUI {
 	}
 
 	private void setServerItem(ServerInfo server) {
-		inv.setItem(29 + OlympaHub.getInstance().serversInfos.servers.indexOf(server) * 2, server.getMenuItem());
+		inv.setItem(server.slot, server.getMenuItem());
 	}
 
 	@Override
@@ -94,9 +95,9 @@ public class MenuGUI extends OlympaGUI {
 			return true;
 		}
 		try {
-			ServerInfo server = OlympaHub.getInstance().serversInfos.servers.get((slot - 29) / 2);
-			if (server != null) {
-				if (server.connect(p)) p.closeInventory();
+			Optional<ServerInfo> server = OlympaHub.getInstance().serversInfos.servers.stream().filter(x -> x.slot == slot).findFirst();
+			if (server.isPresent()) {
+				if (server.get().connect(p)) p.closeInventory();
 			}
 		}catch (IndexOutOfBoundsException ex) {}
 		return true;

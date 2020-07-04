@@ -23,7 +23,7 @@ public class ServerConfigCommand extends ComplexCommand {
 
 	public ServerConfigCommand(Plugin plugin) {
 		super(plugin, "serverConfig", "Permet de configurer les serveurs", HubPermissions.SERVER_CONFIG_COMMAND);
-		addArgumentParser("SERVER", () -> OlympaHub.getInstance().serversInfos.servers.stream().map(x -> x.getServer().name()).collect(Collectors.toList()), (x) -> {
+		addArgumentParser("SERVER", sender -> OlympaHub.getInstance().serversInfos.servers.stream().map(x -> x.getServer().name()).collect(Collectors.toList()), (x) -> {
 			try {
 				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(OlympaServer.valueOf(x));
 				if (server != null) return server;

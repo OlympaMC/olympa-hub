@@ -5,6 +5,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import fr.olympa.api.plugin.OlympaAPIPlugin;
+import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
@@ -25,7 +26,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 	public ServerInfosListener serversInfos;
 
-	public Location spawn;
+	public Location spawn, lightning;
 
 	@Override
 	public void onEnable() {
@@ -33,6 +34,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		super.onEnable();
 
 		spawn = getConfig().getLocation("spawn");
+		lightning = getConfig().getLocation("lightning");
 
 		getServer().getPluginManager().registerEvents(new HubListener(), this);
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -40,7 +42,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		new SpawnCommand(this).register();
 		new ServerConfigCommand(this).register();
 
-		OlympaCore.getInstance().registerRedisSub(serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), "sendServersInfos");
+		OlympaCore.getInstance().registerRedisSub(serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), RedisChannel.BUNGEE_SEND_SERVERSINFOS.name());
 		
 		OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag().setMessages(null, "§cNe vous égarez pas !", ChatMessageType.ACTION_BAR).setEntryExitDenied(false, true));
 
