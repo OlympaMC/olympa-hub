@@ -64,8 +64,11 @@ public class MenuGUI extends OlympaGUI {
 		return component;
 	}
 
+	private OlympaPlayer player;
+
 	public MenuGUI(OlympaPlayer player) {
 		super("Menu Olympa", 6);
+		this.player = player;
 		inv.setContents(basicContents);
 
 		ItemUtils.skull(x -> inv.setItem(13, x), "§eMon profil", player.getName(),
@@ -78,6 +81,7 @@ public class MenuGUI extends OlympaGUI {
 				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
 
 		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers) {
+			if (!server.getServer().canConnect(player)) continue;
 			setServerItem(server);
 			server.observe("gui_" + hashCode(), () -> setServerItem(server));
 		}
@@ -95,7 +99,7 @@ public class MenuGUI extends OlympaGUI {
 			return true;
 		}
 		try {
-			Optional<ServerInfo> server = OlympaHub.getInstance().serversInfos.servers.stream().filter(x -> x.slot == slot).findFirst();
+			Optional<ServerInfo> server = OlympaHub.getInstance().serversInfos.servers.stream().filter(x -> x.slot == slot && x.getServer().canConnect(player)).findFirst();
 			if (server.isPresent()) {
 				if (server.get().connect(p)) p.closeInventory();
 			}

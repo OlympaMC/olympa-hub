@@ -18,6 +18,7 @@ import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.lines.DynamicLine;
 import fr.olympa.api.lines.FixedLine;
 import fr.olympa.api.region.Region;
+import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.server.OlympaServer;
@@ -125,7 +126,7 @@ public class ServerInfo extends AbstractObservable {
 		public Portal(Region region, Location holoLocation) {
 			this.region = OlympaCore.getInstance().getRegionManager().registerRegion(region, "portal_" + getServer().name(), EventPriority.HIGH, new Flag() {
 				@Override
-				public boolean enters(Player p, Set<TrackedRegion> to) {
+				public ActionResult enters(Player p, Set<TrackedRegion> to) {
 					connect(p);
 					return super.enters(p, to);
 				}

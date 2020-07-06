@@ -1,8 +1,10 @@
 package fr.olympa.hub;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -42,12 +44,17 @@ public class HubListener implements Listener {
 		p.setAllowFlight(false);
 		p.setCanPickupItems(false);
 		p.getInventory().setContents(inventoryContents);
+		p.getInventory().setHeldItemSlot(4);
+		p.sendTitle("§6§lOlympa", "§eBienvenue !", 2, 40, 5);
 	}
 	
 	@EventHandler
 	public void onOlympaJoin(OlympaPlayerLoadEvent e) {
 		if (e.getOlympaPlayer().getGroup().isHighStaff()) {
-			OlympaHub.getInstance().lightning.getWorld().strikeLightningEffect(OlympaHub.getInstance().lightning);
+			Bukkit.getScheduler().runTask(OlympaHub.getInstance(), () -> OlympaHub.getInstance().lightning.getWorld().strikeLightningEffect(OlympaHub.getInstance().lightning));
+		}else {
+			Player p = e.getPlayer();
+			p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.1f, 1f);
 		}
 	}
 
@@ -67,8 +74,8 @@ public class HubListener implements Listener {
 
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e) {
+		Player player = e.getPlayer();
 		if (e.getHand() == EquipmentSlot.HAND) {
-			Player player = e.getPlayer();
 			if (player.getInventory().getHeldItemSlot() == 4) {
 				new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player);
 				e.setCancelled(true);
