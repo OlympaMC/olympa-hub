@@ -67,7 +67,7 @@ public class MenuGUI extends OlympaGUI {
 	private OlympaPlayer player;
 
 	public MenuGUI(OlympaPlayer player) {
-		super("Menu Olympa", 6);
+		super("Ω | Menu Olympa", 6);
 		this.player = player;
 		inv.setContents(basicContents);
 

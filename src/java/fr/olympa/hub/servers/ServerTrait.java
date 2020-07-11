@@ -6,6 +6,7 @@ import fr.olympa.api.holograms.Hologram;
 import fr.olympa.api.lines.DynamicLine;
 import fr.olympa.api.lines.FixedLine;
 import fr.olympa.api.server.OlympaServer;
+import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.exception.NPCLoadException;
@@ -36,7 +37,7 @@ public class ServerTrait extends Trait {
 	private void showHologram() {
 		removeHologram();
 		if (server != null) {
-			this.hologram = new Hologram(npc.getEntity().getLocation().add(0, npc.getEntity().getHeight() + 0.2, 0).clone(), new FixedLine<>("§e§l" + server.getServer().getNameCaps()), FixedLine.EMPTY_LINE, new DynamicLine<>((x) -> "§7§l" + (server.getOnlinePlayers() == -1 ? "§cx" : server.getOnlinePlayers()) + " §7joueurs en ligne", server));
+			this.hologram = OlympaCore.getInstance().getHologramsManager().createHologram(npc.getEntity().getLocation().add(0, npc.getEntity().getHeight() + 0.2, 0), false, new FixedLine<>("§e§l" + server.getServer().getNameCaps()), FixedLine.EMPTY_LINE, new DynamicLine<>((x) -> "§7§l" + (server.getOnlinePlayers() == -1 ? "§cx" : server.getOnlinePlayers()) + " §7joueurs en ligne", server));
 		}
 	}
 

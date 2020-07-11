@@ -131,7 +131,7 @@ public class ServerInfo extends AbstractObservable {
 					return super.enters(p, to);
 				}
 			});
-			this.hologram = new Hologram(holoLocation.clone().add(0, 1, 0), new FixedLine<>("§e§l" + getServer().getNameCaps()), FixedLine.EMPTY_LINE, new DynamicLine<>((x) -> "§7§l" + (online == -1 ? "§cx" : online) + " §7joueurs en ligne", ServerInfo.this));
+			this.hologram = OlympaCore.getInstance().getHologramsManager().createHologram(holoLocation.clone().add(0, 1, 0), false, new FixedLine<>("§e§l" + getServer().getNameCaps()), FixedLine.EMPTY_LINE, new DynamicLine<>((x) -> "§7§l" + (online == -1 ? "§cx" : online) + " §7joueurs en ligne", ServerInfo.this));
 		}
 
 		public void destroy() {

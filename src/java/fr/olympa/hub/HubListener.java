@@ -31,7 +31,7 @@ import fr.olympa.hub.gui.MenuGUI;
 
 public class HubListener implements Listener {
 
-	private ItemStack[] inventoryContents = new ItemStack[] { null, null, null, null, ItemUtils.item(Material.CHEST, "§eMenu §6§lOlympa ☁") };
+	private ItemStack[] inventoryContents = new ItemStack[] { null, null, null, null, ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa") };
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
@@ -45,7 +45,7 @@ public class HubListener implements Listener {
 		p.setCanPickupItems(false);
 		p.getInventory().setContents(inventoryContents);
 		p.getInventory().setHeldItemSlot(4);
-		p.sendTitle("§6§lOlympa", "§eBienvenue !", 2, 40, 5);
+		p.sendTitle("§6§lOlympa", "§eBienvenue !", 2, 50, 7);
 	}
 	
 	@EventHandler
