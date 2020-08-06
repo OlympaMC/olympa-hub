@@ -11,7 +11,6 @@ import org.bukkit.event.Listener;
 
 import fr.olympa.api.groups.OlympaGroup;
 import fr.olympa.api.permission.OlympaCorePermissions;
-import fr.olympa.api.permission.OlympaPermission;
 import fr.olympa.api.plugin.OlympaAPIPlugin;
 import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.api.region.Region;
@@ -71,8 +70,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(ServerTrait.class).withName("server"));
 
-		OlympaCorePermissions.FLY_COMMAND = new OlympaPermission(OlympaGroup.MINI_YOUTUBER);
-		OlympaCorePermissions.GAMEMODE_COMMAND = new OlympaPermission(OlympaGroup.MINI_YOUTUBER);
+		OlympaCorePermissions.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+		OlympaCorePermissions.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
 	}
 
 }
