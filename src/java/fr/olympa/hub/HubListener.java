@@ -30,8 +30,8 @@ import fr.olympa.api.region.tracking.flags.PlayerBlocksFlag;
 import fr.olympa.hub.gui.MenuGUI;
 
 public class HubListener implements Listener {
-
-	private ItemStack[] inventoryContents = new ItemStack[] { null, null, null, null, ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa") };
+	private final Material menuMaterial = Material.CHEST;
+	private ItemStack[] inventoryContents = new ItemStack[] { null, null, null, null, ItemUtils.item(menuMaterial, "§eΩ | Menu §6§lOlympa") };
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
@@ -76,7 +76,7 @@ public class HubListener implements Listener {
 	public void onPlayerInteract(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		if (e.getHand() == EquipmentSlot.HAND) {
-			if (player.getInventory().getHeldItemSlot() == 4) {
+			if (player.getInventory().getHeldItemSlot() == 4 && e.getItem() != null && e.getItem().getType() == menuMaterial) {
 				new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player);
 				e.setCancelled(true);
 			}
@@ -85,7 +85,7 @@ public class HubListener implements Listener {
 
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
-		if (e.getSlot() == 4) {
+		if (e.getSlot() == 4 && e.getCurrentItem() != null && e.getCurrentItem().getType() == menuMaterial) {
 			Player player = (Player) e.getWhoClicked();
 			new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player);
 			e.setCancelled(true);
