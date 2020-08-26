@@ -18,6 +18,7 @@ import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
+import fr.olympa.hub.games.MiniGamesManager;
 import fr.olympa.hub.pads.LaunchPadManager;
 import fr.olympa.hub.servers.ServerConfigCommand;
 import fr.olympa.hub.servers.ServerInfosListener;
@@ -37,6 +38,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 	public ServerInfosListener serversInfos;
 
 	public Location spawn, lightning;
+	
+	public MiniGamesManager games;
 
 	@Override
 	public void onEnable() {
@@ -74,6 +77,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		OlympaCorePermissions.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
 		OlympaCorePermissions.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+
+		games = new MiniGamesManager(this); 
 	}
 
 }
