@@ -15,11 +15,11 @@ import fr.olympa.hub.games.IGame.GameType;
 public class OlympaPlayerHub extends OlympaPlayerObject {
 
 	public static final Map<String, String> COLUMNS = ImmutableMap.<String, String>builder()
-			.put("scoreElytra", "DOUBLE NOT NULL DEFAULT -1")
-			.put("scoreJump", "DOUBLE NOT NULL DEFAULT -1")
-			.put("scoreArena", "DOUBLE NOT NULL DEFAULT -1")
-			.put("scoreLaby", "DOUBLE NOT NULL DEFAULT -1")
-			.put("scoreDac", "DOUBLE NOT NULL DEFAULT -1")
+			.put("scoreElytra", "DOUBLE NOT NULL DEFAULT 0")
+			.put("scoreJump", "DOUBLE NOT NULL DEFAULT 0")
+			.put("scoreArena", "DOUBLE NOT NULL DEFAULT 0")
+			.put("scoreLaby", "DOUBLE NOT NULL DEFAULT 0")
+			.put("scoreDac", "DOUBLE NOT NULL DEFAULT 0")
 			
 			.build();
 	
