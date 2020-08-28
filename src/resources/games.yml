@@ -10,7 +10,8 @@ game_jump:
     xMax: 0
     yMax: 0
     zMax: 0
-    
+  
+  #first checkpoint must be the start_loc
   checkpoints:
    - world 0 0 0
    - world 0 0 0

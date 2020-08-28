@@ -13,11 +13,11 @@ import fr.olympa.hub.OlympaHub;
 
 @SuppressWarnings("unchecked")
 public enum GameType {
-	ELYTRA("scoreElytra", "§6Course d'élytra", "de la ", true, true, null),
-	JUMP("scoreJump", "§6Jump", "du ", true, true, GameJump::new),
-	ARENA("scoreArena", "Arène 1vs1", "de l'", false, false, null),
-	LABY("scoreLaby", "Labyrinthe", "du ", false, true, null),
-	DAC("scoreDac", "Dé-à-coudre", "du ", false, false, null),
+	ELYTRA("score_elytra", "§6Course d'élytra", "de la ", true, true, null),
+	JUMP("score_jump", "§6Jump", "du ", true, true, GameJump::new),
+	ARENA("score_arena", "Arène 1vs1", "de l'", false, false, null),
+	LABY("score_laby", "Labyrinthe", "du ", false, true, null),
+	DAC("score_dac", "Dé-à-coudre", "du ", false, false, null),
 	
 	;
 	

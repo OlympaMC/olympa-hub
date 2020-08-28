@@ -14,11 +14,11 @@ import fr.olympa.api.provider.OlympaPlayerObject;
 public class OlympaPlayerHub extends OlympaPlayerObject {
 
 	public static final Map<String, String> COLUMNS = ImmutableMap.<String, String>builder()
-			.put("scoreElytra", "DOUBLE NOT NULL DEFAULT 0")
-			.put("scoreJump", "DOUBLE NOT NULL DEFAULT 0")
-			.put("scoreArena", "DOUBLE NOT NULL DEFAULT 0")
-			.put("scoreLaby", "DOUBLE NOT NULL DEFAULT 0")
-			.put("scoreDac", "DOUBLE NOT NULL DEFAULT 0")
+			.put("score_elytra", "DOUBLE NOT NULL DEFAULT 0")
+			.put("score_jump", "DOUBLE NOT NULL DEFAULT 0")
+			.put("score_arena", "DOUBLE NOT NULL DEFAULT 0")
+			.put("score_laby", "DOUBLE NOT NULL DEFAULT 0")
+			.put("score_dac", "DOUBLE NOT NULL DEFAULT 0")
 			
 			.build();
 	

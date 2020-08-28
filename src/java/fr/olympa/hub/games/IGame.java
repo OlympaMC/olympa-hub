@@ -4,13 +4,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.logging.Level;
 
@@ -25,7 +28,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
 import fr.olympa.api.holograms.Hologram;
@@ -42,18 +44,20 @@ import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.utils.observable.Observable;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
+import net.minecraft.server.v1_15_R1.MinecraftServer;
 
 public abstract class IGame implements Observable, Listener{
 	
 	private static final int maxDisplayedTopScores = 10;
-	static final int maxTopScoresStored = maxDisplayedTopScores * maxDisplayedTopScores; 
+	static final int maxTopScoresStored = 100; 
 	
-	private OlympaHub plugin;
-	private Map<String, Observer> observers = new HashMap<String, Observer>();
+	protected OlympaHub plugin;
+	protected final IGame instance;
+	private List<Observer> observers = new ArrayList<Observer>();
 	
-	private ItemStack[] hotBarContent = new ItemStack[9];
+	protected ItemStack[] hotBarContent = new ItemStack[9];
 	private Map<UUID, ItemStack[]> players = new HashMap<UUID, ItemStack[]>();
-	private List<UUID> ghostStarters = new ArrayList<UUID>(); //contient les joueurs pour lesquels il ne faut pas lancer le jeu même s'ils le déclenchent
+	//private List<UUID> ghostStarters = new ArrayList<UUID>(); //contient les joueurs pour lesquels il ne faut pas lancer le jeu même s'ils le déclenchent
 	
 	//scores map, must be sorted from the best to the worst
 	//la taille ne doit pas dépasser maxTopScoresStored
@@ -68,6 +72,8 @@ public abstract class IGame implements Observable, Listener{
 	@SuppressWarnings("unchecked")
 	public IGame(OlympaHub plugin, GameType game, ConfigurationSection config) {
 		this.plugin = plugin;
+		this.instance = this;
+		
 		this.gameType = game;
 		
 		this.config = config;
@@ -83,6 +89,7 @@ public abstract class IGame implements Observable, Listener{
 		try {
 			ResultSet query = gameType.getStatement().executeQuery();
 			while (query.next()) {
+				//Bukkit.getLogger().log(Level.SEVERE, "jump score : " + AccountProvider.getPlayerInformations(query.getLong("player_id")).getName() + " - " + query.getDouble(2));
 				topScores.put(AccountProvider.getPlayerInformations(query.getLong("player_id")), query.getDouble(gameType.getBddKey()));
 			}
 		} catch (SQLException e) {
@@ -97,25 +104,22 @@ public abstract class IGame implements Observable, Listener{
 			
 			final int index = i;
 			
-			holo.addLine(new DynamicLine<HologramLine>(
-					new Function<HologramLine, String>() {
-						
-						@Override
-						public String apply(HologramLine line) {
-							if (topScores.size() > index) {
-								OlympaPlayerInformations p = (OlympaPlayerInformations) topScores.keySet().toArray()[index];
-								
-								return "§a" + index + ". §2" + p.getName() + " - " + topScores.get(p);
-							}else
-								return "§a" + index + ". §7indéfini";
-						}
-					}, this));	
+			holo.addLine(new DynamicLine<HologramLine>(line -> {
+				if (topScores.size() > index) {
+					OlympaPlayerInformations p = (OlympaPlayerInformations) topScores.keySet().toArray()[index];
+					if (gameType.isTimerScore())
+						return "§a" + index + ". §2" + p.getName() + " - " + new DecimalFormat("#.##").format(topScores.get(p));
+					else
+						return "§a" + index + ". §2" + p.getName() + " - " + new DecimalFormat("#").format(topScores.get(p));
+				}else
+					return "§a" + index + ". §7indéfini";
+			}, instance));
 		}
 		
 		//création de l'holo du début de partie
 		OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, 
 				new FixedLine<HologramLine>("§6Début " + gameType.getNameWithArticle()), 
-				new FixedLine<HologramLine>("§7(marchez ici pour commencer)"));
+				new FixedLine<HologramLine>("§7Commencez ici"));
 		
 		//gestion sortie de zone de jeu
 		OlympaCore.getInstance().getRegionManager().registerRegion(area, "zone_" + gameType.toString().toLowerCase(), EventPriority.HIGH, new Flag() {
@@ -126,8 +130,14 @@ public abstract class IGame implements Observable, Listener{
 				return ActionResult.ALLOW;
 			}
 		});
+		
+		//définition de la hotbar du jeu
+		if (gameType.isRestartable())
+			hotBarContent[7] = ItemUtils.item(Material.BELL, "§eRecommencer");
+		hotBarContent[8] = ItemUtils.item(Material.BARRIER, "§cSortir du jeu");
 	}
 	
+	/*
 	protected void setHotBar(ItemStack... items) {
 		for (int i = 0 ; i < hotBarContent.length ; i++)
 			if (items.length > i)
@@ -139,7 +149,7 @@ public abstract class IGame implements Observable, Listener{
 			hotBarContent[7] = ItemUtils.item(Material.ENDER_PEARL, "§eRecommencer");
 		hotBarContent[8] = ItemUtils.item(Material.BARRIER, "§cSortir du jeu");
 				
-	}
+	}*/
 	
 	///////////////////////////////////////////////////////////
 	//               START, RESTART and ENDGAME              //
@@ -164,7 +174,7 @@ public abstract class IGame implements Observable, Listener{
 	 * @param p
 	 */
 	protected void restartGame(OlympaPlayerHub p) {
-		p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Vous venez de recommencer depuis le début, réinitialisation des scores.");
+		p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Redémarrage du jeu, réinitialisation des scores...");
 	}
 	
 	/**
@@ -175,16 +185,15 @@ public abstract class IGame implements Observable, Listener{
 	 * @param score obtained score
 	 * @return true if player finished the game, false otherwise
 	 */
-	protected boolean endGame(OlympaPlayerHub p, double score, boolean teleportToGameSpawn) {
+	protected boolean endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		if (!players.keySet().contains(p.getUniqueId()))
 			return false;
 		
+		p.getPlayer().getInventory().clear();
 		p.getPlayer().getInventory().setContents(players.remove(p.getUniqueId()));
 		
-		if (teleportToGameSpawn) {
-			ghostStarters.add(p.getUniqueId());
-			p.getPlayer().teleport(startingLoc);	
-		}
+		if (warpToSpawn)
+			p.getPlayer().teleport(startingLoc);
 		
 		if (score == -1) {
 			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Partie annulée.");
@@ -192,49 +201,57 @@ public abstract class IGame implements Observable, Listener{
 		}
 		
 		//Messages de victoire/défaite
-		if (gameType.isTimerScore())
+		if (gameType.isTimerScore()) {
 			if (p.getScore(gameType) == 0)
 				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aPremière partie terminée ! Votre temps est de " + 
 						new DecimalFormat("#.##").format(score) + "s.");
 		
 			else if (p.getScore(gameType) <= score)
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§a7Vous n'avez pas battu votre précédent record de " + 
+				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Vous n'avez pas battu votre précédent record de " + 
 						new DecimalFormat("#.##").format(p.getScore(gameType)) + "s ! Temps obtenu : " + new DecimalFormat("#.##").format(score) + "s.");
 		
 			else 
 				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Record personnel battu ! Passage de " + 
 						new DecimalFormat("#.##").format(p.getScore(gameType)) + "s à " + new DecimalFormat("#.##").format(score) + "s. Félicitations !");
-		
-		else
+			
+		}else {
 			if (score == 1)
 				if (p.getScore(gameType) == 0)
 					p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aFélicitations pour votre première victoire !");
 				else
 					p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Et une victoire de plus ! Nouveau compte de victoires : " + new DecimalFormat("#").format(p.getScore(gameType) + 1));
 			else
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aC'est perdu, mais vous ferez mieux la prochaine fois !");
+				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aC'est perdu, mais vous ferez mieux la prochaine fois !");	
+		}
 
-		if (gameType.isTimerScore())
-			p.setScore(gameType, score);
-		else
+		/*
+		if (gameType.isTimerScore()) {
+			if (p.getScore(gameType) > score)
+				p.setScore(gameType, score);
+		}else
 			p.setScore(gameType, p.getScore(gameType) + 1);
+			*/
 		
 		//rang du joueur, 0 si non classé
 		int oldPlayerRank = getPlayerRank(p);
 		
 		String oldPlayerRankString;
 		if (oldPlayerRank == 0)
-			oldPlayerRankString = "§7aucune§6";
+			oldPlayerRankString = "§7aucune§e";
 		else
 			oldPlayerRankString = Integer.toString(oldPlayerRank);
 		
-		if (updateTopScores(p, score)) {
-			observers.values().forEach(o -> o.changed());
+		//Bukkit.broadcastMessage(oldPlayerRankString);
+		
+		if (updateScores(p, score)) {
+			observers.forEach(o -> o.changed());
 			
-			if (getPlayerRank(p) < oldPlayerRank)
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§6Vous progressez dans le tableau des scores de la place " + oldPlayerRankString + 
-						" à la place " + getPlayerRank(p) + ", félicitations !!");
-		}	
+			if (getPlayerRank(p) < oldPlayerRank || oldPlayerRank == 0)
+				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place " + oldPlayerRankString + 
+						" à la place §c" + getPlayerRank(p) + "§e, félicitations !!");
+		}
+		
+		//Bukkit.broadcastMessage("new scores : " + topScores);
 		
 		return true;
 	}
@@ -250,44 +267,70 @@ public abstract class IGame implements Observable, Listener{
 	 * @return player rank (1 is the best, 0 is unranked)
 	 */
 	public int getPlayerRank(OlympaPlayerHub p) {
-		return new ArrayList<OlympaPlayerInformations>(topScores.keySet()).indexOf(p.getInformation()) + 1;
+		//return new ArrayList<OlympaPlayerInformations>(topScores.keySet()).indexOf(p.getInformation()) + 1;
+		List<OlympaPlayerInformations> list = new ArrayList<OlympaPlayerInformations>(topScores.keySet());
+		for (int i = 0 ; i < topScores.keySet().size() ; i++)
+			if (list.get(i).getId() == p.getId())
+				return i + 1;
+		
+		return 0;
 	}
 	
 	/**
-	 * Update scores map
-	 * @return true if top scores have been changed
+	 * Update player score and top scores map
+	 * @param target player
+	 * @param new player score
+	 * @return true if top scores have been changed, false otherwise
 	 */
-	private boolean updateTopScores(OlympaPlayerHub p, double score) {
-		LinkedHashMap<OlympaPlayerInformations, Double> oldScores = new LinkedHashMap<OlympaPlayerInformations, Double>(topScores);
-		oldScores.put(p.getInformation(), score);
+	private boolean updateScores(OlympaPlayerHub p, double score) {
+		//Bukkit.broadcastMessage("try to update scores. old score : " + p.getScore(gameType) + " - new score : " + score);
 		
-		LinkedHashMap<OlympaPlayerInformations, Double> newScores = new LinkedHashMap<OlympaPlayerInformations, Double>();
-
 		if (gameType.isTimerScore()) 
-			oldScores.entrySet().stream().sorted(Map.Entry. comparingByValue()).forEach(e -> newScores.put(e.getKey(), e.getValue()));
+			if (p.getScore(gameType) == 0 || p.getScore(gameType) > score)
+				p.setScore(gameType, score);
+			else
+				return false;
 		else
-			oldScores.entrySet().stream().sorted(Map.Entry. comparingByValue(new Comparator<Double>(){
-
-				@Override
-				public int compare(Double o1, Double o2) {
-					return (int) (o2-o1);
-				}
-			})).forEach(e -> newScores.put(e.getKey(), e.getValue()));
+			if (p.getScore(gameType) < score)
+				p.setScore(gameType, p.getScore(gameType) + 1);
+			else
+				return false;
 		
-		if (newScores.size() > maxTopScoresStored) {
-			List<OlympaPlayerInformations> keys = new ArrayList<OlympaPlayerInformations>(newScores.keySet());
-			newScores.remove(keys.get(keys.size() - 1));
-		}
+		//int previousRank = getPlayerRank(p);
 		
-		int oldRank = getPlayerRank(p);
-		int newRank = new ArrayList<OlympaPlayerInformations>(newScores.keySet()).indexOf(p.getInformation()) + 1;
-
-		topScores = newScores;
+		topScores.put(p.getInformation(), score);
+		sortScores();
 		
-		if (newRank != oldRank)
+		//Bukkit.broadcastMessage("old rank : " + previousRank + " - new rank : " + getPlayerRank(p));
+		
+		if (getPlayerRank(p) > 0)
 			return true;
 		else
-			return false;			
+			return false;
+	}
+	
+	private void sortScores() {
+		//get all entries from the LinkedHashMap and convert it to a List
+		List<Map.Entry<OlympaPlayerInformations, Double>> list = new ArrayList<Map.Entry<OlympaPlayerInformations, Double>>( topScores.entrySet() );
+		
+		Collections.sort(list, new Comparator<Map.Entry<OlympaPlayerInformations, Double>>(){
+			 
+		    public int compare(Entry<OlympaPlayerInformations, Double> e1, Entry<OlympaPlayerInformations, Double> e2) {
+		    	if (gameType.isTimerScore())
+		    		return (int) (e1.getValue()*1000d - e2.getValue()*1000d);
+		    	else 
+		    		return (int) (e2.getValue()*1000d - e1.getValue()*1000d);
+		    }
+		});
+		
+		//store sorted data into top scores map 
+		topScores.clear();
+		int i = 0;
+		while(topScores.size() < maxTopScoresStored && list.size() > i) {
+			topScores.put(list.get(i).getKey(), list.get(i).getValue());
+			i++;
+		}
+		//entries.forEach(e -> topScores.put(e.getKey(), e.getValue()));
 	}
 	
 	public GameType getGameType() {
@@ -303,11 +346,23 @@ public abstract class IGame implements Observable, Listener{
 	//          MOVE, TELEPORT, INTERRACT LISTENERS          //
 	///////////////////////////////////////////////////////////
 	
+	private Set<Player> alreadyTriggeredPlayers = new HashSet<Player>();
+	private int lastCheckedTick = MinecraftServer.currentTick;
 	
 	@EventHandler //handle player interract with its hotbar
 	public void onInterract(PlayerInteractEvent e) {
 		if (!players.keySet().contains(e.getPlayer().getUniqueId()))
 			return;
+		
+		if (MinecraftServer.currentTick == lastCheckedTick) {
+			lastCheckedTick = MinecraftServer.currentTick + 1;
+			alreadyTriggeredPlayers.clear();
+		}
+		
+		//empêche l'exécution d'un playerInterractEvent plus d'une fois par tick
+		if (alreadyTriggeredPlayers.contains(e.getPlayer()))
+			return;
+		alreadyTriggeredPlayers.add(e.getPlayer());
 		
 		switch(e.getPlayer().getInventory().getHeldItemSlot()) {
 		case 7:
@@ -334,35 +389,26 @@ public abstract class IGame implements Observable, Listener{
 	
 	@EventHandler
 	public void playerMoveEvent(PlayerMoveEvent e) {
-		if (e.getFrom().getBlockX() == e.getTo().getBlockX() && e.getFrom().getBlockZ() == e.getTo().getBlockZ())
+		if (e.getFrom().getBlock().equals(e.getTo().getBlock()))
 			return;
+
+		Player p = e.getPlayer();
+		//Bukkit.broadcastMessage("starting loc : " + startingLoc);
+		//Bukkit.broadcastMessage(p + " moved - from : " + e.getTo().getBlock().getLocation() + " - to : " + startingLoc.getBlock());
 		
-		onMove(e.getPlayer(), e.getFrom(), e.getTo());
-	}
-	
-	@EventHandler
-	public void playerTeleportEvent(PlayerTeleportEvent e) {
-		onMove(e.getPlayer(), e.getFrom(), e.getTo());
-	}
-	
-	private void onMove(Player p, Location from, Location to) {
-		//si le joueur marche sur le bloc qui commence la partie
-		if (to.getBlockX() == startingLoc.getBlockX() && to.getBlockY() == startingLoc.getBlockY() && to.getBlockZ() == startingLoc.getBlockZ()) {
+		if (e.getTo().getBlock().equals(startingLoc.getBlock())) {
 			
-			if (!ghostStarters.contains(p.getUniqueId()))
-				if (players.containsKey(p.getUniqueId()))
-					restartGame(AccountProvider.get(p.getUniqueId()));
-				else
-					startGame(AccountProvider.get(p.getUniqueId()));	
+			if (players.containsKey(p.getUniqueId()))
+				restartGame(AccountProvider.get(p.getUniqueId()));
 			else
-				ghostStarters.remove(p.getUniqueId());
+				startGame(AccountProvider.get(p.getUniqueId()));
 			
 		}else if (players.containsKey(p.getUniqueId()))
-			onMoveHandler(p, from, to);
+			onMoveHandler(p, e.getFrom(), e.getTo());
 	}
 	
 	/**
-	 * Override the method to execute actions on player move or teleport
+	 * Execute actions on player move
 	 * @param p
 	 * @param from
 	 * @param to
@@ -383,12 +429,13 @@ public abstract class IGame implements Observable, Listener{
 	
 	@Override
 	public void observe(String name, Observer observer) {
-		observers.put(name, observer);
+		Bukkit.getLogger().log(Level.SEVERE, "add observer : " + observer);
+		observers.add(observer);
 	}
 	
 	@Override
 	public void unobserve(String name) {
-		observers.remove(name);
+		//observers.remove(name);
 	}
 
 	protected final Location getLoc(String str) {
@@ -398,7 +445,7 @@ public abstract class IGame implements Observable, Listener{
 			return null;
 		
 		try {
-			return new Location(Bukkit.getWorld(args[0]), Double.valueOf(args[1]), Double.valueOf(args[1]), Double.valueOf(args[3]));
+			return new Location(Bukkit.getWorld(args[0]), Double.valueOf(args[1]) + 0.5, Double.valueOf(args[2]), Double.valueOf(args[3]) + 0.5);
 		}catch(NumberFormatException e) {
 			return null;
 		}
