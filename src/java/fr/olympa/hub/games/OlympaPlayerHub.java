@@ -10,7 +10,6 @@ import java.util.UUID;
 import com.google.common.collect.ImmutableMap;
 
 import fr.olympa.api.provider.OlympaPlayerObject;
-import fr.olympa.hub.games.IGame.GameType;
 
 public class OlympaPlayerHub extends OlympaPlayerObject {
 
@@ -27,6 +26,9 @@ public class OlympaPlayerHub extends OlympaPlayerObject {
 	
 	public OlympaPlayerHub(UUID uuid, String name, String ip) {
 		super(uuid, name, ip);
+		
+		for (GameType game : GameType.values())
+			scores.put(game, 0d);
 	}
 	
 	@Override
@@ -38,7 +40,7 @@ public class OlympaPlayerHub extends OlympaPlayerObject {
 	@Override
 	public void saveDatas(PreparedStatement statement) throws SQLException {
 		for (int i = 0 ; i < GameType.values().length ; i++)
-			statement.setDouble(i, scores.get(GameType.values()[i]));
+			statement.setDouble(i + 1, scores.get(GameType.values()[i]));
 	}
 	
 	/**

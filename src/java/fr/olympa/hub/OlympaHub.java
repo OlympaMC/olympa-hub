@@ -3,7 +3,9 @@ package fr.olympa.hub;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
@@ -48,7 +50,9 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		instance = this;
 		super.onEnable();
 		
-		AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "creatif", OlympaPlayerHub.COLUMNS);
+		AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
+
+		games = new MiniGamesManager(this); 
 
 		spawn = getConfig().getLocation("spawn");
 		lightning = getConfig().getLocation("lightning");
@@ -81,8 +85,6 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		OlympaCorePermissions.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
 		OlympaCorePermissions.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
-
-		games = new MiniGamesManager(this); 
 	}
 
 }
