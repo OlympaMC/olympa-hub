@@ -1,15 +1,7 @@
 game_jump:
   start_loc: world 0 0 0
   holo_loc: world 0 0 0
-  area:
-    ==: fr.olympa.api.region.shapes.Cuboid
-    world: "world"
-    xMin: 0
-    yMin: 0
-    zMin: 0
-    xMax: 0
-    yMax: 0
-    zMax: 0
+  area: world 0 0 0 0 0 0
   
   #first checkpoint must be the start_loc
   checkpoints:
@@ -17,3 +9,12 @@ game_jump:
    - world 0 0 0
    - world 0 0 0
    - world 0 0 0
+   
+game_arena:
+  start_loc: world 0 0 0
+  holo_loc: world 0 0 0
+  area: world 0 0 0 0 0 0
+  
+  #arena: world 0 0 0 0 0 0
+  player_1_spawn: world 0 0 0
+  player_2_spawn: world 0 0 0

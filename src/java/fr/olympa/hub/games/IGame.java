@@ -38,6 +38,7 @@ import fr.olympa.api.lines.FixedLine;
 import fr.olympa.api.player.OlympaPlayerInformations;
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.region.Region;
+import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
@@ -78,7 +79,7 @@ public abstract class IGame implements Listener{
 		this.gameType = game;
 		
 		this.config = config;
-		this.area = config.getSerializable("area", Region.class);
+		this.area = getRegion(config.getString("area"));
 		this.startingLoc = getLoc(config.getString("start_loc"));
 
 		Location holoLoc = getLoc(config.getString("holo_loc"));
@@ -105,25 +106,25 @@ public abstract class IGame implements Listener{
 			
 			final int index = i;
 			
-			Bukkit.getLogger().log(Level.WARNING, "CHARGEMENT DE LA LIGNE " + i);
+			//Bukkit.getLogger().log(Level.WARNING, "CHARGEMENT DE LA LIGNE " + i);
 			
 			holo.addLine(new DynamicLine<HologramLine>(line -> {
-				/*
+				
 				if (topScores.size() > index) {
 					OlympaPlayerInformations p = (OlympaPlayerInformations) topScores.keySet().toArray()[index];
 					if (gameType.isTimerScore())
-						return "§a" + index + ". §2" + p.getName() + " - " + new DecimalFormat("#.##").format(topScores.get(p));
+						return "§a" + index + ". §e" + p.getName() + " §a- " + new DecimalFormat("#.##").format(topScores.get(p) + "s");
 					else
-						return "§a" + index + ". §2" + p.getName() + " - " + new DecimalFormat("#").format(topScores.get(p));
+						return "§a" + index + ". §e" + p.getName() + " §a- " + new DecimalFormat("#").format(topScores.get(p) + " victoires");
 				}else
 					return "§a" + index + ". §7indéfini";
-					*/
-				Bukkit.getLogger().log(Level.SEVERE, "line " + index + " = " + "tick : " + MinecraftServer.currentTick);
-				return "tick : " + MinecraftServer.currentTick;
+					
+				//Bukkit.getLogger().log(Level.SEVERE, "line " + index + " = " + "tick : " + MinecraftServer.currentTick);
+				//return "tick : " + MinecraftServer.currentTick;
 			}, observable));
 		}
 		
-		observable.update();
+		//observable.update();
 		
 		//création de l'holo du début de partie
 		OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, 
@@ -160,6 +161,10 @@ public abstract class IGame implements Listener{
 				
 	}*/
 	
+	public Set<UUID> getPlayers(){
+		return Collections.unmodifiableSet(players.keySet());
+	}
+	
 	///////////////////////////////////////////////////////////
 	//               START, RESTART and ENDGAME              //
 	///////////////////////////////////////////////////////////
@@ -183,7 +188,8 @@ public abstract class IGame implements Listener{
 	 * @param p
 	 */
 	protected void restartGame(OlympaPlayerHub p) {
-		p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Redémarrage du jeu, réinitialisation des scores...");
+		if (gameType.isRestartable())
+			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Redémarrage du jeu, réinitialisation des scores...");
 	}
 	
 	/**
@@ -194,9 +200,9 @@ public abstract class IGame implements Listener{
 	 * @param score obtained score
 	 * @return true if player finished the game, false otherwise
 	 */
-	protected boolean endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
+	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		if (!players.keySet().contains(p.getUniqueId()))
-			return false;
+			return;
 		
 		p.getPlayer().getInventory().clear();
 		p.getPlayer().getInventory().setContents(players.remove(p.getUniqueId()));
@@ -206,7 +212,7 @@ public abstract class IGame implements Listener{
 		
 		if (score == -1) {
 			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Partie annulée.");
-			return false;	
+			return;	
 		}
 		
 		//Messages de victoire/défaite
@@ -259,10 +265,6 @@ public abstract class IGame implements Listener{
 				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place " + oldPlayerRankString + 
 						" à la place §c" + getPlayerRank(p) + "§e, félicitations !!");
 		}
-		
-		//Bukkit.broadcastMessage("new scores : " + topScores);
-		
-		return true;
 	}
 
 	
@@ -342,7 +344,7 @@ public abstract class IGame implements Listener{
 		//entries.forEach(e -> topScores.put(e.getKey(), e.getValue()));
 	}
 	
-	public GameType getGameType() {
+	public GameType getType() {
 		return gameType;
 	}
 	
@@ -355,6 +357,7 @@ public abstract class IGame implements Listener{
 	//          MOVE, TELEPORT, INTERRACT LISTENERS          //
 	///////////////////////////////////////////////////////////
 	
+	
 	private Set<Player> alreadyTriggeredPlayers = new HashSet<Player>();
 	private int lastCheckedTick = MinecraftServer.currentTick;
 	
@@ -363,14 +366,17 @@ public abstract class IGame implements Listener{
 		if (!players.keySet().contains(e.getPlayer().getUniqueId()))
 			return;
 		
+		e.setCancelled(true);
+		
 		if (MinecraftServer.currentTick >= lastCheckedTick) {
 			lastCheckedTick = MinecraftServer.currentTick + 1;
 			alreadyTriggeredPlayers.clear();
 		}
 		
 		//empêche l'exécution d'un playerInterractEvent plus d'une fois par tick
-		if (alreadyTriggeredPlayers.contains(e.getPlayer()))
+		if (alreadyTriggeredPlayers.contains(e.getPlayer())) 
 			return;
+		
 		alreadyTriggeredPlayers.add(e.getPlayer());
 		
 		switch(e.getPlayer().getInventory().getHeldItemSlot()) {
@@ -447,5 +453,20 @@ public abstract class IGame implements Listener{
 		}catch(NumberFormatException e) {
 			return null;
 		}
+	}
+	
+	protected final Cuboid getRegion(String str) {
+		String[] args = str.split(" ");
+		
+		if (args.length != 7)
+			return null;
+
+		try {
+			return new Cuboid(Bukkit.getWorld(args[0]), Integer.valueOf(args[1]), Integer.valueOf(args[2]), Integer.valueOf(args[3]), 
+					Integer.valueOf(args[4]), Integer.valueOf(args[5]), Integer.valueOf(args[6]));
+		}catch(NumberFormatException e) {
+			return null;
+		}
+		
 	}
 }

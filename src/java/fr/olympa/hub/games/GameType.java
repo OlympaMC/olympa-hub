@@ -15,7 +15,7 @@ import fr.olympa.hub.OlympaHub;
 public enum GameType {
 	ELYTRA("score_elytra", "§6Course d'élytra", "de la ", true, true, null),
 	JUMP("score_jump", "§6Jump", "du ", true, true, GameJump::new),
-	ARENA("score_arena", "Arène 1vs1", "de l'", false, false, null),
+	ARENA("score_arena", "Arène 1vs1", "de l'", false, false, GameArena::new),
 	LABY("score_laby", "Labyrinthe", "du ", false, true, null),
 	DAC("score_dac", "Dé-à-coudre", "du ", false, false, null),
 	

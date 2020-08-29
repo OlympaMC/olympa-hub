@@ -61,14 +61,13 @@ public class GameJump extends IGame{
 	}
 	
 	@Override
-	protected boolean endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
+	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		super.endGame(p, score, warpToSpawn);
 		
 		playersCPTimeInit.remove(p.getPlayer());
 		playerLastCPTime.remove(p.getPlayer());
 		
 		playersLastCheckPoint.remove(p.getPlayer());
-		return true;
 	}
 	
 	@Override

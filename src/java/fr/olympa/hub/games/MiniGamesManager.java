@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import fr.olympa.hub.OlympaHub;
 
@@ -47,6 +48,19 @@ public class MiniGamesManager {
 	
 	public static MiniGamesManager getInstance() {
 		return instance;
+	}
+	
+	/**
+	 * Return game the player is player
+	 * @param p player to test
+	 * @return GameType of the game, or null if player isn't playing any game
+	 */
+	public GameType isPlaying(Player p) {
+		for (IGame game : games.values())
+			if (game.getPlayers().contains(p.getUniqueId()))
+				return game.getType();
+		
+		return null;
 	}
 	
 	public IGame getGame(GameType game) {
