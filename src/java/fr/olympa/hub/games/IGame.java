@@ -42,18 +42,19 @@ import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.utils.observable.Observable;
+import fr.olympa.api.utils.observable.SimpleObservable;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
 import net.minecraft.server.v1_15_R1.MinecraftServer;
 
-public abstract class IGame implements Observable, Listener{
+public abstract class IGame implements Listener{
 	
 	private static final int maxDisplayedTopScores = 10;
 	static final int maxTopScoresStored = 100; 
 	
 	protected OlympaHub plugin;
 	protected final IGame instance;
-	private List<Observer> observers = new ArrayList<Observer>();
+	private SimpleObservable observable = new SimpleObservable();
 	
 	protected ItemStack[] hotBarContent = new ItemStack[9];
 	private Map<UUID, ItemStack[]> players = new HashMap<UUID, ItemStack[]>();
@@ -104,7 +105,10 @@ public abstract class IGame implements Observable, Listener{
 			
 			final int index = i;
 			
+			Bukkit.getLogger().log(Level.WARNING, "CHARGEMENT DE LA LIGNE " + i);
+			
 			holo.addLine(new DynamicLine<HologramLine>(line -> {
+				/*
 				if (topScores.size() > index) {
 					OlympaPlayerInformations p = (OlympaPlayerInformations) topScores.keySet().toArray()[index];
 					if (gameType.isTimerScore())
@@ -113,8 +117,13 @@ public abstract class IGame implements Observable, Listener{
 						return "§a" + index + ". §2" + p.getName() + " - " + new DecimalFormat("#").format(topScores.get(p));
 				}else
 					return "§a" + index + ". §7indéfini";
-			}, instance));
+					*/
+				Bukkit.getLogger().log(Level.SEVERE, "line " + index + " = " + "tick : " + MinecraftServer.currentTick);
+				return "tick : " + MinecraftServer.currentTick;
+			}, observable));
 		}
+		
+		observable.update();
 		
 		//création de l'holo du début de partie
 		OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, 
@@ -244,7 +253,7 @@ public abstract class IGame implements Observable, Listener{
 		//Bukkit.broadcastMessage(oldPlayerRankString);
 		
 		if (updateScores(p, score)) {
-			observers.forEach(o -> o.changed());
+			observable.update();
 			
 			if (getPlayerRank(p) < oldPlayerRank || oldPlayerRank == 0)
 				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place " + oldPlayerRankString + 
@@ -354,7 +363,7 @@ public abstract class IGame implements Observable, Listener{
 		if (!players.keySet().contains(e.getPlayer().getUniqueId()))
 			return;
 		
-		if (MinecraftServer.currentTick == lastCheckedTick) {
+		if (MinecraftServer.currentTick >= lastCheckedTick) {
 			lastCheckedTick = MinecraftServer.currentTick + 1;
 			alreadyTriggeredPlayers.clear();
 		}
@@ -422,30 +431,19 @@ public abstract class IGame implements Observable, Listener{
 		endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, false);
 	}
 
-	
-	///////////////////////////////////////////////////////////
-	//               OBSERVABLE IMPLEMENTATION               //
-	///////////////////////////////////////////////////////////
-	
-	@Override
-	public void observe(String name, Observer observer) {
-		Bukkit.getLogger().log(Level.SEVERE, "add observer : " + observer);
-		observers.add(observer);
-	}
-	
-	@Override
-	public void unobserve(String name) {
-		//observers.remove(name);
-	}
-
 	protected final Location getLoc(String str) {
 		String[] args = str.split(" ");
 		
-		if (args.length != 4)
+		if (args.length < 4)
 			return null;
 		
 		try {
-			return new Location(Bukkit.getWorld(args[0]), Double.valueOf(args[1]) + 0.5, Double.valueOf(args[2]), Double.valueOf(args[3]) + 0.5);
+			if (args.length == 4)
+				return new Location(Bukkit.getWorld(args[0]), Double.valueOf(args[1]) + 0.5, Double.valueOf(args[2]), Double.valueOf(args[3]) + 0.5);
+			else if (args.length == 6)
+				return new Location(Bukkit.getWorld(args[0]), Double.valueOf(args[1]) + 0.5, Double.valueOf(args[2]), Double.valueOf(args[3]) + 0.5, Float.valueOf(args[4]), Float.valueOf(args[5]));
+			else
+				return null;
 		}catch(NumberFormatException e) {
 			return null;
 		}
