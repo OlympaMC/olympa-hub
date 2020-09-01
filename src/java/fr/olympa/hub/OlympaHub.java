@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import fr.olympa.api.groups.OlympaGroup;
 import fr.olympa.api.permission.OlympaCorePermissions;
 import fr.olympa.api.plugin.OlympaAPIPlugin;
+import fr.olympa.api.provider.RedisAccess;
 import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.ActionResult;
@@ -56,10 +57,10 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		new SpawnCommand(this).register();
 		new ServerConfigCommand(this).register();
-		
+
 		OlympaGroup.PLAYER.runtimePermissions.add("jumppads.use");
 
-		OlympaCore.getInstance().registerRedisSub(serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), RedisChannel.BUNGEE_SEND_SERVERSINFOS.name());
+		OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE, serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), RedisChannel.BUNGEE_SEND_SERVERSINFOS.name());
 
 		OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag() {
 			@Override
