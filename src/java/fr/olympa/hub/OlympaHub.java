@@ -3,7 +3,9 @@ package fr.olympa.hub;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
@@ -12,13 +14,19 @@ import org.bukkit.event.Listener;
 import fr.olympa.api.groups.OlympaGroup;
 import fr.olympa.api.permission.OlympaCorePermissions;
 import fr.olympa.api.plugin.OlympaAPIPlugin;
+<<<<<<< src/java/fr/olympa/hub/OlympaHub.java
+import fr.olympa.api.provider.AccountProvider;
+=======
 import fr.olympa.api.provider.RedisAccess;
+>>>>>>> src/java/fr/olympa/hub/OlympaHub.java
 import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
+import fr.olympa.hub.games.MiniGamesManager;
+import fr.olympa.hub.games.OlympaPlayerHub;
 import fr.olympa.hub.pads.LaunchPadManager;
 import fr.olympa.hub.servers.ServerConfigCommand;
 import fr.olympa.hub.servers.ServerInfosListener;
@@ -38,11 +46,17 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 	public ServerInfosListener serversInfos;
 
 	public Location spawn, lightning;
+	
+	public MiniGamesManager games;
 
 	@Override
 	public void onEnable() {
 		instance = this;
 		super.onEnable();
+		
+		AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
+
+		games = new MiniGamesManager(this); 
 
 		spawn = getConfig().getLocation("spawn");
 		lightning = getConfig().getLocation("lightning");

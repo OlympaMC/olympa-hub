@@ -1,0 +1,20 @@
+game_jump:
+  start_loc: world 1 30 12
+  holo_loc: world 3 29 9
+  area: world -2 0 7 5 255 23
+    
+  checkpoints:
+   - world 1 30 12
+   - world 3 31 18
+   - world 3 35 13
+   - world 2 35 20
+   - world 0 35 16
+   
+   
+game_arena:
+  start_loc: world -15 29 15
+  holo_loc: world -18 29 15
+  area: world -26 0 3 -12 255 16
+  
+  player_1_spawn: world -24 30 9
+  player_2_spawn: world -20 30 9
