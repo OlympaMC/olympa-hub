@@ -76,7 +76,7 @@ public class HubListener implements Listener {
 	public void onPlayerInteract(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		if (e.getHand() == EquipmentSlot.HAND) {
-			if (player.getInventory().getHeldItemSlot() == 4 && MiniGamesManager.getInstance().isPlaying(e.getPlayer()) != null) {
+			if (player.getInventory().getHeldItemSlot() == 4 && MiniGamesManager.getInstance().isPlaying(e.getPlayer()) == null) {
 				new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player);
 				e.setCancelled(true);
 			}
@@ -85,7 +85,7 @@ public class HubListener implements Listener {
 
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
-		if (e.getSlot() == 4 && MiniGamesManager.getInstance().isPlaying((Player) e.getWhoClicked()) != null) {
+		if (e.getSlot() == 4 && MiniGamesManager.getInstance().isPlaying((Player) e.getWhoClicked()) == null) {
 			Player player = (Player) e.getWhoClicked();
 			new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player);
 			e.setCancelled(true);

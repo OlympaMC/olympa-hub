@@ -32,6 +32,8 @@ public class GameJump extends IGame{
 		config.getStringList("checkpoints").forEach(s -> checkpoints.add(getLoc(s)));
 		
 		hotBarContent[6] = ItemUtils.item(Material.TOTEM_OF_UNDYING, "§2Revenir au checkpoint précédent");
+		
+		allowedTpLocs.addAll(checkpoints);
 	}
 
 	@Override
@@ -53,7 +55,6 @@ public class GameJump extends IGame{
 		
 		playersCPTimeInit.put(p.getPlayer(), System.currentTimeMillis());
 		playerLastCPTime.put(p.getPlayer(), 0l);
-		//p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aTéléportation au checkpoint ");
 		
 		playersLastCheckPoint.put(p.getPlayer(), 0);
 		
@@ -80,7 +81,9 @@ public class GameJump extends IGame{
 		if (playersLastCheckPoint.get(p) + 1 == check) 
 			if (check == checkpoints.size() - 1) {
 				endGame(AccountProvider.get(p.getUniqueId()), (playerLastCPTime.get(p) + getCurrentCPTime(p))/1000d, false);
-				plugin.getTask().runTaskLater(() -> p.teleport(startingLoc), 80);
+				
+				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Téléportation au spawn dans 5 secondes...");
+				plugin.getTask().runTaskLater(() -> p.teleport(startingLoc), 100);
 				
 			}else {
 				playerLastCPTime.put(p, playerLastCPTime.get(p) + getCurrentCPTime(p));
@@ -94,7 +97,6 @@ public class GameJump extends IGame{
 			p.sendMessage(gameType.getChatPrefix() + "§7Vous avez déjà validé ce checkpoint !");
 		else if (playersLastCheckPoint.get(p) + 1 < check)
 			p.sendMessage(gameType.getChatPrefix() + "§cNe brûlez pas les étapes ! §7Vous devez d'abord vous rendre au point " + (playersLastCheckPoint.get(p) + 1));
-			
 	}
 	
 	private int getCheckpointIndex(Location toCheck) {

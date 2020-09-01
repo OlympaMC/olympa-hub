@@ -14,9 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.logging.Level;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,9 +22,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
 import fr.olympa.api.holograms.Hologram;
@@ -41,12 +41,11 @@ import fr.olympa.api.region.Region;
 import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
+import fr.olympa.api.region.tracking.flags.DamageFlag;
 import fr.olympa.api.region.tracking.flags.Flag;
-import fr.olympa.api.utils.observable.Observable;
 import fr.olympa.api.utils.observable.SimpleObservable;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
-import net.minecraft.server.v1_15_R1.MinecraftServer;
 
 public abstract class IGame implements Listener{
 	
@@ -68,8 +67,11 @@ public abstract class IGame implements Listener{
 	protected ConfigurationSection config;
 	protected final GameType gameType;
 	private Region area;
+	protected TrackedRegion region;
 	protected Location startingLoc;
 	private Hologram holo;
+	
+	protected Set<Location> allowedTpLocs = new HashSet<Location>();
 	
 	@SuppressWarnings("unchecked")
 	public IGame(OlympaHub plugin, GameType game, ConfigurationSection config) {
@@ -98,6 +100,8 @@ public abstract class IGame implements Listener{
 			e.printStackTrace();
 		}
 		
+		//Bukkit.getLogger().log(Level.SEVERE, "scores " + gameType + " : " + topScores);
+		
 		//création de l'holo scores
 		holo = OlympaCore.getInstance().getHologramsManager().createHologram(holoLoc, false, 
 				new FixedLine<HologramLine>("§6Scores " + gameType.getNameWithArticle()), new FixedLine<HologramLine>(" "));
@@ -111,13 +115,17 @@ public abstract class IGame implements Listener{
 			holo.addLine(new DynamicLine<HologramLine>(line -> {
 				
 				if (topScores.size() > index) {
+					
 					OlympaPlayerInformations p = (OlympaPlayerInformations) topScores.keySet().toArray()[index];
+
+					//Bukkit.getLogger().log(Level.SEVERE, index + "/" + (topScores.size() - 1) + " - " + p.getName() + " : " + topScores.get(p));
+					
 					if (gameType.isTimerScore())
-						return "§a" + index + ". §e" + p.getName() + " §a- " + new DecimalFormat("#.##").format(topScores.get(p) + "s");
+						return "§a" + (index + 1) + ". §e" + p.getName() + " §a- " + new DecimalFormat("#.##").format(topScores.get(p)) + "s";
 					else
-						return "§a" + index + ". §e" + p.getName() + " §a- " + new DecimalFormat("#").format(topScores.get(p) + " victoires");
+						return "§a" + (index + 1) + ". §e" + p.getName() + " §a- " + new DecimalFormat("#").format(topScores.get(p)) + " victoires";
 				}else
-					return "§a" + index + ". §7indéfini";
+					return "§a" + (index + 1) + ". §7indéfini";
 					
 				//Bukkit.getLogger().log(Level.SEVERE, "line " + index + " = " + "tick : " + MinecraftServer.currentTick);
 				//return "tick : " + MinecraftServer.currentTick;
@@ -132,7 +140,16 @@ public abstract class IGame implements Listener{
 				new FixedLine<HologramLine>("§7Commencez ici"));
 		
 		//gestion sortie de zone de jeu
-		OlympaCore.getInstance().getRegionManager().registerRegion(area, "zone_" + gameType.toString().toLowerCase(), EventPriority.HIGH, new Flag() {
+		region = OlympaCore.getInstance().getRegionManager().registerRegion(area, "zone_" + gameType.toString().toLowerCase(), EventPriority.LOWEST, 
+				new DamageFlag(false) {
+			
+			@Override
+			public void damageEvent(EntityDamageEvent e) {
+				if (players.keySet().contains(e.getEntity().getUniqueId()))
+					onDamageHandler(e);
+			}
+		},
+				new Flag() {
 			@Override
 			public ActionResult leaves(Player p, Set<TrackedRegion> to) {
 				super.leaves(p, to);
@@ -145,6 +162,9 @@ public abstract class IGame implements Listener{
 		if (gameType.isRestartable())
 			hotBarContent[7] = ItemUtils.item(Material.BELL, "§eRecommencer");
 		hotBarContent[8] = ItemUtils.item(Material.BARRIER, "§cSortir du jeu");
+		
+		//add allowed tp locs
+		allowedTpLocs.add(startingLoc);
 	}
 	
 	/*
@@ -179,7 +199,7 @@ public abstract class IGame implements Listener{
 		p.getPlayer().getInventory().clear();
 		p.getPlayer().getInventory().setContents(hotBarContent);
 		
-		p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aDébut du jeu ! Faites de votre mieux !");
+		p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aVous venez de rejoindre le jeu ! Faites de votre mieux !");
 	}
 	
 	/**
@@ -309,7 +329,11 @@ public abstract class IGame implements Listener{
 		
 		//int previousRank = getPlayerRank(p);
 		
-		topScores.put(p.getInformation(), score);
+		if (gameType.isTimerScore())
+			topScores.put(p.getInformation(), score);
+		else 
+			topScores.put(p.getInformation(), p.getScore(gameType) + score);
+		
 		sortScores();
 		
 		//Bukkit.broadcastMessage("old rank : " + previousRank + " - new rank : " + getPlayerRank(p));
@@ -356,40 +380,27 @@ public abstract class IGame implements Listener{
 	///////////////////////////////////////////////////////////
 	//          MOVE, TELEPORT, INTERRACT LISTENERS          //
 	///////////////////////////////////////////////////////////
+
 	
-	
-	private Set<Player> alreadyTriggeredPlayers = new HashSet<Player>();
-	private int lastCheckedTick = MinecraftServer.currentTick;
-	
-	@EventHandler //handle player interract with its hotbar
+	@EventHandler(priority = EventPriority.LOWEST) //handle player interract with its hotbar
 	public void onInterract(PlayerInteractEvent e) {
 		if (!players.keySet().contains(e.getPlayer().getUniqueId()))
 			return;
 		
 		e.setCancelled(true);
 		
-		if (MinecraftServer.currentTick >= lastCheckedTick) {
-			lastCheckedTick = MinecraftServer.currentTick + 1;
-			alreadyTriggeredPlayers.clear();
-		}
-		
-		//empêche l'exécution d'un playerInterractEvent plus d'une fois par tick
-		if (alreadyTriggeredPlayers.contains(e.getPlayer())) 
-			return;
-		
-		alreadyTriggeredPlayers.add(e.getPlayer());
-		
-		switch(e.getPlayer().getInventory().getHeldItemSlot()) {
-		case 7:
-			if (gameType.isRestartable()) {
-				restartGame(AccountProvider.get(e.getPlayer().getUniqueId()));
+		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)
+			switch(e.getPlayer().getInventory().getHeldItemSlot()) {
+			case 7:
+				if (gameType.isRestartable() && !e.getPlayer().getLocation().getBlock().equals(startingLoc.getBlock())) {
+					restartGame(AccountProvider.get(e.getPlayer().getUniqueId()));
+					return;
+				}
+				break;
+			case 8:
+				endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, true);
 				return;
 			}
-			break;
-		case 8:
-			endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, true);
-			return;
-		}
 		
 		onInterractHandler(e);
 	}
@@ -401,8 +412,26 @@ public abstract class IGame implements Listener{
 	protected void onInterractHandler(PlayerInteractEvent e) {
 		
 	}
+
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onTeleport(PlayerTeleportEvent e) {
+		if (players.containsKey(e.getPlayer().getUniqueId())) {
+			boolean allowTp = false;
+			
+			for (Location loc : allowedTpLocs)
+				if (!allowTp) 
+					if (loc.getBlock().equals(e.getTo().getBlock()))
+						allowTp = true;
+			
+			if (!allowTp) {
+				e.getPlayer().sendMessage(gameType.getChatPrefix() + "§cVous téléporter pendant le jeu est interdit !");
+				endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, false);	
+			}	
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void playerMoveEvent(PlayerMoveEvent e) {
 		if (e.getFrom().getBlock().equals(e.getTo().getBlock()))
 			return;
@@ -413,10 +442,10 @@ public abstract class IGame implements Listener{
 		
 		if (e.getTo().getBlock().equals(startingLoc.getBlock())) {
 			
-			if (players.containsKey(p.getUniqueId()))
-				restartGame(AccountProvider.get(p.getUniqueId()));
-			else
+			if (!players.containsKey(p.getUniqueId()))
 				startGame(AccountProvider.get(p.getUniqueId()));
+			//else
+				//restartGame(AccountProvider.get(p.getUniqueId()));
 			
 		}else if (players.containsKey(p.getUniqueId()))
 			onMoveHandler(p, e.getFrom(), e.getTo());
@@ -432,10 +461,24 @@ public abstract class IGame implements Listener{
 		
 	}
 	
+	/**
+	 * Execute actions when a player takes damages
+	 * @param e
+	 */
+	protected void onDamageHandler(EntityDamageEvent e) {
+		
+	}
+	
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
 		endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, false);
 	}
+
+	
+	///////////////////////////////////////////////////////////
+	//                         UTILS                         //
+	///////////////////////////////////////////////////////////
+	
 
 	protected final Location getLoc(String str) {
 		String[] args = str.split(" ");
