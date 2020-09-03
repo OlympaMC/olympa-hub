@@ -58,6 +58,7 @@ public class HubListener implements Listener {
 		}
 	}
 
+	
 	@EventHandler
 	public void onWorldLoad(WorldTrackingEvent e) {
 		e.getWorld().setGameRule(GameRule.DO_WEATHER_CYCLE, false);
@@ -71,6 +72,7 @@ public class HubListener implements Listener {
 			}
 		});
 	}
+	
 	
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e) {

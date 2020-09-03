@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+
 import com.google.common.collect.ImmutableMap;
 
 import fr.olympa.api.provider.OlympaPlayerObject;
@@ -46,7 +48,7 @@ public class OlympaPlayerHub extends OlympaPlayerObject {
 	/**
 	 * Get player score for the specified game.
 	 * @param game
-	 * @return player score (-1 if never played)
+	 * @return player score (0 if never played)
 	 */
 	public double getScore(GameType game) {
 		return scores.get(game);

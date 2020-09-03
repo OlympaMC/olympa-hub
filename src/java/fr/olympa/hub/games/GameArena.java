@@ -8,15 +8,11 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -26,9 +22,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.flags.DamageFlag;
-import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.hub.OlympaHub;
 
 public class GameArena extends IGame{
@@ -50,7 +44,8 @@ public class GameArena extends IGame{
 		super(plugin, GameType.ARENA, config);
 
 		//arena = getRegion(config.getString("arena"));
-		region.registerFlags(new DamageFlag(true));
+		//region.registerFlags(new DamageFlag(true));
+		region.getRegion().getWorld().setPVP(true);
 		
 		pos1 = getLoc(config.getString("player_1_spawn"));
 		pos2 = getLoc(config.getString("player_2_spawn"));
@@ -73,46 +68,38 @@ public class GameArena extends IGame{
 	
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
-		super.endGame(p, score, warpToSpawn);
-		
-		if (score == -1)
+		if (score == -1 && playingPlayers.contains(p.getPlayer()))
 			fireLostFor(p.getPlayer());
-		
-		queuedPlayers.remove(p.getPlayer());
-		//startingPlayers.remove(p.getPlayer());
-		playingPlayers.remove(p.getPlayer());
-		
-		updateGameStartDelay();
+		else {
+			super.endGame(p, score, warpToSpawn);
+			
+			queuedPlayers.remove(p.getPlayer());
+			//startingPlayers.remove(p.getPlayer());
+			playingPlayers.remove(p.getPlayer());
+			
+			updateGameStartDelay();	
+		}
 	}
 	
 	@Override
 	protected void onInterractHandler(PlayerInteractEvent e) {
 		if (!playingPlayers.contains(e.getPlayer()))
 			return;
-		
-		//Bukkit.broadcastMessage("INTERRACT");
-		Bukkit.broadcastMessage(e.getPlayer() + "has in line : " + e.getPlayer().hasLineOfSight(getOtherPlayingPlayer(e.getPlayer())));
+
 		e.setCancelled(false);
 	}
 
 	protected void onDamageHandler(EntityDamageEvent e) {
-		Bukkit.broadcastMessage("DAMAGES");
-	}
-	/*
-	@EventHandler
-	public void onDamage(EntityDamageEvent e) {
-		Bukkit.broadcastMessage("DAMAGES : " + e.getFinalDamage());
-		
 		if (!playingPlayers.contains(e.getEntity()))
 			return;
 		
 		Player p = (Player) e.getEntity();
 		
-		if (p.getHealth() <= p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
+		if (p.getHealth() <= e.getFinalDamage())
 			fireLostFor(p);
 		else
 			e.setCancelled(false);
-	}*/
+	}
 	
 	@EventHandler
 	public void onHeal(EntityRegainHealthEvent e) {
@@ -171,6 +158,21 @@ public class GameArena extends IGame{
 	}
 	
 	private void startGame(List<Player> startingPlayers, int countdown) {
+		//cancel si l'un des joueurs n'est plus dans la partie
+		if (startingPlayers.size() != 2 || !getPlayers().contains(startingPlayers.get(0).getUniqueId()) || !getPlayers().contains(startingPlayers.get(1).getUniqueId())) {
+			startingPlayers.forEach(p -> {
+				if (getPlayers().contains(p.getUniqueId())) {
+					p.sendMessage(gameType.getChatPrefix() + "§cVotre adversaire a annulé la partie ! §7En attente d'un nouvau joueur...");
+					queuedPlayers.add(0, p);
+				}
+			});
+			
+			isGameStarting = false;
+			tryToInitGame();
+			
+			return;
+		}
+		
 		//gestion timer avant début partie
 		if (countdown > 0) {
 			startingPlayers.forEach(p -> p.sendTitle("§c" + countdown, "§7Début du match dans...", 0, 22, 0));
@@ -183,40 +185,28 @@ public class GameArena extends IGame{
 		//lancement de la partie
 		}else {
 			
-			isGameStarting = false;
+			startingPlayers.forEach(p -> p.getInventory().setItem(queueCountInvIndex, null));
 			
-			if (startingPlayers.size() == 2 && startingPlayers.get(0).isOnline() && startingPlayers.get(1).isOnline()) {
-				startingPlayers.forEach(p -> p.getInventory().setItem(queueCountInvIndex, null));
-				
-				ItemStack potHeal = new ItemStack(Material.SPLASH_POTION);
-				PotionMeta meta = (PotionMeta) potHeal.getItemMeta();
-				meta.addCustomEffect(new PotionEffect(PotionEffectType.HEAL, 1, 0), true);
-				meta.setDisplayName("§ePotion de soin I");
-				potHeal.setItemMeta(meta);
-				potHeal.setAmount(2);
-				
-				startingPlayers.forEach(p -> p.getInventory().addItem(ItemUtils.item(Material.IRON_SWORD, "§7Epée en fer")));
-				startingPlayers.forEach(p -> p.getInventory().addItem(potHeal.clone()));
-				startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.HEAD, ItemUtils.item(Material.IRON_HELMET, "§7Casque")));
-				startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.CHEST, ItemUtils.item(Material.IRON_CHESTPLATE, "§7Plastron")));
-				startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.LEGS, ItemUtils.item(Material.IRON_LEGGINGS, "§7Jambières")));
-				startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.FEET, ItemUtils.item(Material.IRON_BOOTS, "§7Bottes")));
+			ItemStack potHeal = new ItemStack(Material.SPLASH_POTION);
+			PotionMeta meta = (PotionMeta) potHeal.getItemMeta();
+			meta.addCustomEffect(new PotionEffect(PotionEffectType.HEAL, 1, 0), true);
+			meta.setDisplayName("§ePotion de soin I");
+			potHeal.setItemMeta(meta);
+			potHeal.setAmount(2);
+			
+			startingPlayers.forEach(p -> p.getInventory().addItem(ItemUtils.item(Material.IRON_SWORD, "§7Epée en fer")));
+			startingPlayers.forEach(p -> p.getInventory().addItem(potHeal.clone()));
+			startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.HEAD, ItemUtils.item(Material.IRON_HELMET, "§7Casque")));
+			startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.CHEST, ItemUtils.item(Material.IRON_CHESTPLATE, "§7Plastron")));
+			startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.LEGS, ItemUtils.item(Material.IRON_LEGGINGS, "§7Jambières")));
+			startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.FEET, ItemUtils.item(Material.IRON_BOOTS, "§7Bottes")));
 
-				playingPlayers.addAll(startingPlayers);
-				
-				startingPlayers.get(0).teleport(pos1);
-				startingPlayers.get(1).teleport(pos2);
-				
-			//si l'un des joueurs n'est plus en ligne, annulation du lancement de la partie
-			}else {
-				startingPlayers.forEach(p -> {
-					if (p.isOnline()) {
-						p.sendMessage(gameType.getChatPrefix() + "§cVotre adversaire a annulé la partie ! §7En attente d'un nouvau joueur...");
-						queuedPlayers.add(0, p);
-					}
-				});
-				tryToInitGame();
-			}
+			playingPlayers.addAll(startingPlayers);
+			
+			startingPlayers.get(0).teleport(pos1);
+			startingPlayers.get(1).teleport(pos2);
+			
+			isGameStarting = false;
 		}
 	}
 }
