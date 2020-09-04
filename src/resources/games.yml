@@ -18,3 +18,26 @@ game_arena:
   
   player_1_spawn: world -24 30 9
   player_2_spawn: world -20 30 9
+  
+game_elytra:
+  start_loc: world -15 29 15
+  holo_loc: world -18 29 15
+  area: world -26 0 3 -12 255 16
+  
+  tp_loc: world 0 0 0  
+  portals_locs:
+   - world 0 0 0 0 0 0
+   - world 0 0 0 0 0 0
+   - world 0 0 0 0 0 0
+   - world 0 0 0 0 0 0
+  portals_indexs:
+   - 1
+   - 2
+   - 2
+   - 3
+  
+  
+  
+  
+  
+  

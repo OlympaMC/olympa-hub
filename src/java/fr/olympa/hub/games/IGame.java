@@ -24,6 +24,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -153,20 +154,6 @@ public abstract class IGame implements Listener{
 		allowedTpLocs.add(startingLoc);
 	}
 	
-	/*
-	protected void setHotBar(ItemStack... items) {
-		for (int i = 0 ; i < hotBarContent.length ; i++)
-			if (items.length > i)
-				hotBarContent[i] = items[i];
-			else
-				hotBarContent[i] = null;
-		
-		if (gameType.isRestartable())
-			hotBarContent[7] = ItemUtils.item(Material.ENDER_PEARL, "§eRecommencer");
-		hotBarContent[8] = ItemUtils.item(Material.BARRIER, "§cSortir du jeu");
-				
-	}*/
-	
 	public Set<UUID> getPlayers(){
 		return Collections.unmodifiableSet(players.keySet());
 	}
@@ -195,7 +182,7 @@ public abstract class IGame implements Listener{
 	 */
 	protected void restartGame(OlympaPlayerHub p) {
 		if (gameType.isRestartable())
-			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Redémarrage du jeu, réinitialisation des scores...");
+			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Remise à 0 des scores...");
 	}
 	
 	/**
@@ -390,6 +377,12 @@ public abstract class IGame implements Listener{
 		
 	}
 
+	@EventHandler
+	public void onInterractInventory(InventoryInteractEvent e) {
+		if (!players.containsKey(e.getWhoClicked().getUniqueId()))
+			return;
+		e.setCancelled(true);
+	}
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onTeleport(PlayerTeleportEvent e) {

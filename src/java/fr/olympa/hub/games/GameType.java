@@ -7,7 +7,7 @@ import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.sql.OlympaStatement;
 
 public enum GameType {
-	ELYTRA("score_elytra", "§6Course d'élytra", "de la ", true, true, null),
+	ELYTRA("score_elytra", "§6Course d'élytra", "de la ", true, true, GameElytra::new),
 	JUMP("score_jump", "§6Jump", "du ", true, true, GameJump::new),
 	ARENA("score_arena", "§6Arène 1vs1", "de l'", false, false, GameArena::new),
 	LABY("score_laby", "§6Labyrinthe", "du ", false, true, null),
