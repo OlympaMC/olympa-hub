@@ -24,6 +24,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -41,7 +42,6 @@ import fr.olympa.api.region.Region;
 import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
-import fr.olympa.api.region.tracking.flags.DamageFlag;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.utils.observable.SimpleObservable;
 import fr.olympa.core.spigot.OlympaCore;
@@ -117,18 +117,13 @@ public abstract class IGame implements Listener{
 				if (topScores.size() > index) {
 					
 					OlympaPlayerInformations p = (OlympaPlayerInformations) topScores.keySet().toArray()[index];
-
-					//Bukkit.getLogger().log(Level.SEVERE, index + "/" + (topScores.size() - 1) + " - " + p.getName() + " : " + topScores.get(p));
 					
 					if (gameType.isTimerScore())
 						return "§a" + (index + 1) + ". §e" + p.getName() + " §a- " + new DecimalFormat("#.##").format(topScores.get(p)) + "s";
 					else
-						return "§a" + (index + 1) + ". §e" + p.getName() + " §a- " + new DecimalFormat("#").format(topScores.get(p)) + " victoires";
+						return "§a" + (index + 1) + ". §e" + p.getName() + " §a- " + (int) (double) topScores.get(p) + " victoires";
 				}else
 					return "§a" + (index + 1) + ". §7indéfini";
-					
-				//Bukkit.getLogger().log(Level.SEVERE, "line " + index + " = " + "tick : " + MinecraftServer.currentTick);
-				//return "tick : " + MinecraftServer.currentTick;
 			}, observable));
 		}
 		
@@ -140,23 +135,15 @@ public abstract class IGame implements Listener{
 				new FixedLine<HologramLine>("§7Commencez ici"));
 		
 		//gestion sortie de zone de jeu
-		region = OlympaCore.getInstance().getRegionManager().registerRegion(area, "zone_" + gameType.toString().toLowerCase(), EventPriority.LOWEST, 
-				new DamageFlag(false) {
-			
-			@Override
-			public void damageEvent(EntityDamageEvent e) {
-				if (players.keySet().contains(e.getEntity().getUniqueId()))
-					onDamageHandler(e);
-			}
-		},
-				new Flag() {
-			@Override
-			public ActionResult leaves(Player p, Set<TrackedRegion> to) {
-				super.leaves(p, to);
-				endGame(AccountProvider.get(p.getUniqueId()), -1, false);
-				return ActionResult.ALLOW;
-			}
-		});
+		region = OlympaCore.getInstance().getRegionManager().registerRegion(area, "zone_" + gameType.toString().toLowerCase(), EventPriority.HIGHEST,
+			new Flag() {
+				@Override
+				public ActionResult leaves(Player p, Set<TrackedRegion> to) {
+					super.leaves(p, to);
+					endGame(AccountProvider.get(p.getUniqueId()), -1, false);
+					return ActionResult.ALLOW;
+				}
+			});
 		
 		//définition de la hotbar du jeu
 		if (gameType.isRestartable())
@@ -166,20 +153,6 @@ public abstract class IGame implements Listener{
 		//add allowed tp locs
 		allowedTpLocs.add(startingLoc);
 	}
-	
-	/*
-	protected void setHotBar(ItemStack... items) {
-		for (int i = 0 ; i < hotBarContent.length ; i++)
-			if (items.length > i)
-				hotBarContent[i] = items[i];
-			else
-				hotBarContent[i] = null;
-		
-		if (gameType.isRestartable())
-			hotBarContent[7] = ItemUtils.item(Material.ENDER_PEARL, "§eRecommencer");
-		hotBarContent[8] = ItemUtils.item(Material.BARRIER, "§cSortir du jeu");
-				
-	}*/
 	
 	public Set<UUID> getPlayers(){
 		return Collections.unmodifiableSet(players.keySet());
@@ -209,7 +182,7 @@ public abstract class IGame implements Listener{
 	 */
 	protected void restartGame(OlympaPlayerHub p) {
 		if (gameType.isRestartable())
-			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Redémarrage du jeu, réinitialisation des scores...");
+			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Remise à 0 des scores...");
 	}
 	
 	/**
@@ -258,14 +231,14 @@ public abstract class IGame implements Listener{
 			else
 				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aC'est perdu, mais vous ferez mieux la prochaine fois !");	
 		}
-
-		/*
+		
 		if (gameType.isTimerScore()) {
-			if (p.getScore(gameType) > score)
-				p.setScore(gameType, score);
-		}else
-			p.setScore(gameType, p.getScore(gameType) + 1);
-			*/
+			if (p.getScore(gameType) == 0 || p.getScore(gameType) > score)
+				p.setScore(gameType, score);	
+		}else {
+			if (score > 0)
+				p.setScore(gameType, p.getScore(gameType) + 1);	
+		}
 		
 		//rang du joueur, 0 si non classé
 		int oldPlayerRank = getPlayerRank(p);
@@ -316,23 +289,12 @@ public abstract class IGame implements Listener{
 	private boolean updateScores(OlympaPlayerHub p, double score) {
 		//Bukkit.broadcastMessage("try to update scores. old score : " + p.getScore(gameType) + " - new score : " + score);
 		
-		if (gameType.isTimerScore()) 
-			if (p.getScore(gameType) == 0 || p.getScore(gameType) > score)
-				p.setScore(gameType, score);
-			else
-				return false;
-		else
-			if (p.getScore(gameType) < score)
-				p.setScore(gameType, p.getScore(gameType) + 1);
-			else
-				return false;
-		
 		//int previousRank = getPlayerRank(p);
 		
-		if (gameType.isTimerScore())
-			topScores.put(p.getInformation(), score);
-		else 
-			topScores.put(p.getInformation(), p.getScore(gameType) + score);
+		if (score <= 0)
+			return false;
+
+		topScores.put(p.getInformation(), p.getScore(gameType));
 		
 		sortScores();
 		
@@ -387,18 +349,20 @@ public abstract class IGame implements Listener{
 		if (!players.keySet().contains(e.getPlayer().getUniqueId()))
 			return;
 		
-		e.setCancelled(true);
-		
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)
 			switch(e.getPlayer().getInventory().getHeldItemSlot()) {
 			case 7:
 				if (gameType.isRestartable() && !e.getPlayer().getLocation().getBlock().equals(startingLoc.getBlock())) {
 					restartGame(AccountProvider.get(e.getPlayer().getUniqueId()));
+					
+					e.setCancelled(true);
 					return;
 				}
 				break;
 			case 8:
 				endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, true);
+				
+				e.setCancelled(true);
 				return;
 			}
 		
@@ -413,6 +377,12 @@ public abstract class IGame implements Listener{
 		
 	}
 
+	@EventHandler
+	public void onInterractInventory(InventoryInteractEvent e) {
+		if (!players.containsKey(e.getWhoClicked().getUniqueId()))
+			return;
+		e.setCancelled(true);
+	}
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onTeleport(PlayerTeleportEvent e) {
@@ -459,6 +429,12 @@ public abstract class IGame implements Listener{
 	 */
 	protected void onMoveHandler(Player p, Location from, Location to) {
 		
+	}
+	
+	@EventHandler
+	public void onDamage(EntityDamageEvent e) {
+		if (players.containsKey(e.getEntity().getUniqueId()))
+			onDamageHandler(e);
 	}
 	
 	/**
