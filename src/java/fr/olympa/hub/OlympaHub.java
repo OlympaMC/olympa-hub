@@ -13,7 +13,7 @@ import fr.olympa.api.groups.OlympaGroup;
 import fr.olympa.api.permission.OlympaCorePermissions;
 import fr.olympa.api.plugin.OlympaAPIPlugin;
 import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.provider.RedisAccess;
+import fr.olympa.api.redis.RedisAccess;
 import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.ActionResult;
