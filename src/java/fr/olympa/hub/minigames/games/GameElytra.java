@@ -192,7 +192,7 @@ public class GameElytra extends IGame {
 				restartGame(AccountProvider.get(e.getEntity().getUniqueId()));	
 			}
 	}
-	
+	 
 	private int getMaxPortalIndex() {
 		int i = -1;
 		for (int i2 : portals.values())
