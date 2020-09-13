@@ -13,15 +13,15 @@ import fr.olympa.api.groups.OlympaGroup;
 import fr.olympa.api.permission.OlympaCorePermissions;
 import fr.olympa.api.plugin.OlympaAPIPlugin;
 import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.provider.RedisAccess;
+import fr.olympa.api.redis.RedisAccess;
 import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
-import fr.olympa.hub.games.MiniGamesManager;
-import fr.olympa.hub.games.OlympaPlayerHub;
+import fr.olympa.hub.minigames.utils.MiniGamesManager;
+import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import fr.olympa.hub.pads.LaunchPadManager;
 import fr.olympa.hub.servers.ServerConfigCommand;
 import fr.olympa.hub.servers.ServerInfosListener;
@@ -29,6 +29,7 @@ import fr.olympa.hub.servers.ServerTrait;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.trait.TraitInfo;
 import net.md_5.bungee.api.ChatMessageType;
+import redis.clients.jedis.Jedis;
 
 public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
@@ -43,6 +44,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 	public Location spawn, lightning;
 
 	public MiniGamesManager games;
+	
+	public Jedis jedis;
 
 	@Override
 	public void onEnable() {
@@ -50,8 +53,6 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		super.onEnable();
 
 		AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
-
-		games = new MiniGamesManager(this);
 
 		spawn = getConfig().getLocation("spawn");
 		lightning = getConfig().getLocation("lightning");
@@ -70,7 +71,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		OlympaGroup.PLAYER.runtimePermissions.add("jumppads.use");
 
 		OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), RedisChannel.BUNGEE_SEND_SERVERSINFOS.name());
-
+		//RedisAccess.INSTANCE.disconnect();
+		
 		OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag() {
 			@Override
 			public ActionResult leaves(Player p, Set<TrackedRegion> to) {
@@ -84,6 +86,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		OlympaCorePermissions.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
 		OlympaCorePermissions.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+
+		games = new MiniGamesManager(this);
 	}
 
 }

@@ -1,4 +1,4 @@
-package fr.olympa.hub.games;
+package fr.olympa.hub.minigames.utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,12 +6,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
+import fr.olympa.hub.minigames.games.IGame;
+import redis.clients.jedis.Jedis;
 
 public class MiniGamesManager {
 
@@ -39,11 +41,22 @@ public class MiniGamesManager {
             return;
         }
         
-        for (GameType game : GameType.values())
-        	if (game.getGameProvider() != null)
-        		games.put(game, game.getGameProvider().getGame(plugin, gamesConfig.getConfigurationSection("game_" + game.toString().toLowerCase())));
+        for (GameType game : GameType.values()) 
+        	if (game.getGameProvider() != null) {
+        		IGame iGame = game.getGameProvider().getGame(plugin, gamesConfig.getConfigurationSection("game_" + game.toString().toLowerCase()));
+        		plugin.getLogger().log(Level.INFO, "§aGame " + game + " successfully loaded.");
+        		games.put(game, iGame);	
+        	}else
+        		plugin.getLogger().log(Level.WARNING, "§cGame " + game + " wasn't loaded successfully.");	
         
-        Bukkit.getLogger().log(Level.INFO, "§aLoaded minigames : " + games.keySet());
+		
+		//register redis
+        
+        /*plugin.getTask().runTaskLater(() -> {
+        	OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), new GamesRedisListener(), RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name());
+            plugin.getLogger().log(Level.INFO, "§aLoaded minigames redis chanel " + RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name().toLowerCase());
+        }, 100);*/
+		
 	}
 	
 	public static MiniGamesManager getInstance() {

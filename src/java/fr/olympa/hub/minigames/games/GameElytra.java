@@ -1,4 +1,4 @@
-package fr.olympa.hub.games;
+package fr.olympa.hub.minigames.games;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -16,6 +18,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -27,14 +30,17 @@ import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
+import fr.olympa.hub.minigames.utils.GameType;
+import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class GameElytra extends IGame {
 
-	private static int startingDelay = 3;
+	private static final int startingDelay = 3;
 	
-	private Location startLoc;
+	
+	private Location startRaceLoc;
 	private Map<Region, Integer> portals = new HashMap<Region, Integer>();
 	
 	private Map<Player, Integer> nextPortal = new HashMap<Player, Integer>();
@@ -43,8 +49,8 @@ public class GameElytra extends IGame {
 	public GameElytra(OlympaHub plugin, ConfigurationSection config) {
 		super(plugin, GameType.ELYTRA, config);
 		
-		startLoc = getLoc("tp_loc");
-		allowedTpLocs.add(startLoc);
+		startRaceLoc = getLoc(config.getString("tp_loc"));
+		allowedTpLocs.add(startRaceLoc);
 		
 		List<Region> listReg = new ArrayList<Region>();
 		List<Integer> listInd = new ArrayList<Integer>();
@@ -54,7 +60,8 @@ public class GameElytra extends IGame {
 		
 		//register des régions
 		listReg.forEach(reg -> {
-			OlympaCore.getInstance().getRegionManager().registerRegion(reg, "elytra_anneau_" + reg.getMax().getBlockX(), EventPriority.HIGH, new Flag() {
+			OlympaCore.getInstance().getRegionManager().registerRegion(reg, "elytra_anneau_" + reg.hashCode(),
+					EventPriority.HIGH, new Flag() {
 				@Override
 				public ActionResult enters(Player p, Set<TrackedRegion> to) {
 					super.enters(p, to);
@@ -85,25 +92,31 @@ public class GameElytra extends IGame {
 	}
 	
 	private void isEnteringPortal(Player p, Region reg) {
-		int portalIndex = new ArrayList<Region>(portals.keySet()).indexOf(reg);
+		//int portalIndex = new ArrayList<Region>(portals.keySet()).indexOf(reg);
+		int portalIndex = portals.get(reg);
 		
 		if (nextPortal.get(p) == portalIndex) {
-			p.sendMessage(gameType + "§aPorte " + (portalIndex + 1) + " validée !");
+			p.sendMessage(gameType.getChatPrefix() + "§aPorte " + (portalIndex + 1) + " validée !");
 			nextPortal.put(p, portalIndex + 1);
 			
 		}else if (nextPortal.get(p) < portalIndex)
-			p.sendMessage(gameType + "§cVous n'avez pas validé l'une des portes précédentes. §7Retournez en arrière ou réinitialisez la partie.");
+			p.sendMessage(gameType.getChatPrefix() + "§cVous n'avez pas validé l'une des portes précédentes.§7 Retournez en arrière ou réinitialisez la partie.");
 		else
-			p.sendMessage(gameType + "§7Vous avez déjà validé cette porte !");
+			p.sendMessage(gameType.getChatPrefix() + "§7Vous avez déjà validé cette porte !");
 	}
 	
 	@Override
 	protected void startGame(OlympaPlayerHub p) {
 		super.startGame(p);
-				
-		p.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, new ItemStack(Material.ELYTRA));
-		nextPortal.put(p.getPlayer(), 0);
-		startTime.put(p.getPlayer(), System.currentTimeMillis() -startingDelay*1000);
+		
+		ItemStack elytras = new ItemStack(Material.ELYTRA);
+		ItemMeta meta = elytras.getItemMeta();
+		meta.setUnbreakable(true);
+		elytras.setItemMeta(meta);
+		
+		p.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, elytras);
+		//nextPortal.put(p.getPlayer(), 0);
+		//startTime.put(p.getPlayer(), System.currentTimeMillis() -startingDelay*1000);
 		
 		launchPreGame(p.getPlayer(), startingDelay);
 	}
@@ -111,9 +124,6 @@ public class GameElytra extends IGame {
 	@Override
 	protected void restartGame(OlympaPlayerHub p) {
 		super.restartGame(p);
-		p.getPlayer().removePotionEffect(PotionEffectType.LEVITATION);
-		nextPortal.put(p.getPlayer(), 0);
-		startTime.put(p.getPlayer(), System.currentTimeMillis() -startingDelay*1000);
 		
 		launchPreGame(p.getPlayer(), startingDelay);
 	}
@@ -121,11 +131,12 @@ public class GameElytra extends IGame {
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		super.endGame(p, score, warpToSpawn);
+		
 		p.getPlayer().removePotionEffect(PotionEffectType.LEVITATION);
 		nextPortal.remove(p.getPlayer());
 		startTime.remove(p.getPlayer());
 		
-		if (!warpToSpawn) {
+		if (score > 0 && !warpToSpawn) {
 			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Téléportation au spawn dans 5 secondes...");
 			plugin.getTask().runTaskLater(() -> p.getPlayer().teleport(startingLoc), 100);
 		}
@@ -135,9 +146,18 @@ public class GameElytra extends IGame {
 	
 	
 	private void launchPreGame(Player p, int timeLeft) {
-		if (timeLeft == 3) {
-			p.teleport(startingLoc);
-			p.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 60, 0, false, false));
+		if (!getPlayers().contains(p.getUniqueId()))
+			return;
+		
+		if (timeLeft == startingDelay) {
+			p.getPlayer().removePotionEffect(PotionEffectType.LEVITATION);
+			p.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, startingDelay*20, 0, false, false));
+			
+			nextPortal.put(p.getPlayer(), 0);
+			startTime.put(p.getPlayer(), System.currentTimeMillis() + startingDelay*1000);
+			
+			p.setGliding(false);
+			p.teleport(startRaceLoc);
 		}	
 		
 		if (timeLeft > 0) {
@@ -145,7 +165,7 @@ public class GameElytra extends IGame {
 			
 			plugin.getTask().runTaskLater(() -> launchPreGame(p, timeLeft - 1), 20);
 		}else {
-			p.removePotionEffect(PotionEffectType.LEVITATION);
+			//p.removePotionEffect(PotionEffectType.LEVITATION);
 			p.sendMessage(gameType.getChatPrefix() + "§eDébut de la course !");
 		}
 		
@@ -160,8 +180,11 @@ public class GameElytra extends IGame {
 		if (!getPlayers().contains(e.getEntity().getUniqueId()))
 			return;
 		
+		if (System.currentTimeMillis() - startTime.get(e.getEntity()) < 0)
+			e.setCancelled(true);
+		
 		if (!e.isGliding())
-			if (nextPortal.get(e.getEntity()) >= portals.size())
+			if (nextPortal.get(e.getEntity()) >= getMaxPortalIndex())
 				endGame(AccountProvider.get(e.getEntity().getUniqueId()), 
 						((double)(System.currentTimeMillis() - startTime.get(e.getEntity())))/1000d, false);
 			else {
@@ -170,7 +193,14 @@ public class GameElytra extends IGame {
 			}
 	}
 	
-	
+	private int getMaxPortalIndex() {
+		int i = -1;
+		for (int i2 : portals.values())
+			if (i2 > i)
+				i = i2;
+		
+		return i;
+	}
 	
 	
 

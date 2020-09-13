@@ -1,4 +1,4 @@
-package fr.olympa.hub.games;
+package fr.olympa.hub.minigames.games;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -46,11 +47,15 @@ import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.utils.observable.SimpleObservable;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
+import fr.olympa.hub.minigames.utils.GameType;
+import fr.olympa.hub.minigames.utils.MiniGamesManager;
+import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
+import redis.clients.jedis.Jedis;
 
 public abstract class IGame implements Listener{
 	
 	private static final int maxDisplayedTopScores = 10;
-	static final int maxTopScoresStored = 100; 
+	public static final int maxTopScoresStored = 100; 
 	
 	protected OlympaHub plugin;
 	protected final IGame instance;
@@ -94,7 +99,10 @@ public abstract class IGame implements Listener{
 			ResultSet query = gameType.getStatement().executeQuery();
 			while (query.next()) {
 				//Bukkit.getLogger().log(Level.SEVERE, "jump score : " + AccountProvider.getPlayerInformations(query.getLong("player_id")).getName() + " - " + query.getDouble(2));
-				topScores.put(AccountProvider.getPlayerInformations(query.getLong("player_id")), query.getDouble(gameType.getBddKey()));
+				OlympaPlayerInformations p = AccountProvider.getPlayerInformations(query.getLong("player_id"));
+				
+				if (p != null)
+					topScores.put(p, query.getDouble(gameType.getBddKey()));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -109,8 +117,6 @@ public abstract class IGame implements Listener{
 		for (int i = 0 ; i < maxDisplayedTopScores ; i++) {
 			
 			final int index = i;
-			
-			//Bukkit.getLogger().log(Level.WARNING, "CHARGEMENT DE LA LIGNE " + i);
 			
 			holo.addLine(new DynamicLine<HologramLine>(line -> {
 				
@@ -168,6 +174,12 @@ public abstract class IGame implements Listener{
 	 * @param p
 	 */
 	protected void startGame(OlympaPlayerHub p) {
+		GameType previousGame = MiniGamesManager.getInstance().isPlaying(p.getPlayer());
+	
+		//cancel previous game if exists
+		if (MiniGamesManager.getInstance().getGame(previousGame) != null)
+			MiniGamesManager.getInstance().getGame(previousGame).endGame(p, -1, false);
+		
 		players.put(p.getUniqueId(), p.getPlayer().getInventory().getContents());
 		p.getPlayer().getInventory().clear();
 		p.getPlayer().getInventory().setContents(hotBarContent);
@@ -251,8 +263,8 @@ public abstract class IGame implements Listener{
 		
 		//Bukkit.broadcastMessage(oldPlayerRankString);
 		
-		if (updateScores(p, score)) {
-			observable.update();
+		topScores.put(p.getInformation(), p.getScore(gameType));
+		if (updateScores(p.getInformation(), score)) {
 			
 			if (getPlayerRank(p) < oldPlayerRank || oldPlayerRank == 0)
 				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place " + oldPlayerRankString + 
@@ -264,13 +276,17 @@ public abstract class IGame implements Listener{
 	///////////////////////////////////////////////////////////
 	//                   MANAGE TOP SCORES                   //
 	///////////////////////////////////////////////////////////
+
+	public int getPlayerRank(OlympaPlayerHub p) {
+		return getPlayerRank(p.getInformation());
+	}
 	
 	/**
 	 * Return player rank for this game, 0 if not classed
 	 * @param p player
 	 * @return player rank (1 is the best, 0 is unranked)
 	 */
-	public int getPlayerRank(OlympaPlayerHub p) {
+	public int getPlayerRank(OlympaPlayerInformations p) {
 		//return new ArrayList<OlympaPlayerInformations>(topScores.keySet()).indexOf(p.getInformation()) + 1;
 		List<OlympaPlayerInformations> list = new ArrayList<OlympaPlayerInformations>(topScores.keySet());
 		for (int i = 0 ; i < topScores.keySet().size() ; i++)
@@ -286,22 +302,24 @@ public abstract class IGame implements Listener{
 	 * @param new player score
 	 * @return true if top scores have been changed, false otherwise
 	 */
-	private boolean updateScores(OlympaPlayerHub p, double score) {
-		//Bukkit.broadcastMessage("try to update scores. old score : " + p.getScore(gameType) + " - new score : " + score);
-		
-		//int previousRank = getPlayerRank(p);
-		
+	public boolean updateScores(OlympaPlayerInformations p, double score) {
 		if (score <= 0)
 			return false;
-
-		topScores.put(p.getInformation(), p.getScore(gameType));
 		
 		sortScores();
 		
-		//Bukkit.broadcastMessage("old rank : " + previousRank + " - new rank : " + getPlayerRank(p));
-		
-		if (getPlayerRank(p) > 0)
+		if (getPlayerRank(p) > 0) {
+			observable.update();
+			
+			/*
+	        try (Jedis jedis = RedisAccess.INSTANCE.connect()) {
+	            jedis.publish(RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name(), gameType.toString() + ":" + p.getId() + ":" + score);
+	        } 
+	        RedisAccess.INSTANCE.disconnect();
+	        */
+	        
 			return true;
+		}
 		else
 			return false;
 	}
@@ -391,7 +409,7 @@ public abstract class IGame implements Listener{
 			
 			for (Location loc : allowedTpLocs)
 				if (!allowTp) 
-					if (loc.getBlock().equals(e.getTo().getBlock()))
+					if (loc.getBlock() != null && loc.getBlock().equals(e.getTo().getBlock()))
 						allowTp = true;
 			
 			if (!allowTp) {

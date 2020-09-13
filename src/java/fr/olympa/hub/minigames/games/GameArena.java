@@ -1,12 +1,10 @@
-package fr.olympa.hub.games;
+package fr.olympa.hub.minigames.games;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,8 +20,9 @@ import org.bukkit.potion.PotionEffectType;
 
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.region.tracking.flags.DamageFlag;
 import fr.olympa.hub.OlympaHub;
+import fr.olympa.hub.minigames.utils.GameType;
+import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 
 public class GameArena extends IGame{
 	
@@ -43,8 +42,6 @@ public class GameArena extends IGame{
 	public GameArena(OlympaHub plugin, ConfigurationSection config) {
 		super(plugin, GameType.ARENA, config);
 
-		//arena = getRegion(config.getString("arena"));
-		//region.registerFlags(new DamageFlag(true));
 		region.getRegion().getWorld().setPVP(true);
 		
 		pos1 = getLoc(config.getString("player_1_spawn"));

@@ -1,4 +1,4 @@
-package fr.olympa.hub.games;
+package fr.olympa.hub.minigames.utils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

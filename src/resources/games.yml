@@ -19,25 +19,22 @@ game_arena:
   player_1_spawn: world -24 30 9
   player_2_spawn: world -20 30 9
   
-game_elytra:
-  start_loc: world -15 29 15
-  holo_loc: world -18 29 15
-  area: world -26 0 3 -12 255 16
   
-  tp_loc: world 0 0 0  
+game_elytra:
+  start_loc: world -14 29 -7
+  holo_loc: world -16 29 -9
+  area: world -5 0 -5 -71 255 -74
+  
+  tp_loc: world -11 37 -30
   portals_locs:
-   - world 0 0 0 0 0 0
-   - world 0 0 0 0 0 0
-   - world 0 0 0 0 0 0
-   - world 0 0 0 0 0 0
+   - world -13 33 -31 -9 33 -27
+   - world -15 29 -36 -9 17 -36
+   - world -13 21 -49 -8 11 -49
+   - world -20 21 -49 -15 11 -49
+   - world -17 19 -60 -10 12 -60
   portals_indexs:
+   - 0
    - 1
    - 2
    - 2
    - 3
-  
-  
-  
-  
-  
-  

@@ -1,4 +1,4 @@
-package fr.olympa.hub.games;
+package fr.olympa.hub.minigames.games;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -16,6 +16,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.hub.OlympaHub;
+import fr.olympa.hub.minigames.utils.GameType;
+import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 
 public class GameJump extends IGame{
 

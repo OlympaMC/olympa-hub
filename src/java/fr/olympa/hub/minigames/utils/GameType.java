@@ -1,10 +1,14 @@
-package fr.olympa.hub.games;
+package fr.olympa.hub.minigames.utils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.sql.OlympaStatement;
+import fr.olympa.hub.minigames.games.GameArena;
+import fr.olympa.hub.minigames.games.GameElytra;
+import fr.olympa.hub.minigames.games.GameJump;
+import fr.olympa.hub.minigames.games.IGame;
 
 public enum GameType {
 	ELYTRA("score_elytra", "§6Course d'élytra", "de la ", true, true, GameElytra::new),

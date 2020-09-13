@@ -27,8 +27,8 @@ import fr.olympa.api.region.tracking.flags.GameModeFlag;
 import fr.olympa.api.region.tracking.flags.PhysicsFlag;
 import fr.olympa.api.region.tracking.flags.PlayerBlockInteractFlag;
 import fr.olympa.api.region.tracking.flags.PlayerBlocksFlag;
-import fr.olympa.hub.games.MiniGamesManager;
 import fr.olympa.hub.gui.MenuGUI;
+import fr.olympa.hub.minigames.utils.MiniGamesManager;
 
 public class HubListener implements Listener {
 	private ItemStack[] inventoryContents = new ItemStack[] { null, null, null, null, ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa") };
