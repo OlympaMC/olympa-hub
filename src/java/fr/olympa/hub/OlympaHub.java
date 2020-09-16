@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 
 import fr.olympa.api.groups.OlympaGroup;
 import fr.olympa.api.permission.OlympaCorePermissions;
+import fr.olympa.api.permission.OlympaPermission;
 import fr.olympa.api.plugin.OlympaAPIPlugin;
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.redis.RedisAccess;
@@ -44,7 +45,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 	public Location spawn, lightning;
 
 	public MiniGamesManager games;
-	
+
 	public Jedis jedis;
 
 	@Override
@@ -53,6 +54,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		super.onEnable();
 
 		AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
+		OlympaPermission.registerPermissions(HubPermissions.class);
 
 		spawn = getConfig().getLocation("spawn");
 		lightning = getConfig().getLocation("lightning");
@@ -72,7 +74,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), RedisChannel.BUNGEE_SEND_SERVERSINFOS.name());
 		//RedisAccess.INSTANCE.disconnect();
-		
+
 		OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag() {
 			@Override
 			public ActionResult leaves(Player p, Set<TrackedRegion> to) {
