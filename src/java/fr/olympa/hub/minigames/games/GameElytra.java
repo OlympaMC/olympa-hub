@@ -110,7 +110,7 @@ public class GameElytra extends IGame {
 				i = i2;
 		
 		return i;
-	}
+	} 
 	
 	private void isEnteringPortal(Player p, Region reg) {
 		//int portalIndex = new ArrayList<Region>(portals.keySet()).indexOf(reg);
