@@ -45,7 +45,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 	public Location spawn, lightning;
 
 	public MiniGamesManager games;
-	
+
 	public Jedis jedis;
 
 	@Override
@@ -74,7 +74,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), RedisChannel.BUNGEE_SEND_SERVERSINFOS.name());
 		//RedisAccess.INSTANCE.disconnect();
-		
+
 		OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag() {
 			@Override
 			public ActionResult leaves(Player p, Set<TrackedRegion> to) {
