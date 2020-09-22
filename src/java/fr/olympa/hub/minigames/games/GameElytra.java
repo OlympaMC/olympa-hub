@@ -3,6 +3,7 @@ package fr.olympa.hub.minigames.games;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,8 +24,12 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import fr.olympa.api.command.complex.Cmd;
+import fr.olympa.api.command.complex.CommandContext;
+import fr.olympa.api.editor.RegionEditor;
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.region.Region;
+import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
@@ -33,6 +38,10 @@ import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class GameElytra extends IGame {
@@ -41,22 +50,25 @@ public class GameElytra extends IGame {
 	
 	
 	private Location startRaceLoc;
-	private Map<Region, Integer> portals = new HashMap<Region, Integer>();
+	private Map<Region, Integer> portals = new LinkedHashMap<Region, Integer>();
 	
 	private Map<Player, Integer> nextPortal = new HashMap<Player, Integer>();
 	private Map<Player, Long> startTime = new HashMap<Player, Long>();
 	
-	public GameElytra(OlympaHub plugin, ConfigurationSection config) {
-		super(plugin, GameType.ELYTRA, config);
+	public GameElytra(OlympaHub plugin, ConfigurationSection configFromFile) {
+		super(plugin, GameType.ELYTRA, configFromFile);
 		
-		startRaceLoc = getLoc(config.getString("tp_loc"));
-		allowedTpLocs.add(startRaceLoc);
+		//getLoc(config.getString("tp_loc"));
+		allowedTpLocs.add(startRaceLoc = config.getLocation("tp_loc"));
 		
 		List<Region> listReg = new ArrayList<Region>();
 		List<Integer> listInd = new ArrayList<Integer>();
 
-		config.getStringList("portals_locs").forEach(s -> listReg.add(getRegion(s)));
-		config.getStringList("portals_indexs").forEach(s -> listInd.add(Integer.valueOf(s)));
+		config.getList("portals_locs").forEach(r -> listReg.add((Region) r));
+		config.getList("portals_indexs").forEach(i -> listInd.add((Integer) i));
+		
+		//config.getStringList("portals_locs").forEach(s -> listReg.add(getRegion(s)));
+		//config.getStringList("portals_indexs").forEach(s -> listInd.add(Integer.valueOf(s)));
 		
 		//register des régions
 		listReg.forEach(reg -> {
@@ -91,6 +103,15 @@ public class GameElytra extends IGame {
 		}.runTaskTimer(plugin, 10, 2);
 	}
 	
+	private int getMaxPortalIndex() {
+		int i = -1;
+		for (int i2 : portals.values())
+			if (i2 > i)
+				i = i2;
+		
+		return i;
+	}
+	
 	private void isEnteringPortal(Player p, Region reg) {
 		//int portalIndex = new ArrayList<Region>(portals.keySet()).indexOf(reg);
 		int portalIndex = portals.get(reg);
@@ -98,6 +119,9 @@ public class GameElytra extends IGame {
 		if (nextPortal.get(p) == portalIndex) {
 			p.sendMessage(gameType.getChatPrefix() + "§aPorte " + (portalIndex + 1) + " validée !");
 			nextPortal.put(p, portalIndex + 1);
+			
+			if (portalIndex + 1 == getMaxPortalIndex())
+				p.setGliding(!p.isGliding());
 			
 		}else if (nextPortal.get(p) < portalIndex)
 			p.sendMessage(gameType.getChatPrefix() + "§cVous n'avez pas validé l'une des portes précédentes.§7 Retournez en arrière ou réinitialisez la partie.");
@@ -192,16 +216,203 @@ public class GameElytra extends IGame {
 				restartGame(AccountProvider.get(e.getEntity().getUniqueId()));	
 			}
 	}
-	 
-	private int getMaxPortalIndex() {
-		int i = -1;
-		for (int i2 : portals.values())
-			if (i2 > i)
-				i = i2;
+
+	
+	///////////////////////////////////////////////////////////
+	//                      CONFIG INIT                      //
+	///////////////////////////////////////////////////////////
+	
+	
+	protected ConfigurationSection initConfig(ConfigurationSection config) {
+		config = super.initConfig(config);
 		
-		return i;
+		if (!config.contains("tp_loc"))
+			config.set("tp_loc", new Location(world, 0, 0, 0));
+		
+		if (!config.contains("portals_locs")) {
+			List<Region> list = new ArrayList<Region>();
+			list.add(new Cuboid(world, 0, 0, 0, 1, 1, 1));
+			list.add(new Cuboid(world, 0, 0, 0, 1, 1, 1));
+			list.add(new Cuboid(world, 0, 0, 0, 1, 1, 1));
+			list.add(new Cuboid(world, 0, 0, 0, 1, 1, 1));
+			config.set("portals_locs", list);	
+		}
+		
+		if (!config.contains("portals_indexs")) {
+			List<Integer> list = new ArrayList<Integer>();
+			list.add(0);
+			list.add(1);
+			list.add(1);
+			list.add(2);
+			config.set("portals_indexs", list);
+		}
+		
+		return config;
+	}
+
+
+	///////////////////////////////////////////////////////////
+	//                       COMMANDS                        //
+	///////////////////////////////////////////////////////////
+	
+	
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true, args = "INTEGER", min = 1)
+	public void addPortal(CommandContext cmd) {
+		int portalIndex;
+		
+		if (cmd.getArgument(0) == null)
+			return;
+		
+		portalIndex = cmd.getArgument(0);
+		
+		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aSélectionnez la région de l'anneau " + cmd.getArgument(0));
+		
+		new RegionEditor(cmd.command.getPlayer(), region -> {
+			  if (region == null) 
+				  return;
+			  
+			  portals.put(region, portalIndex);
+			  //regs.add(region);
+			  
+			  //indexs.add(portalIndex);
+
+			  List<Region> regs = new ArrayList<Region>();
+			  List<Integer> ids = new ArrayList<Integer>();
+			  
+			  portals.forEach((reg, id) -> {
+				  regs.add(reg);
+				  ids.add(id);
+			  });
+			  
+			  config.set("portals_locs", regs);
+			  config.set("portals_indexs", ids);
+			  
+			  cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aAnneau ajouté avec succès." + 
+						"\n§7Attention si l'ordre des anneaux n'est pas respecté ! Soit aucun anneau 0 n'a été trouvé, soit "
+						+ "les indexs d'anneaux sautent une étape (par exemple, il y a deux aneaux 0 et 2 mais aucun anneau 1). "
+						+ "Veuillez vérifier la configuration ou des erreurs pouaient se produire.");
+			  
+			}).enterOrLeave();
+		
+		checkPortalsProgression(cmd.command.getPlayer());
 	}
 	
+	
+	@Cmd (player = true)
+	public void listPortals(CommandContext cmd) {
+		
+		String msg = gameType.getChatPrefix() + "§aListe des anneaux :";
+				/*new ComponentBuilder()
+				.append(gameType.getChatPrefix() + "Liste des anneaux")
+				.color(net.md_5.bungee.api.ChatColor.GOLD);*/
+		
+		List<Region> list = new ArrayList<Region>(portals.keySet());
+		//config.getStringList("portals_locs").forEach(s -> list.add(getRegion(s)));
+		
+		//List<Integer> indexs = new ArrayList<Integer>();
+		//config.getIntegerList("portals_indexs").forEach(i -> indexs.add(i));
+		
+		for (int i = 0 ; i < list.size() ; i++) {
+			Location min = list.get(i).getMin();
+			Location max = list.get(i).getMax();
+			
+			msg += "\n§2Id " + i + " : §eanneau " + min.getBlockX() + "," + min.getBlockY() + "," + min.getBlockZ() + " | " +
+						max.getBlockX() + "," + max.getBlockY() + "," + max.getBlockZ() + " §7(étape " + portals.get(list.get(i)) + ")";
+			//.event(new ClickEvent(Action.RUN_COMMAND, "/" + gameType.toString().toLowerCase() + " removeportal " + i));
+		}
+		
+		cmd.command.getPlayer().sendMessage(msg);
+	}
+	
+	@Cmd (player = true, min = 1, args = "INTEGER")
+	public void removePortal(CommandContext cmd) {
+		
+		List<Region> regs = new ArrayList<Region>();
+		List<Integer> indexs = new ArrayList<Integer>();
+		
+		portals.forEach((r, i) -> {
+			regs.add(r);
+			indexs.add(i);
+		});
+		
+		if ((Integer) cmd.getArgument(0) >= regs.size()) {
+			cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§cIndex non valide, faites /elytra listportal pour avoir la liste des portails.");
+			return;
+		}
+
+		regs.remove(((Integer) cmd.getArgument(0)).intValue());
+		indexs.remove(((Integer) cmd.getArgument(0)).intValue());
+
+		portals.clear();
+		for (int i = 0 ; i < regs.size() ; i++)
+			portals.put(regs.get(i), indexs.get(i));
+		
+		config.set("portals_locs", regs);
+		config.set("portals_indexs", indexs);
+		
+		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aPortail " + cmd.getArgument(0) + " supprimé. §7Réexécutez /elytra listportals pour afficher les nouveaux IDs des portails." + 
+				"\n§7Attention si l'ordre des anneaux n'est pas respecté ! Soit aucun anneau 0 n'a été trouvé, soit "
+				+ "les indexs d'anneaux sautent une étape (par exemple, il y a deux aneaux 0 et 2 mais aucun anneau 1). "
+				+ "Veuillez vérifier la configuration ou des erreurs pouaient se produire.");
+		
+		//checkPortalsProgression(cmd.command.getPlayer());
+	}
+	
+	/**
+	 * Send message to editing player if the new portals organization don't start from 0 skip a step (portals should always follow an array of integers, x2 = x1++)
+	 */
+	@Deprecated
+	private void checkPortalsProgression(Player p) {
+		boolean msg = false;
+		
+		//check for portal 0
+		if (!portals.values().contains(0))
+			msg = true;
+		
+		if (msg = false) {
+			List<Region> list = new ArrayList<Region>(portals.keySet());
+			
+			int max = 0;
+			for (int i : portals.values())
+				if (i > max) max = i;
+			
+			for (int i = 1 ; i <= max ; i++) {
+				boolean okStep = false;
+				
+				for (int j = 0 ; j < portals.size() ; i++)
+					if (portals.get(list.get(j)) == i)
+						okStep = true;
+				
+				if (!okStep) {
+					msg = true;
+					break;
+				}
+			}
+			
+			if (msg)
+				p.sendMessage(gameType + "§7\nAttention si l'ordre des anneaux n'est pas respecté ! Soit aucun anneau 0 n'a été trouvé, soit "
+						+ "les indexs d'anneaux sautent une étape (par exemple, il y a deux aneaux 0 et 2 mais aucun anneau 1). "
+						+ "Veuillez vérifier la configuration ou des erreurs pouaient se produire.");
+		}
+	}
+	
+	@Cmd (player = true)
+	public void raceStartLoc(CommandContext cmd) {
+		Location loc = cmd.command.getPlayer().getLocation();//.getBlock().getLocation().add(0.5, 0, 0.5);
+		
+		allowedTpLocs.remove(startRaceLoc);
+		startRaceLoc = loc;
+		allowedTpLocs.add(startRaceLoc);
+		
+		config.set("tp_loc", loc);
+		
+		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de tp_loc a été définie en " + 
+				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
+	}
 	
 
 }

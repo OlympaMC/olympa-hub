@@ -18,8 +18,12 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import fr.olympa.api.command.complex.Cmd;
+import fr.olympa.api.command.complex.CommandContext;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.provider.AccountProvider;
+import fr.olympa.api.region.Region;
+import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
@@ -39,13 +43,13 @@ public class GameArena extends IGame{
 	
 	boolean isGameStarting = false;
 	
-	public GameArena(OlympaHub plugin, ConfigurationSection config) {
-		super(plugin, GameType.ARENA, config);
+	public GameArena(OlympaHub plugin, ConfigurationSection fileConfig) {
+		super(plugin, GameType.ARENA, fileConfig);
 
 		region.getRegion().getWorld().setPVP(true);
 		
-		pos1 = getLoc(config.getString("player_1_spawn"));
-		pos2 = getLoc(config.getString("player_2_spawn"));
+		pos1 = config.getLocation("player_1_spawn");
+		pos2 = config.getLocation("player_2_spawn");
 		
 		hotBarContent[queueCountInvIndex] = ItemUtils.item(Material.SUNFLOWER, "");
 
@@ -205,6 +209,56 @@ public class GameArena extends IGame{
 			
 			isGameStarting = false;
 		}
+	}
+
+	
+	///////////////////////////////////////////////////////////
+	//                      CONFIG INIT                      //
+	///////////////////////////////////////////////////////////
+	
+	
+	protected ConfigurationSection initConfig(ConfigurationSection config) {
+		config = super.initConfig(config);
+		
+		if (!config.contains("player_1_spawn"))
+			config.set("player_1_spawn", new Location(world, 0, 0, 0));
+		
+		if (!config.contains("player_2_spawn"))
+			config.set("player_2_spawn", new Location(world, 0, 0, 0));
+		
+		return config;
+	}
+
+
+	///////////////////////////////////////////////////////////
+	//                       COMMANDS                        //
+	///////////////////////////////////////////////////////////
+
+	
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void setPlayerOneSpawn(CommandContext cmd) {
+		pos1 = cmd.command.getPlayer().getLocation();
+		config.set("player_1_spawn", pos1);
+		
+		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de téléportation du joueur 1 a été définie en " + 
+				pos1.getBlockX() + ", " + pos1.getBlockY() + ", " + pos1.getBlockZ());
+	}
+	
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void setPlayerTwoSpawn(CommandContext cmd) {
+		pos2 = cmd.command.getPlayer().getLocation();
+		config.set("player_2_spawn", pos2);
+		
+		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de téléportation du joueur 2 a été définie en " + 
+				pos2.getBlockX() + ", " + pos2.getBlockY() + ", " + pos2.getBlockZ());
 	}
 }
 

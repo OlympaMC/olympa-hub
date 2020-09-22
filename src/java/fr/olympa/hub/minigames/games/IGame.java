@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,6 +26,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -32,6 +34,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
+import fr.olympa.api.command.complex.Cmd;
+import fr.olympa.api.command.complex.CommandContext;
+import fr.olympa.api.command.complex.ComplexCommand;
+import fr.olympa.api.editor.RegionEditor;
 import fr.olympa.api.holograms.Hologram;
 import fr.olympa.api.holograms.Hologram.HologramLine;
 import fr.olympa.api.item.ItemUtils;
@@ -46,13 +52,14 @@ import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.utils.observable.SimpleObservable;
 import fr.olympa.core.spigot.OlympaCore;
+import fr.olympa.hub.HubPermissions;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import redis.clients.jedis.Jedis;
 
-public abstract class IGame implements Listener{
+public abstract class IGame extends ComplexCommand implements Listener{
 	
 	private static final int maxDisplayedTopScores = 10;
 	public static final int maxTopScoresStored = 100; 
@@ -74,22 +81,30 @@ public abstract class IGame implements Listener{
 	private Region area;
 	protected TrackedRegion region;
 	protected Location startingLoc;
-	private Hologram holo;
+	
+	private Hologram scoresHolo;
+	private Hologram startHolo;
 	
 	protected Set<Location> allowedTpLocs = new HashSet<Location>();
 	
+	protected World world;
+	
 	@SuppressWarnings("unchecked")
-	public IGame(OlympaHub plugin, GameType game, ConfigurationSection config) {
+	public IGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile) {
+		super(plugin, game.toString().toLowerCase(), "Accès à la config " + game.getNameWithArticle(), HubPermissions.EDIT_MINIGAMES);
+		
 		this.plugin = plugin;
 		this.instance = this;
 		
 		this.gameType = game;
-		
-		this.config = config;
-		this.area = getRegion(config.getString("area"));
-		this.startingLoc = getLoc(config.getString("start_loc"));
 
-		Location holoLoc = getLoc(config.getString("holo_loc"));
+		this.world = Bukkit.getWorlds().get(0);
+		this.config = initConfig(configFromFile);
+		
+		this.area = (Region) config.get("area");//getRegion(config.getString("area"));
+		this.startingLoc = config.getLocation("start_loc");//getLoc(config.getString("start_loc"));
+
+		//Location holoLoc = ;//getLoc(config.getString("holo_loc"));
 		
 		//register listener
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -111,14 +126,14 @@ public abstract class IGame implements Listener{
 		//Bukkit.getLogger().log(Level.SEVERE, "scores " + gameType + " : " + topScores);
 		
 		//création de l'holo scores
-		holo = OlympaCore.getInstance().getHologramsManager().createHologram(holoLoc, false, 
+		scoresHolo = OlympaCore.getInstance().getHologramsManager().createHologram(config.getLocation("holo_loc"), false, 
 				new FixedLine<HologramLine>("§6Scores " + gameType.getNameWithArticle()), new FixedLine<HologramLine>(" "));
 		
 		for (int i = 0 ; i < maxDisplayedTopScores ; i++) {
 			
 			final int index = i;
 			
-			holo.addLine(new DynamicLine<HologramLine>(line -> {
+			scoresHolo.addLine(new DynamicLine<HologramLine>(line -> {
 				
 				if (topScores.size() > index) {
 					
@@ -136,7 +151,7 @@ public abstract class IGame implements Listener{
 		//observable.update();
 		
 		//création de l'holo du début de partie
-		OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, 
+		startHolo = OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, 
 				new FixedLine<HologramLine>("§6Début " + gameType.getNameWithArticle()), 
 				new FixedLine<HologramLine>("§7Commencez ici"));
 		
@@ -396,9 +411,10 @@ public abstract class IGame implements Listener{
 	}
 
 	@EventHandler
-	public void onInterractInventory(InventoryInteractEvent e) {
+	public void onInterractInventory(InventoryClickEvent e) {
 		if (!players.containsKey(e.getWhoClicked().getUniqueId()))
 			return;
+		
 		e.setCancelled(true);
 	}
 	
@@ -473,7 +489,7 @@ public abstract class IGame implements Listener{
 	//                         UTILS                         //
 	///////////////////////////////////////////////////////////
 	
-
+/*
 	protected final Location getLoc(String str) {
 		String[] args = str.split(" ");
 		
@@ -505,5 +521,101 @@ public abstract class IGame implements Listener{
 			return null;
 		}
 		
+	}*/
+
+	
+	///////////////////////////////////////////////////////////
+	//                      CONFIG INIT                      //
+	///////////////////////////////////////////////////////////
+	
+	/**
+	 * Create default values in config if nothing has been found for this game
+	 * Only for internal use
+	 */
+	protected ConfigurationSection initConfig(ConfigurationSection config) {
+		//plugin.getLogger().log(Level.INFO, "config avant (dans fct) : " + config);
+		
+		if (config == null)
+			config = MiniGamesManager.getInstance().getConfig().createSection(gameType.toString().toLowerCase());
+			
+		if (!config.getKeys(true).contains("area")) {
+			config.set("area", new Cuboid(world, 0, 0, 0, 1, 1, 1));
+			//plugin.getLogger().log(Level.INFO, "set default area : " + config.get("area"));	
+		}
+
+		if (!config.getKeys(true).contains("holo_loc")) {
+			config.set("holo_loc", new Location(world, 0, 0, 0));	
+			//plugin.getLogger().log(Level.INFO, "set default holo : " + config.get("holo_loc"));	
+		}
+
+		if (!config.getKeys(true).contains("start_loc")) {
+			config.set("start_loc", new Location(world, 0, 0, 0));	
+			//plugin.getLogger().log(Level.INFO, "set default start : " + config.get("start_loc"));	
+		}
+		
+		//plugin.getLogger().log(Level.INFO, "config après (dans fct) : " + config);
+
+		return config;
 	}
+
+	
+	///////////////////////////////////////////////////////////
+	//                       COMMANDS                        //
+	///////////////////////////////////////////////////////////
+
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void area(CommandContext cmd) {
+		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aSélectionnez la région du jeu.");
+		  
+		new RegionEditor(cmd.command.getPlayer(), region -> {
+			  if (region == null) 
+				  return;
+			  
+			  area = region;
+			  config.set("area", region);
+			  cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aRégion mise à jour avec succès.");
+			  
+			}).enterOrLeave();
+	}
+
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void hololoc(CommandContext cmd) {
+		Location loc = cmd.command.getPlayer().getLocation().getBlock().getLocation().add(0.5, 0, 0.5);
+		
+		scoresHolo.move(loc);
+		config.set("holo_loc", loc);
+		
+		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de holo_loc a été définie en " + 
+				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
+	}
+
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void startLoc(CommandContext cmd) {
+		Location loc = cmd.command.getPlayer().getLocation().getBlock().getLocation().add(0.5, 0, 0.5);
+		
+		allowedTpLocs.remove(startingLoc);
+		startingLoc = loc;
+		allowedTpLocs.add(startingLoc);
+		
+		startHolo.move(loc.clone().add(0, 2, 0));
+		config.set("start_loc", loc);
+		
+		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de start_loc a été définie en " + 
+				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
+	}
+	
+	
+	
 }
