@@ -27,12 +27,10 @@ public class MenuGUI extends OlympaGUI {
 	static {
 		ItemStack orangeSeparator = ItemUtils.itemSeparator(DyeColor.ORANGE);
 		ItemStack yellowSeparator = ItemUtils.itemSeparator(DyeColor.YELLOW);
-		for (int slot = 0; slot < 54; slot++) { // fill du orange partout
+		for (int slot = 0; slot < 54; slot++)
 			basicContents[slot] = orangeSeparator;
-		}
-		for (int slot : new int[] { 2, 11, 10, 9, 18, 27, 36, 45, 46, 47, 48, 49, 50, 51, 52, 53, 44, 35, 26, 17, 16, 15, 6 }) { // fait le contour jaune
+		for (int slot : new int[] { 2, 11, 10, 9, 18, 27, 36, 45, 46, 47, 48, 49, 50, 51, 52, 53, 44, 35, 26, 17, 16, 15, 6 })
 			basicContents[slot] = yellowSeparator;
-		}
 		basicContents[0] = ItemUtils.skullCustom("§bTwitter",
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2M3NDVhMDZmNTM3YWVhODA1MDU1NTkxNDllYTE2YmQ0YTg0ZDQ0OTFmMTIyMjY4MThjMzg4MWMwOGU4NjBmYyJ9fX0=");
 		basicContents[1] = ItemUtils.skullCustom("§5Discord",
@@ -81,11 +79,14 @@ public class MenuGUI extends OlympaGUI {
 				"",
 				"§8> §7Membre depuis le " + DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.FRANCE).format(new Date(player.getFirstConnection() * 1000)),
 				"",
-				"§8> §7" + (player.getEmail() == null ? "§oMail non spécifié" : player.getEmail())/*,
-				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié")*/);
+				"§8> §7" + (player.getEmail() == null ? "§oMail non spécifié" : player.getEmail()),
+				"§8> §7Compte Teamspeak " + (player.getTeamspeakId() == 0 ? "lié !" : "non relié"),
+				"§8> §7Version " + (player.getPremiumUniqueId() != null ? "Premium" : "Crack"));
+		//				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
 
 		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers) {
-			if (!server.getServer().canConnect(player)) continue;
+			if (!server.getServer().canConnect(player))
+				continue;
 			setServerItem(server);
 			server.observe("gui_" + hashCode(), () -> setServerItem(server));
 		}
@@ -104,11 +105,9 @@ public class MenuGUI extends OlympaGUI {
 		}
 		try {
 			Optional<ServerInfo> server = OlympaHub.getInstance().serversInfos.servers.stream().filter(x -> x.slot == slot && x.getServer().canConnect(player)).findFirst();
-			if (server.isPresent()) {
-				if (server.get().connect(p)) {
+			if (server.isPresent())
+				if (server.get().connect(p))
 					p.closeInventory();
-				}
-			}
 		} catch (IndexOutOfBoundsException ex) {
 		}
 		return true;
@@ -116,9 +115,8 @@ public class MenuGUI extends OlympaGUI {
 
 	@Override
 	public boolean onClose(Player p) {
-		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers) {
+		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers)
 			server.unobserve("gui_" + hashCode());
-		}
 		return super.onClose(p);
 	}
 

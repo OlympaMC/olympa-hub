@@ -4,7 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.sql.OlympaStatement;
+import fr.olympa.api.sql.statement.OlympaStatement;
 import fr.olympa.hub.minigames.games.GameArena;
 import fr.olympa.hub.minigames.games.GameElytra;
 import fr.olympa.hub.minigames.games.GameJump;
