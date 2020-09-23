@@ -88,8 +88,8 @@ public class GameDac extends IGame {
 		super.endGame(p, score, warpToSpawn);
 		
 		playingPlayers.remove(p.getPlayer());
-	}
-	
+	} 
+	 
 	private void tryToInitGame() {
 		if (isGameInProgress || getPlayers().size() < minPlayers)
 			getPlayers().forEach(id -> Bukkit.getPlayer(id).sendMessage(gameType.getChatPrefix() + "§aNombres de joueurs : " + getPlayers().size() + "/" + minPlayers));
