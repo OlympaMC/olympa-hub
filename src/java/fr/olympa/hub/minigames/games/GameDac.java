@@ -81,7 +81,7 @@ public class GameDac extends IGame {
 		else
 			tryToInitGame();
 	}
-	
+	 
 	
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
