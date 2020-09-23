@@ -297,8 +297,6 @@ public class GameElytra extends IGame {
 						+ "Veuillez vérifier la configuration ou des erreurs pouaient se produire.");
 			  
 			}).enterOrLeave();
-		
-		checkPortalsProgression(cmd.command.getPlayer());
 	}
 	
 	
@@ -306,15 +304,8 @@ public class GameElytra extends IGame {
 	public void listPortals(CommandContext cmd) {
 		
 		String msg = gameType.getChatPrefix() + "§aListe des anneaux :";
-				/*new ComponentBuilder()
-				.append(gameType.getChatPrefix() + "Liste des anneaux")
-				.color(net.md_5.bungee.api.ChatColor.GOLD);*/
 		
 		List<Region> list = new ArrayList<Region>(portals.keySet());
-		//config.getStringList("portals_locs").forEach(s -> list.add(getRegion(s)));
-		
-		//List<Integer> indexs = new ArrayList<Integer>();
-		//config.getIntegerList("portals_indexs").forEach(i -> indexs.add(i));
 		
 		for (int i = 0 ; i < list.size() ; i++) {
 			Location min = list.get(i).getMin();
@@ -359,46 +350,8 @@ public class GameElytra extends IGame {
 				+ "les indexs d'anneaux sautent une étape (par exemple, il y a deux aneaux 0 et 2 mais aucun anneau 1). "
 				+ "Veuillez vérifier la configuration ou des erreurs pouaient se produire.");
 		
-		//checkPortalsProgression(cmd.command.getPlayer());
 	}
 	
-	/**
-	 * Send message to editing player if the new portals organization don't start from 0 skip a step (portals should always follow an array of integers, x2 = x1++)
-	 */
-	@Deprecated
-	private void checkPortalsProgression(Player p) {
-		boolean msg = false;
-		
-		//check for portal 0
-		if (!portals.values().contains(0))
-			msg = true;
-		
-		if (msg = false) {
-			List<Region> list = new ArrayList<Region>(portals.keySet());
-			
-			int max = 0;
-			for (int i : portals.values())
-				if (i > max) max = i;
-			
-			for (int i = 1 ; i <= max ; i++) {
-				boolean okStep = false;
-				
-				for (int j = 0 ; j < portals.size() ; i++)
-					if (portals.get(list.get(j)) == i)
-						okStep = true;
-				
-				if (!okStep) {
-					msg = true;
-					break;
-				}
-			}
-			
-			if (msg)
-				p.sendMessage(gameType + "§7\nAttention si l'ordre des anneaux n'est pas respecté ! Soit aucun anneau 0 n'a été trouvé, soit "
-						+ "les indexs d'anneaux sautent une étape (par exemple, il y a deux aneaux 0 et 2 mais aucun anneau 1). "
-						+ "Veuillez vérifier la configuration ou des erreurs pouaient se produire.");
-		}
-	}
 	
 	@Cmd (player = true)
 	public void raceStartLoc(CommandContext cmd) {
