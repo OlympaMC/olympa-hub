@@ -13,6 +13,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import fr.olympa.api.command.complex.Cmd;
+import fr.olympa.api.command.complex.CommandContext;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.hub.OlympaHub;
@@ -28,10 +30,10 @@ public class GameJump extends IGame{
 	
 	private Map<Player, Integer> playersLastCheckPoint = new HashMap<Player, Integer>();
 	
-	public GameJump(OlympaHub plugin, ConfigurationSection config) {
-		super(plugin, GameType.JUMP, config);
+	public GameJump(OlympaHub plugin, ConfigurationSection fileConfig) {
+		super(plugin, GameType.JUMP, fileConfig);
 		
-		config.getStringList("checkpoints").forEach(s -> checkpoints.add(getLoc(s)));
+		config.getList("checkpoints").forEach(loc -> checkpoints.add((Location) loc));
 		
 		hotBarContent[6] = ItemUtils.item(Material.TOTEM_OF_UNDYING, "§2Revenir au checkpoint précédent");
 		
@@ -136,4 +138,88 @@ public class GameJump extends IGame{
 					". Temps actuel : " + new DecimalFormat("#.##").format(playerLastCPTime.get(e.getPlayer())/1000d) + "s");
 		}
 	}
+
+	
+	///////////////////////////////////////////////////////////
+	//                      CONFIG INIT                      //
+	///////////////////////////////////////////////////////////
+	
+	
+	protected ConfigurationSection initConfig(ConfigurationSection config) {
+		config = super.initConfig(config);
+		
+		if (!config.contains("checkpoints")) {
+			List<Location> list = new ArrayList<Location>();
+			list.add(startingLoc);
+			list.add(new Location(world, 1, 1, 1));
+			
+			config.set("checkpoints", list);	
+		}
+		
+		return config;
+	}
+
+
+	///////////////////////////////////////////////////////////
+	//                       COMMANDS                        //
+	///////////////////////////////////////////////////////////
+
+	
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void addCheckPoint(CommandContext cmd) {
+		Location loc = cmd.command.getPlayer().getLocation();
+		
+		checkpoints.add(loc);
+		
+		config.set("checkpoints", checkpoints);
+		
+		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLe checkpoint " + (checkpoints.size() - 1) + " a été défini en " + 
+				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
+	}
+	
+	@Override
+	public void startLoc(CommandContext cmd) {
+		super.startLoc(cmd);
+		
+		checkpoints.set(0, startingLoc);
+		config.set("checkpoints", checkpoints);
+	}
+	
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void clearCheckPoints(CommandContext cmd) {
+		checkpoints.clear();
+		checkpoints.add(startingLoc);
+		
+		config.set("checkpoints", checkpoints);
+		
+		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLes checkpoints ont été supprimés.");
+	}
+	
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void listCheckPoints(CommandContext cmd) {
+		String msg = gameType.getChatPrefix() + "§aListe des checkpoints : ";
+		
+		for (int i = 1 ; i < checkpoints.size() ; i++)
+			msg += "\n§2 " + i + ". §a" + checkpoints.get(i).getBlockX() + ", " + checkpoints.get(i).getBlockY() + ", " + checkpoints.get(i).getBlockZ();
+		
+		cmd.command.getPlayer().sendMessage(msg);
+	}
 }
+
+
+
+
+
+

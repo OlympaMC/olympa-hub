@@ -9,8 +9,12 @@ import java.util.logging.Level;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
+import fr.olympa.api.command.complex.ComplexCommand;
 import fr.olympa.core.spigot.OlympaCore;
+import fr.olympa.hub.HubPermissions;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.games.IGame;
 import redis.clients.jedis.Jedis;
@@ -21,19 +25,30 @@ public class MiniGamesManager {
 	
 	private Map<GameType, IGame> games = new HashMap<GameType, IGame>(); 
 	
+	private YamlConfiguration config;
+	private File configFile;
+	
 	public MiniGamesManager(OlympaHub plugin) {
 		instance = this;
 		
-        File gamesConfigFile = new File(plugin.getDataFolder(), "games.yml");
+        configFile = new File(plugin.getDataFolder(), "games.yml");
         
-        if (!gamesConfigFile.exists()) {
-        	gamesConfigFile.getParentFile().mkdirs();
-            plugin.saveResource("games.yml", false);
+        if (!configFile.exists()) {
+        	try {
+				if (configFile.getParentFile().mkdirs() || configFile.createNewFile())
+		            plugin.getLogger().log(Level.WARNING, "Games config games.yml wasn't found, creating empty file.");
+					
+			} catch (IOException e) {
+	            plugin.getLogger().log(Level.SEVERE, "§cUnable to create minigames config, please check the files permissions.");
+				e.printStackTrace();
+			}
+            //plugin.saveResource("games.yml", false);
          }
 
-        YamlConfiguration gamesConfig = new YamlConfiguration();
+        config = new YamlConfiguration();
+
         try {
-        	gamesConfig.load(gamesConfigFile);
+        	config.load(configFile);
             plugin.getLogger().log(Level.INFO, "§aSuccessfully loaded games.yml.");
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
@@ -43,12 +58,15 @@ public class MiniGamesManager {
         
         for (GameType game : GameType.values()) 
         	if (game.getGameProvider() != null) {
-        		IGame iGame = game.getGameProvider().getGame(plugin, gamesConfig.getConfigurationSection("game_" + game.toString().toLowerCase()));
-        		plugin.getLogger().log(Level.INFO, "§aGame " + game + " successfully loaded.");
+        		IGame iGame = game.getGameProvider().getGame(plugin, config.getConfigurationSection(game.toString().toLowerCase()));
+        		iGame.register(); //register game commands
         		games.put(game, iGame);	
+        		
+        		plugin.getLogger().log(Level.INFO, "§aGame " + game + " successfully loaded.");
         	}else
         		plugin.getLogger().log(Level.WARNING, "§cGame " + game + " wasn't loaded successfully.");	
         
+        saveConfig(getConfig());
 		
 		//register redis
         
@@ -79,11 +97,25 @@ public class MiniGamesManager {
 	public IGame getGame(GameType game) {
 		return games.get(game);
 	}
-
 	
-	///////////////////////////////////////////////////////////
-	//                  GAMETYPE SUB CLASS                   //
-	///////////////////////////////////////////////////////////
+	/**
+	 * Get games config
+	 * @return
+	 */
+	public YamlConfiguration getConfig() {
+		return config;
+	}
 	
-
+	/**
+	 * Save config to games.yml file
+	 * @param config
+	 */
+	public void saveConfig(YamlConfiguration config) {
+		try {
+			config.save(configFile);
+		} catch (IOException e) {
+			OlympaHub.getInstance().getLogger().log(Level.SEVERE, "Failed to save games.yml, please check authorizations.");
+			e.printStackTrace();
+		}
+	}
 }

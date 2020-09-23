@@ -55,7 +55,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
 		OlympaPermission.registerPermissions(HubPermissions.class);
-
+		
 		spawn = getConfig().getLocation("spawn");
 		lightning = getConfig().getLocation("lightning");
 
@@ -90,6 +90,11 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		OlympaCorePermissions.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
 
 		games = new MiniGamesManager(this);
+	}
+	
+	@Override
+	public void onDisable() {
+		MiniGamesManager.getInstance().saveConfig(MiniGamesManager.getInstance().getConfig());
 	}
 
 }
