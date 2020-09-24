@@ -53,6 +53,14 @@ public enum GameType {
 		}
 	}
 	
+	public static GameType getGameTypeOfBddKey(String key) {
+		for (GameType game : GameType.values())
+			if (game.getBddKey().equals(key))
+				return game;
+		
+		return null;
+	}
+	
 	public GameProvider getGameProvider(){
 		return constructor;
 	}

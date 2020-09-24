@@ -267,23 +267,26 @@ public abstract class IGame extends ComplexCommand implements Listener{
 				p.setScore(gameType, p.getScore(gameType) + 1);	
 		}
 		
+		//si le joueur a vu son score progresser, update des top scores
+		if (p.getScore(gameType) > 0) {
+			
 		//rang du joueur, 0 si non classé
 		int oldPlayerRank = getPlayerRank(p);
 		
 		String oldPlayerRankString;
 		if (oldPlayerRank == 0)
-			oldPlayerRankString = "§7aucune§e";
+			oldPlayerRankString = "§7aucune";
 		else
 			oldPlayerRankString = Integer.toString(oldPlayerRank);
 		
-		//Bukkit.broadcastMessage(oldPlayerRankString);
-		
 		topScores.put(p.getInformation(), p.getScore(gameType));
+		
 		if (updateScores(p.getInformation(), score)) {
 			
 			if (getPlayerRank(p) < oldPlayerRank || oldPlayerRank == 0)
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place " + oldPlayerRankString + 
-						" à la place §c" + getPlayerRank(p) + "§e, félicitations !!");
+				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place §c" + 
+						oldPlayerRankString + " §eà la place §c" + getPlayerRank(p) + "§e, félicitations !!");
+		}	
 		}
 	}
 
@@ -420,7 +423,11 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onTeleport(PlayerTeleportEvent e) {
+		
 		if (players.containsKey(e.getPlayer().getUniqueId())) {
+			if (e.getFrom() == null || e.getTo() == null || e.isCancelled() || e.getFrom().distance(e.getTo()) < 0.7)
+				return;
+
 			boolean allowTp = false;
 			
 			for (Location loc : allowedTpLocs)
@@ -441,7 +448,10 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void playerMoveEvent(PlayerMoveEvent e) {
-		if (e.getFrom().getBlock().equals(e.getTo().getBlock()))
+		if (e.isCancelled() || (
+				e.getFrom().getBlockX() == e.getTo().getBlockX() && 
+				e.getFrom().getBlockY() == e.getTo().getBlockY() && 
+				e.getFrom().getBlockZ() == e.getTo().getBlockZ()))
 			return;
 
 		Player p = e.getPlayer();
@@ -487,45 +497,6 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	public void onQuit(PlayerQuitEvent e) {
 		endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, false);
 	}
-
-	
-	///////////////////////////////////////////////////////////
-	//                         UTILS                         //
-	///////////////////////////////////////////////////////////
-	
-/*
-	protected final Location getLoc(String str) {
-		String[] args = str.split(" ");
-		
-		if (args.length < 4)
-			return null;
-		
-		try {
-			if (args.length == 4)
-				return new Location(Bukkit.getWorld(args[0]), Double.valueOf(args[1]) + 0.5, Double.valueOf(args[2]), Double.valueOf(args[3]) + 0.5);
-			else if (args.length == 6)
-				return new Location(Bukkit.getWorld(args[0]), Double.valueOf(args[1]) + 0.5, Double.valueOf(args[2]), Double.valueOf(args[3]) + 0.5, Float.valueOf(args[4]), Float.valueOf(args[5]));
-			else
-				return null;
-		}catch(NumberFormatException e) {
-			return null;
-		}
-	}
-	
-	protected final Cuboid getRegion(String str) {
-		String[] args = str.split(" ");
-		
-		if (args.length != 7)
-			return null;
-
-		try {
-			return new Cuboid(Bukkit.getWorld(args[0]), Integer.valueOf(args[1]), Integer.valueOf(args[2]), Integer.valueOf(args[3]), 
-					Integer.valueOf(args[4]), Integer.valueOf(args[5]), Integer.valueOf(args[6]));
-		}catch(NumberFormatException e) {
-			return null;
-		}
-		
-	}*/
 
 	
 	///////////////////////////////////////////////////////////

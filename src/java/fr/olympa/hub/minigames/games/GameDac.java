@@ -36,7 +36,8 @@ public class GameDac extends IGame {
 	private final int playDelay = 10;
 	
 	private int currentTurn = -1;
-	
+
+	private List<Player> waitingPlayers = new ArrayList<Player>();
 	private List<Player> playingPlayers = new ArrayList<Player>();
 	
 	private Cuboid jumpRegion;
@@ -57,15 +58,17 @@ public class GameDac extends IGame {
 
 		resetLandingArea();
 
-		//cancen region entering if player isn't the one which should jump
+		//cancel region entering if player isn't the one which should jump
+		//and set the jump marker to true
 		OlympaCore.getInstance().getRegionManager().registerRegion(barrierRegion, "dac_barrier_area",
 				EventPriority.HIGH, new Flag() {
 			@Override
 			public ActionResult enters(Player p, Set<TrackedRegion> to) {
 				super.enters(p, to);
-				if (p.equals(playingPlayer) && !hasJumped)
+				if (p.equals(playingPlayer) && !hasJumped) {
+					hasJumped = true;
 					return ActionResult.ALLOW;
-				else
+				}else
 					return ActionResult.DENY;
 			}
 		});
@@ -75,6 +78,8 @@ public class GameDac extends IGame {
 	protected void startGame(OlympaPlayerHub p) {
 		super.startGame(p);
 
+		waitingPlayers.add(p.getPlayer());
+		
 		if (isGameInProgress)
 			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Une partie est déjà en cours...");
 		else
@@ -85,81 +90,91 @@ public class GameDac extends IGame {
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		super.endGame(p, score, warpToSpawn);
+
+		waitingPlayers.remove(p.getPlayer());
 		
-		playingPlayers.remove(p.getPlayer());
+		if (playingPlayers.contains(p.getPlayer())) {
+			playingPlayers.remove(p.getPlayer());
+			playGameTurn(false);
+		}
 	} 
 	 
 	private void tryToInitGame() {
-		if (isGameInProgress || getPlayers().size() < minPlayers)
+		if (isGameInProgress || waitingPlayers.size() < minPlayers)
 			getPlayers().forEach(id -> Bukkit.getPlayer(id).sendMessage(gameType.getChatPrefix() + "§aNombres de joueurs : " + getPlayers().size() + "/" + minPlayers));
 		else
 			startGame(countdownDelay);
 	}
 	
 	private void startGame(int countdown) {
-		if (isGameInProgress && countdown == countdownDelay)
+		if (isGameInProgress)
 			return;
 		
-		isGameInProgress = true;
+		//s'il n'y a plus assez de joueurs pour commencer la partie, cancel de cette der
+		if (waitingPlayers.size() <= 1) 
+			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§7Plus assez de joueur pour commencer la partie..."));
 		
-		if (countdown == countdownDelay) {
-			//getPlayers().forEach(uuid -> Bukkit.getPlayer(uuid).teleport(tpLoc));
-			playingPlayers.clear();
-		}
-		
+		//actions avant début de partie
 		if (countdown > 0) {
-			getPlayers().forEach(uuid -> Bukkit.getPlayer(uuid).sendTitle("§c" + countdown, "§7Début du match dans...", 0, 21, 0));
-			getPlayers().forEach(uuid -> Bukkit.getPlayer(uuid).sendMessage(gameType.getChatPrefix() + "§aDébut du match dans " + countdown));
+			waitingPlayers.forEach(p -> p.sendTitle("§c" + countdown, "§7Début du match dans...", 0, 21, 0));
+			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§aDébut du match dans " + countdown));
 			
-			plugin.getTask().runTaskLater(() -> startGame(countdown - 1), 20, TimeUnit.SECONDS);
+			plugin.getTask().runTaskLater(() -> startGame(countdown - 1), 1, TimeUnit.SECONDS);
+			
+		//actions de début de partie
 		}else {
-			if (getPlayers().size() <= 1) {
-				isGameInProgress =  false;
-				getPlayers().forEach(uuid -> Bukkit.getPlayer(uuid).sendMessage(gameType.getChatPrefix() + "§7Plus assez de joueur pour commencer la partie..."));
-				return;
-			}
-			getPlayers().forEach(uuid -> playingPlayers.add(Bukkit.getPlayer(uuid)));
+			isGameInProgress = true;
+			
+			playingPlayers.addAll(waitingPlayers);
+			waitingPlayers.clear();
+			
 			playingPlayers.forEach(p -> p.teleport(tpLoc));
 			
-			playGameTurn(true);
+			playGameTurn(true);	
 		}
 	}
 	
 	private void playGameTurn(boolean isInit) {
+		if (!isGameInProgress)
+			return;
 		
 		//si plus qu'un seul joueur en lice, fin de jeu (ou reset du jeu si 0 joueurs restants)
 		if (playingPlayers.size() <= 1) {
 			if (playingPlayers.size() == 1)
 				endGame(AccountProvider.get(playingPlayers.get(0).getUniqueId()), 1, true);
 			
-			resetLandingArea();
+			//réinitialisation du jeu
 			isGameInProgress = false;
+			resetLandingArea();
+			playingPlayers.clear();
+			playingPlayer = null;
+			
+			//tentative de relance du jeu (si assez de joueurs sont en file d'atente)
 			tryToInitGame();
 			return;
 		}
-
-		hasJumped = false;
 		
 		if (isInit) {
-			playingPlayer = playingPlayers.get(0);
-			plugin.getTask().runTaskLater(() -> playGameTurn(false), 2, TimeUnit.SECONDS);
-			
-			currentTurn = 1;
+			currentTurn = 0;
+			plugin.getTask().runTaskLater(() -> playGameTurn(false), 1, TimeUnit.SECONDS);
 			return;
+			
 		}else {
 			playingPlayer = playingPlayers.get(0);
 			currentTurn++;
 		}
+
+		hasJumped = false;
 		
-		playingPlayer.sendMessage(gameType + "§aTour " + currentTurn + " : c'est à vous ! §7Sautez dans le vide, et tentez d'atterir dans l'eau !");
-		
+		playingPlayer.sendMessage(gameType.getChatPrefix() + "§aTour " + currentTurn + " : c'est à vous ! §7Sautez du pont, et tentez d'atterir dans l'eau !");
+
+		//si le joueur a mis trop de temps à sauter, forfait
 		final int currentTurnBis = currentTurn;
 		
-		//si le joueur a mis trop de temps à sauter, forfait
 		plugin.getTask().runTaskLater(() -> {
 			if (currentTurn == currentTurnBis)
-				if (getPlayers().contains(playingPlayer.getUniqueId()))
-					endGame(AccountProvider.get(playingPlayer.getUniqueId()), -1, true);
+				if (playingPlayer != null)
+					endGame(AccountProvider.get(playingPlayer.getUniqueId()), 0, true);
 			
 		}, playDelay, TimeUnit.SECONDS);
 	}
@@ -170,34 +185,41 @@ public class GameDac extends IGame {
 	 */
 	@Override
 	protected void onMoveHandler(Player p, Location from, Location to) {
-		if (!p.equals(playingPlayer))
+		if (!p.equals(playingPlayer) || !hasJumped)
 			return;
 		
-		Block block = to.add(0, -1, 0).getBlock();
-		
+		Block block = to.clone().add(0, -1, 0).getBlock();
+		/*
 		if (!hasJumped && block.getType() == Material.AIR) {
 			hasJumped = true;
 			return;
-		}
+		}*/
 		
 		if (hasJumped)
 			if (block.getType() == Material.WATER && jumpRegion.isIn(block.getLocation())) {
 				playingPlayers.add(playingPlayers.remove(0));
+				playingPlayer = null;
+				
 				p.teleport(tpLoc);
 				p.sendMessage(gameType.getChatPrefix() + "§aBien visé !");
 				
 				block.setType(Material.BEDROCK);
 				
-				playGameTurn(false);
+				plugin.getTask().runTaskLater(() -> playGameTurn(false), 500, TimeUnit.MILLISECONDS);
 				
 			}else if (block.getType() != Material.AIR) {
+				playingPlayers.remove(0);
+				playingPlayer = null;
+				
 				endGame(AccountProvider.get(p.getUniqueId()), 0, true);
-				playGameTurn(false);
+				plugin.getTask().runTaskLater(() -> playGameTurn(false), 500, TimeUnit.MILLISECONDS);
 			}
 	}
 	
 	private void resetLandingArea() {
-		jumpRegion.getLocations().forEach(loc -> loc.getBlock().setType(Material.WATER));
+		for (int x = jumpRegion.getMin().getBlockX() ; x <= jumpRegion.getMax().getBlockX() ; x++)
+			for (int z = jumpRegion.getMin().getBlockZ() ; z <= jumpRegion.getMax().getBlockZ() ; z++)
+				world.getBlockAt(x, jumpRegion.getMax().getBlockY(), z).setType(Material.WATER);
 	}
 
 	
