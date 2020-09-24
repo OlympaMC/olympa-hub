@@ -424,9 +424,13 @@ public abstract class IGame extends ComplexCommand implements Listener{
 			boolean allowTp = false;
 			
 			for (Location loc : allowedTpLocs)
-				if (!allowTp) 
-					if (loc.getBlock() != null && loc.getBlock().equals(e.getTo().getBlock()))
+					if (loc.getBlockX() == e.getTo().getBlockX() && 
+						loc.getBlockY() == e.getTo().getBlockY() && 
+						loc.getBlockZ() == e.getTo().getBlockZ()) {
+						
 						allowTp = true;
+						break;
+					}
 			
 			if (!allowTp) {
 				e.getPlayer().sendMessage(gameType.getChatPrefix() + "§cVous téléporter pendant le jeu est interdit !");

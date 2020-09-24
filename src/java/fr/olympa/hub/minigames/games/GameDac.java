@@ -53,8 +53,7 @@ public class GameDac extends IGame {
 		jumpRegion = (Cuboid) config.get("jump_region");		
 		barrierRegion = (Cuboid) config.get("barrier_region");
 		
-		tpLoc = config.getLocation("tp_loc");
-		allowedTpLocs.add(tpLoc);
+		allowedTpLocs.add(tpLoc = config.getLocation("tp_loc"));
 
 		resetLandingArea();
 
@@ -171,7 +170,7 @@ public class GameDac extends IGame {
 	 */
 	@Override
 	protected void onMoveHandler(Player p, Location from, Location to) {
-		if (p.equals(playingPlayer))
+		if (!p.equals(playingPlayer))
 			return;
 		
 		Block block = to.add(0, -1, 0).getBlock();
