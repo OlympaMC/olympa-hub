@@ -29,11 +29,11 @@ import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 
 public class GameDac extends IGame {
 
-	private final int minPlayers = 2;
+	private final int minPlayers = 4;
 	private boolean isGameInProgress = false;
 	
 	private final int countdownDelay = 3;
-	private final int playDelay = 10;
+	private final int playDelay = 8;
 	
 	private int currentTurn = -1;
 
