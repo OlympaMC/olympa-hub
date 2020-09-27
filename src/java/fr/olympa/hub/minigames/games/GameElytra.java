@@ -1,5 +1,6 @@
 package fr.olympa.hub.minigames.games;
 
+import java.rmi.activation.ActivateFailedException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +50,7 @@ public class GameElytra extends IGame {
 	private Map<Player, Integer> nextPortal = new HashMap<Player, Integer>();
 	private Map<Player, Long> startTime = new HashMap<Player, Long>();
 	
-	public GameElytra(OlympaHub plugin, ConfigurationSection configFromFile) {
+	public GameElytra(OlympaHub plugin, ConfigurationSection configFromFile) throws ActivateFailedException {
 		super(plugin, GameType.ELYTRA, configFromFile);
 		
 		//getLoc(config.getString("tp_loc"));

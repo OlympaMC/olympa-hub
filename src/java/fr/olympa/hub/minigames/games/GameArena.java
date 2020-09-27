@@ -1,5 +1,6 @@
 package fr.olympa.hub.minigames.games;
 
+import java.rmi.activation.ActivateFailedException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class GameArena extends IGame{
 	
 	boolean isGameStarting = false;
 	
-	public GameArena(OlympaHub plugin, ConfigurationSection fileConfig) {
+	public GameArena(OlympaHub plugin, ConfigurationSection fileConfig) throws ActivateFailedException {
 		super(plugin, GameType.ARENA, fileConfig);
 
 		region.getRegion().getWorld().setPVP(true);

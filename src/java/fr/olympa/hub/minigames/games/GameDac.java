@@ -1,5 +1,6 @@
 package fr.olympa.hub.minigames.games;
 
+import java.rmi.activation.ActivateFailedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +48,7 @@ public class GameDac extends IGame {
 	private Player playingPlayer = null;
 	private boolean hasJumped = false;
 	
-	public GameDac(OlympaHub plugin, ConfigurationSection configFromFile) {
+	public GameDac(OlympaHub plugin, ConfigurationSection configFromFile) throws ActivateFailedException {
 		super(plugin, GameType.DAC, configFromFile);
 
 		jumpRegion = (Cuboid) config.get("jump_region");		

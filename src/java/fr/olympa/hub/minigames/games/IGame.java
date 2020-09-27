@@ -1,5 +1,6 @@
 package fr.olympa.hub.minigames.games;
 
+import java.rmi.activation.ActivateFailedException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -44,6 +45,8 @@ import fr.olympa.api.lines.DynamicLine;
 import fr.olympa.api.lines.FixedLine;
 import fr.olympa.api.player.OlympaPlayerInformations;
 import fr.olympa.api.provider.AccountProvider;
+import fr.olympa.api.redis.RedisAccess;
+import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.api.region.tracking.ActionResult;
@@ -56,11 +59,14 @@ import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
+import redis.clients.jedis.Jedis;
 
 public abstract class IGame extends ComplexCommand implements Listener{
 	
 	private static final int maxDisplayedTopScores = 10;
 	public static final int maxTopScoresStored = 100; 
+	
+	protected final boolean isEnabled;
 	
 	protected OlympaHub plugin;
 	protected final IGame instance;
@@ -88,7 +94,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	protected World world;
 	
 	@SuppressWarnings("unchecked")
-	public IGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile) {
+	public IGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile) throws ActivateFailedException {
 		super(plugin, game.toString().toLowerCase(), "Accès à la config " + game.getNameWithArticle(), HubPermissions.EDIT_MINIGAMES);
 		
 		this.plugin = plugin;
@@ -99,6 +105,11 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		this.world = Bukkit.getWorlds().get(0);
 		this.config = initConfig(configFromFile);
 		
+		this.isEnabled = config.getBoolean("isEnabled");
+		
+		if (!isEnabled)
+			throw new ActivateFailedException("");
+
 		this.area = (Region) config.get("area");//getRegion(config.getString("area"));
 		this.startingLoc = config.getLocation("start_loc");//getLoc(config.getString("start_loc"));
 
@@ -277,9 +288,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		else
 			oldPlayerRankString = Integer.toString(oldPlayerRank);
 		
-		topScores.put(p.getInformation(), p.getScore(gameType));
-		
-		if (updateScores(p.getInformation(), score)) {
+		if (updateScores(p.getInformation(), score, true)) {
 			
 			if (getPlayerRank(p) < oldPlayerRank || oldPlayerRank == 0)
 				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place §c" + 
@@ -318,21 +327,24 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	 * @param new player score
 	 * @return true if top scores have been changed, false otherwise
 	 */
-	public boolean updateScores(OlympaPlayerInformations p, double score) {
+	public boolean updateScores(OlympaPlayerInformations p, double score, boolean shareInfoOnRedis) {
 		if (score <= 0)
 			return false;
+
+		topScores.put(p, score);
 		
 		sortScores();
 		
 		if (getPlayerRank(p) > 0) {
 			observable.update();
 			
-			/*
-	        try (Jedis jedis = RedisAccess.INSTANCE.connect()) {
-	            jedis.publish(RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name(), gameType.toString() + ":" + p.getId() + ":" + score);
-	        } 
-	        RedisAccess.INSTANCE.disconnect();
-	        */
+			if (shareInfoOnRedis) {
+		        try (Jedis jedis = RedisAccess.INSTANCE.connect()) {
+		            jedis.publish(RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name(), gameType.toString() + ":" + p.getId() + ":" + score);
+		        } 
+		        RedisAccess.INSTANCE.disconnect();	
+			}
+	        
 	        
 			return true;
 		}
@@ -510,21 +522,21 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		
 		if (config == null)
 			config = MiniGamesManager.getInstance().getConfig().createSection(gameType.toString().toLowerCase());
-			
-		if (!config.getKeys(true).contains("area")) {
+		
+		if (!config.getKeys(true).contains("isEnabled")) 
+			config.set("isEnabled", true);
+	
+		if (!config.getKeys(true).contains("area")) 
 			config.set("area", new Cuboid(world, 0, 0, 0, 1, 1, 1));
-			//plugin.getLogger().log(Level.INFO, "set default area : " + config.get("area"));	
-		}
+		
 
-		if (!config.getKeys(true).contains("holo_loc")) {
+		if (!config.getKeys(true).contains("holo_loc")) 
 			config.set("holo_loc", new Location(world, 0, 0, 0));	
-			//plugin.getLogger().log(Level.INFO, "set default holo : " + config.get("holo_loc"));	
-		}
+		
 
-		if (!config.getKeys(true).contains("start_loc")) {
+		if (!config.getKeys(true).contains("start_loc")) 
 			config.set("start_loc", new Location(world, 0, 0, 0));	
-			//plugin.getLogger().log(Level.INFO, "set default start : " + config.get("start_loc"));	
-		}
+		
 		
 		//plugin.getLogger().log(Level.INFO, "config après (dans fct) : " + config);
 

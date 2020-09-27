@@ -2,6 +2,7 @@ package fr.olympa.hub.minigames.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.rmi.activation.ActivateFailedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -13,6 +14,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import fr.olympa.api.command.complex.ComplexCommand;
+import fr.olympa.api.redis.RedisAccess;
+import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.HubPermissions;
 import fr.olympa.hub.OlympaHub;
@@ -56,20 +59,26 @@ public class MiniGamesManager {
             return;
         }
         
-        for (GameType game : GameType.values()) 
+        for (GameType game : GameType.values())
         	if (game.getGameProvider() != null) {
-        		IGame iGame = game.getGameProvider().getGame(plugin, config.getConfigurationSection(game.toString().toLowerCase()));
-        		iGame.register(); //register game commands
-        		games.put(game, iGame);	
+        		try {
+        			IGame iGame = game.getGameProvider().getGame(plugin, config.getConfigurationSection(game.toString().toLowerCase()));
+        					
+            		iGame.register(); //register game commands
+            		games.put(game, iGame);	
+            		
+            		plugin.getLogger().log(Level.INFO, "§aGame " + game + " successfully loaded.");
+        		}catch (ActivateFailedException e) {
+        			plugin.getLogger().log(Level.WARNING, "§eGame " + game + "§e wasn't loaded because isEnabled property in games.yml was set to false.");
+        		}
         		
-        		plugin.getLogger().log(Level.INFO, "§aGame " + game + " successfully loaded.");
         	}else
         		plugin.getLogger().log(Level.WARNING, "§cGame " + game + " wasn't loaded successfully.");	
         
         saveConfig(getConfig());
 		
 		//register redis
-        
+        OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), new GamesRedisListener(), RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name());
         /*plugin.getTask().runTaskLater(() -> {
         	OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), new GamesRedisListener(), RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name());
             plugin.getLogger().log(Level.INFO, "§aLoaded minigames redis chanel " + RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name().toLowerCase());

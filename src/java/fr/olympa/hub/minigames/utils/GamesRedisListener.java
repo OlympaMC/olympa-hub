@@ -31,6 +31,6 @@ public class GamesRedisListener extends JedisPubSub {
 		IGame game = MiniGamesManager.getInstance().getGame(gameType);
 		
 		if (game != null)	
-			game.updateScores(AccountProvider.getPlayerInformations(Long.valueOf(infos[1])), Double.valueOf(infos[2]));
+			game.updateScores(AccountProvider.getPlayerInformations(Long.valueOf(infos[1])), Double.valueOf(infos[2]), false);
 	}
 }
