@@ -47,7 +47,7 @@ public class LaunchPad implements ConfigurationSerializable {
 			return null;
 		}
 	}
-	
+	 
 	public Map<String, Object> serialize() {
 		Map<String, Object> map = new HashMap<>();
 		
