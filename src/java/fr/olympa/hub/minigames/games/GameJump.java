@@ -171,13 +171,13 @@ public class GameJump extends IGame{
 	 */
 	@Cmd (player = true)
 	public void addCheckPoint(CommandContext cmd) {
-		Location loc = cmd.command.getPlayer().getLocation();
+		Location loc = getPlayer().getLocation();
 		
 		checkpoints.add(loc);
 		
 		config.set("checkpoints", checkpoints);
 		
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLe checkpoint " + (checkpoints.size() - 1) + " a été défini en " + 
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLe checkpoint " + (checkpoints.size() - 1) + " a été défini en " +
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
 	}
 	
@@ -200,7 +200,7 @@ public class GameJump extends IGame{
 		
 		config.set("checkpoints", checkpoints);
 		
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLes checkpoints ont été supprimés.");
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLes checkpoints ont été supprimés.");
 	}
 	
 	/**
@@ -214,7 +214,7 @@ public class GameJump extends IGame{
 		for (int i = 1 ; i < checkpoints.size() ; i++)
 			msg += "\n§2 " + i + ". §a" + checkpoints.get(i).getBlockX() + ", " + checkpoints.get(i).getBlockY() + ", " + checkpoints.get(i).getBlockZ();
 		
-		cmd.command.getPlayer().sendMessage(msg);
+		getPlayer().sendMessage(msg);
 	}
 }
 
