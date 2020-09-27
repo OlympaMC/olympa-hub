@@ -11,10 +11,10 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.Map.Entry;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,7 +27,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -57,7 +56,6 @@ import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
-import redis.clients.jedis.Jedis;
 
 public abstract class IGame extends ComplexCommand implements Listener{
 	
@@ -544,15 +542,17 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	 */
 	@Cmd (player = true)
 	public void area(CommandContext cmd) {
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aSélectionnez la région du jeu.");
+		Player p = getPlayer();
+		
+		p.sendMessage(gameType.getChatPrefix() + "§aSélectionnez la région du jeu.");
 		  
-		new RegionEditor(cmd.command.getPlayer(), region -> {
+		new RegionEditor(p, region -> {
 			  if (region == null) 
 				  return;
 			  
 			  area = region;
 			  config.set("area", region);
-			  cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aRégion mise à jour avec succès.");
+			p.sendMessage(gameType.getChatPrefix() + "§aRégion mise à jour avec succès.");
 			  
 			}).enterOrLeave();
 	}
@@ -563,12 +563,12 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	 */
 	@Cmd (player = true)
 	public void hololoc(CommandContext cmd) {
-		Location loc = cmd.command.getPlayer().getLocation().getBlock().getLocation().add(0.5, 0, 0.5);
+		Location loc = getPlayer().getLocation().getBlock().getLocation().add(0.5, 0, 0.5);
 		
 		scoresHolo.move(loc);
 		config.set("holo_loc", loc);
 		
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de holo_loc a été définie en " + 
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de holo_loc a été définie en " +
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
 	}
 
@@ -578,7 +578,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	 */
 	@Cmd (player = true)
 	public void startLoc(CommandContext cmd) {
-		Location loc = cmd.command.getPlayer().getLocation().getBlock().getLocation().add(0.5, 0, 0.5);
+		Location loc = getPlayer().getLocation().getBlock().getLocation().add(0.5, 0, 0.5);
 		
 		allowedTpLocs.remove(startingLoc);
 		startingLoc = loc;
@@ -587,7 +587,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		startHolo.move(loc.clone().add(0, 2, 0));
 		config.set("start_loc", loc);
 		
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de start_loc a été définie en " + 
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de start_loc a été définie en " +
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
 	}
 	

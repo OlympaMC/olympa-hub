@@ -22,8 +22,6 @@ import fr.olympa.api.command.complex.Cmd;
 import fr.olympa.api.command.complex.CommandContext;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.region.Region;
-import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
@@ -241,10 +239,10 @@ public class GameArena extends IGame{
 	 */
 	@Cmd (player = true)
 	public void setPlayerOneSpawn(CommandContext cmd) {
-		pos1 = cmd.command.getPlayer().getLocation();
+		pos1 = getPlayer().getLocation();
 		config.set("player_1_spawn", pos1);
 		
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de téléportation du joueur 1 a été définie en " + 
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de téléportation du joueur 1 a été définie en " +
 				pos1.getBlockX() + ", " + pos1.getBlockY() + ", " + pos1.getBlockZ());
 	}
 	
@@ -254,10 +252,10 @@ public class GameArena extends IGame{
 	 */
 	@Cmd (player = true)
 	public void setPlayerTwoSpawn(CommandContext cmd) {
-		pos2 = cmd.command.getPlayer().getLocation();
+		pos2 = getPlayer().getLocation();
 		config.set("player_2_spawn", pos2);
 		
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de téléportation du joueur 2 a été définie en " + 
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de téléportation du joueur 2 a été définie en " +
 				pos2.getBlockX() + ", " + pos2.getBlockY() + ", " + pos2.getBlockZ());
 	}
 }

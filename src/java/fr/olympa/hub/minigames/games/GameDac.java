@@ -12,7 +12,6 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.olympa.api.command.complex.Cmd;
 import fr.olympa.api.command.complex.CommandContext;
@@ -253,17 +252,18 @@ public class GameDac extends IGame {
 	 */
 	@Cmd (player = true)
 	public void jumpArea(CommandContext cmd) {
-
-		new RegionEditor(cmd.command.getPlayer(), region -> {
+		Player p = getPlayer();
+		
+		new RegionEditor(p, region -> {
 			if (region == null || !(region instanceof Cuboid) || region.getMax().getBlockY() != region.getMin().getBlockY()) {
-				cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§cLa sélection n'est pas valide. Ce doit être un cuboïde de 1 bloc d'épaisseur.");
+				p.sendMessage(gameType.getChatPrefix() + "§cLa sélection n'est pas valide. Ce doit être un cuboïde de 1 bloc d'épaisseur.");
 				return;
 			}
 			
 			jumpRegion = (Cuboid) region;
 			config.set("jump_region", region);
 			
-			cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa nouvelle zone de saut a bien été définie. §7Un redémarage est nécessaire.");
+			p.sendMessage(gameType.getChatPrefix() + "§aLa nouvelle zone de saut a bien été définie. §7Un redémarage est nécessaire.");
 		}).enterOrLeave();
 	}
 	
@@ -274,17 +274,18 @@ public class GameDac extends IGame {
 	 */
 	@Cmd (player = true)
 	public void barrierArea(CommandContext cmd) {
+		Player p = getPlayer();
 
-		new RegionEditor(cmd.command.getPlayer(), region -> {
+		new RegionEditor(p, region -> {
 			if (region == null || !(region instanceof Cuboid)) {
-				cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§cLa sélection n'est pas valide. Ce doit être un cuboïde.");
+				p.sendMessage(gameType.getChatPrefix() + "§cLa sélection n'est pas valide. Ce doit être un cuboïde.");
 				return;
 			}
 			
 			barrierRegion = (Cuboid) region;
 			config.set("barrier_region", region);
 			
-			cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa nouvelle région barrière a bien été définie. §7Un redémarage est nécessaire.");
+			p.sendMessage(gameType.getChatPrefix() + "§aLa nouvelle région barrière a bien été définie. §7Un redémarage est nécessaire.");
 		}).enterOrLeave();
 	}
 
@@ -294,12 +295,12 @@ public class GameDac extends IGame {
 	 */
 	@Cmd (player = true)
 	public void tpLoc(CommandContext cmd) {
-		Location loc = cmd.command.getPlayer().getLocation();
+		Location loc = getPlayer().getLocation();
 		
 		tpLoc = loc;
 		config.set("tp_loc", tpLoc);
 		
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLe point de téléportation a été défini en " + 
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLe point de téléportation a été défini en " +
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
 	}
 

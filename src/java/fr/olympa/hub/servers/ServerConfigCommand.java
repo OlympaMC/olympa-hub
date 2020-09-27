@@ -28,9 +28,8 @@ public class ServerConfigCommand extends ComplexCommand {
 				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(OlympaServer.valueOf(x));
 				if (server != null) return server;
 			}catch (IllegalArgumentException ex) {}
-			sendError("Le serveur %s n'existe pas.", x);
 			return null;
-		});
+		}, x -> String.format("Le serveur %s n'existe pas.", x));
 	}
 
 	@Cmd (player = true, min = 1, args = "SERVER", syntax = "<server>")

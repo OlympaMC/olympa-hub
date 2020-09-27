@@ -7,9 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -38,10 +36,6 @@ import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class GameElytra extends IGame {
@@ -262,6 +256,7 @@ public class GameElytra extends IGame {
 	 */
 	@Cmd (player = true, args = "INTEGER", min = 1)
 	public void addPortal(CommandContext cmd) {
+		Player p = getPlayer();
 		int portalIndex;
 		
 		if (cmd.getArgument(0) == null)
@@ -269,9 +264,9 @@ public class GameElytra extends IGame {
 		
 		portalIndex = cmd.getArgument(0);
 		
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aSélectionnez la région de l'anneau " + cmd.getArgument(0));
+		p.sendMessage(gameType.getChatPrefix() + "§aSélectionnez la région de l'anneau " + cmd.getArgument(0));
 		
-		new RegionEditor(cmd.command.getPlayer(), region -> {
+		new RegionEditor(p, region -> {
 			  if (region == null) 
 				  return;
 			  
@@ -291,7 +286,7 @@ public class GameElytra extends IGame {
 			  config.set("portals_locs", regs);
 			  config.set("portals_indexs", ids);
 			  
-			  cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aAnneau ajouté avec succès." + 
+			p.sendMessage(gameType.getChatPrefix() + "§aAnneau ajouté avec succès." +
 						"\n§7Attention si l'ordre des anneaux n'est pas respecté ! Soit aucun anneau 0 n'a été trouvé, soit "
 						+ "les indexs d'anneaux sautent une étape (par exemple, il y a deux aneaux 0 et 2 mais aucun anneau 1). "
 						+ "Veuillez vérifier la configuration ou des erreurs pouaient se produire.");
@@ -316,7 +311,7 @@ public class GameElytra extends IGame {
 			//.event(new ClickEvent(Action.RUN_COMMAND, "/" + gameType.toString().toLowerCase() + " removeportal " + i));
 		}
 		
-		cmd.command.getPlayer().sendMessage(msg);
+		getPlayer().sendMessage(msg);
 	}
 	
 	@Cmd (player = true, min = 1, args = "INTEGER")
@@ -330,8 +325,8 @@ public class GameElytra extends IGame {
 			indexs.add(i);
 		});
 		
-		if ((Integer) cmd.getArgument(0) >= regs.size()) {
-			cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§cIndex non valide, faites /elytra listportal pour avoir la liste des portails.");
+		if (cmd.<Integer>getArgument(0) >= regs.size()) {
+			getPlayer().sendMessage(gameType.getChatPrefix() + "§cIndex non valide, faites /elytra listportal pour avoir la liste des portails.");
 			return;
 		}
 
@@ -345,7 +340,7 @@ public class GameElytra extends IGame {
 		config.set("portals_locs", regs);
 		config.set("portals_indexs", indexs);
 		
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aPortail " + cmd.getArgument(0) + " supprimé. §7Réexécutez /elytra listportals pour afficher les nouveaux IDs des portails." + 
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aPortail " + cmd.getArgument(0) + " supprimé. §7Réexécutez /elytra listportals pour afficher les nouveaux IDs des portails." +
 				"\n§7Attention si l'ordre des anneaux n'est pas respecté ! Soit aucun anneau 0 n'a été trouvé, soit "
 				+ "les indexs d'anneaux sautent une étape (par exemple, il y a deux aneaux 0 et 2 mais aucun anneau 1). "
 				+ "Veuillez vérifier la configuration ou des erreurs pouaient se produire.");
@@ -355,7 +350,7 @@ public class GameElytra extends IGame {
 	
 	@Cmd (player = true)
 	public void raceStartLoc(CommandContext cmd) {
-		Location loc = cmd.command.getPlayer().getLocation();//.getBlock().getLocation().add(0.5, 0, 0.5);
+		Location loc = getPlayer().getLocation();//.getBlock().getLocation().add(0.5, 0, 0.5);
 		
 		allowedTpLocs.remove(startRaceLoc);
 		startRaceLoc = loc;
@@ -363,7 +358,7 @@ public class GameElytra extends IGame {
 		
 		config.set("tp_loc", loc);
 		
-		cmd.command.getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de tp_loc a été définie en " + 
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de tp_loc a été définie en " +
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
 	}
 	

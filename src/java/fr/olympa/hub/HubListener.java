@@ -62,7 +62,7 @@ public class HubListener implements Listener {
 	@EventHandler
 	public void onWorldLoad(WorldTrackingEvent e) {
 		e.getWorld().setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-		e.getRegion().registerFlags(new PlayerBlocksFlag(true), new PhysicsFlag(true), new FoodFlag(true), new GameModeFlag(GameMode.ADVENTURE), new DropFlag(true), new PlayerBlockInteractFlag(false, true, true), new DamageFlag(false) {
+		e.getRegion().registerFlags(new PlayerBlocksFlag(true), new PhysicsFlag(true), new FoodFlag(true, true), new GameModeFlag(GameMode.ADVENTURE), new DropFlag(true), new PlayerBlockInteractFlag(false, true, true), new DamageFlag(false) {
 			@Override
 			public void damageEvent(EntityDamageEvent event) {
 				if (event.getCause() == DamageCause.VOID) {
