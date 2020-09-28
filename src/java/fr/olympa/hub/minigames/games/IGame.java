@@ -269,11 +269,16 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		}
 		
 		if (gameType.isTimerScore()) {
-			if (p.getScore(gameType) == 0 || p.getScore(gameType) > score)
-				p.setScore(gameType, score);	
+			if (p.getScore(gameType) == 0 || p.getScore(gameType) > score) {
+				p.setScore(gameType, score);
+				new AccountProvider(p.getUniqueId()).saveToDb(p);
+			}	
 		}else {
-			if (score > 0)
-				p.setScore(gameType, p.getScore(gameType) + 1);	
+			if (score > 0) {
+				p.setScore(gameType, p.getScore(gameType) + 1);
+				//TODO retirer cette ligne quand la save des données au restart marchera correctement
+				new AccountProvider(p.getUniqueId()).saveToDb(p);
+			}	
 		}
 		
 		//si le joueur a vu son score progresser, update des top scores

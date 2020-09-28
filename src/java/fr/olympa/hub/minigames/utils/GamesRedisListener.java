@@ -13,7 +13,7 @@ public class GamesRedisListener extends JedisPubSub {
 	
 	@Override
 	public void onMessage(String channel, String message) {
-		OlympaHub.getInstance().getLogger().log(Level.INFO, "§dRecieved from " + channel + " : '" + message + "'");
+		//OlympaHub.getInstance().getLogger().log(Level.INFO, "§dRecieved from " + channel + " : '" + message + "'");
 		
 		if (message.length() == 0)
 			return;

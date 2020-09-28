@@ -50,11 +50,8 @@ public class OlympaPlayerHub extends OlympaPlayerObject {
 			if (game != null)
 				statement.setDouble(i + 1, scores.get(game));
 			
-			Bukkit.broadcastMessage("§2SAVE TO BDD " + getPlayer().getName() + " - " + game + " : " + scores.get(game));
-		}					
-					
-		//for (int i = 0 ; i < GameType.values().length ; i++)
-		//	statement.setDouble(i + 1, scores.get(GameType.values()[i]));
+			//Bukkit.broadcastMessage("§2SAVE TO BDD " + getPlayer().getName() + " - " + game + " : " + scores.get(game));
+		}
 	}
 	
 	/**
