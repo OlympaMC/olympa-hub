@@ -257,7 +257,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 			else 
 				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Record personnel battu ! Passage de " + 
 						new DecimalFormat("#.##").format(p.getScore(gameType)) + "s à " + new DecimalFormat("#.##").format(score) + "s. Félicitations !");
-			
+		
 		}else {
 			if (score == 1)
 				if (p.getScore(gameType) == 0)
@@ -268,41 +268,47 @@ public abstract class IGame extends ComplexCommand implements Listener{
 				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aC'est perdu, mais vous ferez mieux la prochaine fois !");	
 		}
 		
+		boolean hasScoreBeenImproved = false;
+		
+		//update du score du joueur en bdd si nécessaire
 		if (gameType.isTimerScore()) {
-			if (p.getScore(gameType) == 0 || p.getScore(gameType) > score) {
+			if ((p.getScore(gameType) == 0 && score > 0) || p.getScore(gameType) > score) {
 				p.setScore(gameType, score);
 				new AccountProvider(p.getUniqueId()).saveToDb(p);
+				
+				hasScoreBeenImproved = true;
 			}	
 		}else {
 			if (score > 0) {
 				p.setScore(gameType, p.getScore(gameType) + 1);
-				//TODO retirer cette ligne quand la save des données au restart marchera correctement
 				new AccountProvider(p.getUniqueId()).saveToDb(p);
+				
+				hasScoreBeenImproved = true;
 			}	
 		}
 		
 		//si le joueur a vu son score progresser, update des top scores
-		if (p.getScore(gameType) > 0) {
+		if (hasScoreBeenImproved) {
+				
+			//rang du joueur, 0 si non classé
+			int oldPlayerRank = getPlayerRank(p);
 			
-		//rang du joueur, 0 si non classé
-		int oldPlayerRank = getPlayerRank(p);
-		
-		String oldPlayerRankString;
-		if (oldPlayerRank == 0)
-			oldPlayerRankString = "§7aucune";
-		else
-			oldPlayerRankString = Integer.toString(oldPlayerRank);
-		
-		if (updateScores(p.getInformation(), score, true)) {
+			String oldPlayerRankString;
+			if (oldPlayerRank == 0)
+				oldPlayerRankString = "§7aucune";
+			else
+				oldPlayerRankString = Integer.toString(oldPlayerRank);
 			
-			if (getPlayerRank(p) < oldPlayerRank || oldPlayerRank == 0)
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place §c" + 
-						oldPlayerRankString + " §eà la place §c" + getPlayerRank(p) + "§e, félicitations !!");
-		}	
+			if (updateScores(p.getInformation(), score, true)) {
+				
+				if (getPlayerRank(p) < oldPlayerRank || oldPlayerRank == 0)
+					p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place §c" + 
+							oldPlayerRankString + " §eà la place §c" + getPlayerRank(p) + "§e, félicitations !!");
+			}	
 		}
 	}
 
-	
+
 	///////////////////////////////////////////////////////////
 	//                   MANAGE TOP SCORES                   //
 	///////////////////////////////////////////////////////////
@@ -335,7 +341,8 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	public boolean updateScores(OlympaPlayerInformations p, double score, boolean shareInfoOnRedis) {
 		if (score <= 0)
 			return false;
-
+			
+		
 		topScores.put(p, score);
 		
 		sortScores();
