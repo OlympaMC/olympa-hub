@@ -75,7 +75,7 @@ public class MenuGUI extends OlympaGUI {
 
 		ItemUtils.skull(x -> inv.setItem(13, x), "§eMon profil", player.getName(),
 				"§8> §7" + player.getName(),
-				"§8> §7" + player.getGroupName(),
+				"§8> §7" + player.getGroupsToHumainString(),
 				"",
 				"§8> §7Membre depuis le " + DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.FRANCE).format(new Date(player.getFirstConnection() * 1000)),
 				"",
