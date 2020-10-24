@@ -24,6 +24,7 @@ import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 
 public class GameJump extends IGame{
 
+	private Location tpLoc;
 	private List<Location> checkpoints = new ArrayList<Location>();
 
 	private Map<Player, Long> playersCPTimeInit = new HashMap<Player, Long>();
@@ -37,7 +38,9 @@ public class GameJump extends IGame{
 		config.getList("checkpoints").forEach(loc -> checkpoints.add((Location) loc));
 		
 		hotBarContent[6] = ItemUtils.item(Material.TOTEM_OF_UNDYING, "§2Revenir au checkpoint précédent");
+		tpLoc = config.getLocation("tp_loc");
 		
+		allowedTpLocs.add(tpLoc);
 		allowedTpLocs.addAll(checkpoints);
 	}
 
@@ -50,6 +53,7 @@ public class GameJump extends IGame{
 		
 		playersLastCheckPoint.put(p.getPlayer(), 0);
 		
+		p.getPlayer().teleport(tpLoc);
 		p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Objectif : finissez le jump le plus rapidement possible !");
 		//p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2" + checkpoints.size() + " checkpoints sont prévus, n'hésitez pas à les utiliser !");
 	}
@@ -63,7 +67,7 @@ public class GameJump extends IGame{
 		
 		playersLastCheckPoint.put(p.getPlayer(), 0);
 		
-		p.getPlayer().teleport(startingLoc);
+		p.getPlayer().teleport(tpLoc);
 	}
 	
 	@Override
@@ -155,6 +159,7 @@ public class GameJump extends IGame{
 			list.add(new Location(world, 1, 1, 1));
 			
 			config.set("checkpoints", list);	
+			config.set("tp_loc", new Location(world, 1, 1, 1));
 		}
 		
 		return config;
@@ -164,6 +169,29 @@ public class GameJump extends IGame{
 	///////////////////////////////////////////////////////////
 	//                       COMMANDS                        //
 	///////////////////////////////////////////////////////////
+	
+	@Override
+	public void startLoc(CommandContext cmd) {
+		super.startLoc(cmd);
+		
+		checkpoints.set(0, startingLoc);
+		config.set("checkpoints", checkpoints);
+	}
+
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void setTpLoc(CommandContext cmd) {
+		tpLoc = getPlayer().getLocation();
+		allowedTpLocs.add(tpLoc);
+		
+		config.set("tp_loc", tpLoc);
+		
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLe point de téléportation a été défini en " +
+				tpLoc.getBlockX() + ", " + tpLoc.getBlockY() + ", " + tpLoc.getBlockZ());
+	}
 
 	
 	/**
@@ -182,14 +210,6 @@ public class GameJump extends IGame{
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
 	}
 	
-	@Override
-	public void startLoc(CommandContext cmd) {
-		super.startLoc(cmd);
-		
-		checkpoints.set(0, startingLoc);
-		config.set("checkpoints", checkpoints);
-	}
-	
 	/**
 	 * Internal function, do NOT call it
 	 * @param cmd
@@ -197,7 +217,7 @@ public class GameJump extends IGame{
 	@Cmd (player = true)
 	public void clearCheckPoints(CommandContext cmd) {
 		checkpoints.clear();
-		checkpoints.add(startingLoc);
+		checkpoints.add(tpLoc);
 		
 		config.set("checkpoints", checkpoints);
 		

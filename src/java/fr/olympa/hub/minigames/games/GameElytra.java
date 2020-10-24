@@ -116,7 +116,8 @@ public class GameElytra extends IGame {
 			nextPortal.put(p, portalIndex + 1);
 			
 			if (portalIndex + 1 == getMaxPortalIndex())
-				p.setGliding(!p.isGliding());
+				//p.setGliding(!p.isGliding());
+				p.setGliding(false);
 			
 		}else if (nextPortal.get(p) < portalIndex)
 			p.sendMessage(gameType.getChatPrefix() + "§cVous n'avez pas validé l'une des portes précédentes.§7 Retournez en arrière ou réinitialisez la partie.");
@@ -203,7 +204,7 @@ public class GameElytra extends IGame {
 			e.setCancelled(true);
 		
 		if (!e.isGliding())
-			if (nextPortal.get(e.getEntity()) >= getMaxPortalIndex())
+			if (nextPortal.get(e.getEntity()) > getMaxPortalIndex())
 				endGame(AccountProvider.get(e.getEntity().getUniqueId()), 
 						((double)(System.currentTimeMillis() - startTime.get(e.getEntity())))/1000d, false);
 			else {
