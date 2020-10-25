@@ -418,7 +418,8 @@ public abstract class IGame extends ComplexCommand implements Listener{
 				}
 				break;
 			case 8:
-				endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, true);
+				plugin.getTask().runTaskLater(() -> endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, true), 1);
+				
 				
 				e.setCancelled(true);
 				return;
