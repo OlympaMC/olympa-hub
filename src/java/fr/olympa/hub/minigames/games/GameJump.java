@@ -132,18 +132,25 @@ public class GameJump extends IGame{
 	protected void onInterractHandler(PlayerInteractEvent e) {
 		//tp player to last achieved checkpoint
 		if (e.getPlayer().getInventory().getHeldItemSlot() == 6 && 
-				(e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			
-			playersCPTimeInit.put(e.getPlayer(), System.currentTimeMillis());
-			
-			int check = playersLastCheckPoint.get(e.getPlayer());
-			e.getPlayer().teleport(checkpoints.get(check));
-			
-			e.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Téléportation au checkpoint " + check + 
-					". Temps actuel : " + new DecimalFormat("#.##").format(playerLastCPTime.get(e.getPlayer())/1000d) + "s");
-		}
+				(e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)) 
+					tpToLastCheckpoint(e.getPlayer());
 	}
 
+	@Override
+	protected boolean exitGameArea(Player p) {
+		tpToLastCheckpoint(p);
+		return false;
+	}
+	
+	private void tpToLastCheckpoint(Player p) {
+		playersCPTimeInit.put(p, System.currentTimeMillis());
+		
+		int check = playersLastCheckPoint.get(p);
+		p.teleport(checkpoints.get(check));
+		
+		p.sendMessage(gameType.getChatPrefix() + "§2Téléportation au checkpoint " + check + 
+				". Temps actuel : " + new DecimalFormat("#.##").format(playerLastCPTime.get(p)/1000d) + "s");
+	}
 	
 	///////////////////////////////////////////////////////////
 	//                      CONFIG INIT                      //

@@ -110,10 +110,8 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		if (!isEnabled)
 			throw new ActivateFailedException("");
 
-		this.area = (Region) config.get("area");//getRegion(config.getString("area"));
-		this.startingLoc = config.getLocation("start_loc");//getLoc(config.getString("start_loc"));
-
-		//Location holoLoc = ;//getLoc(config.getString("holo_loc"));
+		this.area = (Region) config.get("area");
+		this.startingLoc = config.getLocation("start_loc");
 		
 		//register listener
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -122,7 +120,6 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		try {
 			ResultSet query = gameType.getStatement().executeQuery();
 			while (query.next()) {
-				//Bukkit.getLogger().log(Level.SEVERE, "jump score : " + AccountProvider.getPlayerInformations(query.getLong("player_id")).getName() + " - " + query.getDouble(2));
 				OlympaPlayerInformations p = AccountProvider.getPlayerInformations(query.getLong("player_id"));
 				
 				if (p != null)
@@ -131,8 +128,6 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		//Bukkit.getLogger().log(Level.SEVERE, "scores " + gameType + " : " + topScores);
 		
 		//création de l'holo scores
 		scoresHolo = OlympaCore.getInstance().getHologramsManager().createHologram(config.getLocation("holo_loc"), false, 
@@ -157,8 +152,6 @@ public abstract class IGame extends ComplexCommand implements Listener{
 			}, observable));
 		}
 		
-		//observable.update();
-		
 		//création de l'holo du début de partie
 		startHolo = OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, 
 				new FixedLine<HologramLine>("§6Début " + gameType.getNameWithArticle()), 
@@ -170,8 +163,15 @@ public abstract class IGame extends ComplexCommand implements Listener{
 				@Override
 				public ActionResult leaves(Player p, Set<TrackedRegion> to) {
 					super.leaves(p, to);
-					endGame(AccountProvider.get(p.getUniqueId()), -1, false);
-					return ActionResult.ALLOW;
+					
+					if (!players.keySet().contains(p.getUniqueId()))
+						return ActionResult.ALLOW;
+					
+					if (exitGameArea(p)) {
+						endGame(AccountProvider.get(p.getUniqueId()), -1, false);
+						return ActionResult.ALLOW;	
+					}else
+						return ActionResult.TELEPORT_ELSEWHERE;
 				}
 			});
 		
@@ -396,6 +396,10 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		return area;
 	}
 
+	public void beginGame(Player p) {
+		p.teleport(startingLoc);
+		startGame((OlympaPlayerHub)AccountProvider.get(p.getUniqueId()));
+	}
 	
 	///////////////////////////////////////////////////////////
 	//          MOVE, TELEPORT, INTERRACT LISTENERS          //
@@ -484,7 +488,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		if (e.getTo().getBlock().equals(startingLoc.getBlock())) {
 			
 			if (!players.containsKey(p.getUniqueId()))
-				startGame(AccountProvider.get(p.getUniqueId()));
+				startGame((OlympaPlayerHub)AccountProvider.get(p.getUniqueId()));
 			//else
 				//restartGame(AccountProvider.get(p.getUniqueId()));
 			
@@ -521,6 +525,14 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, false);
 	}
 
+	/**
+	 * Fires when a player goes out of game area. Execution of default logic (ends game) can be cancelled by returning false.
+	 * @param p player
+	 * @return true if the default logic has to be executed, false otherwise
+	 */
+	protected boolean exitGameArea(Player p) {
+		return true;
+	}
 	
 	///////////////////////////////////////////////////////////
 	//                      CONFIG INIT                      //

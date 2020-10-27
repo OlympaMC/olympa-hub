@@ -45,16 +45,21 @@ public class GameElytra extends IGame {
 	
 	
 	private Location startRaceLoc;
+	private Location endRaceLoc;
+	
 	private Map<Region, Integer> portals = new LinkedHashMap<Region, Integer>();
 	
 	private Map<Player, Integer> nextPortal = new HashMap<Player, Integer>();
 	private Map<Player, Long> startTime = new HashMap<Player, Long>();
+	
+	private int lastPortalIndex = 0;
 	
 	public GameElytra(OlympaHub plugin, ConfigurationSection configFromFile) throws ActivateFailedException {
 		super(plugin, GameType.ELYTRA, configFromFile);
 		
 		//getLoc(config.getString("tp_loc"));
 		allowedTpLocs.add(startRaceLoc = config.getLocation("tp_loc"));
+		allowedTpLocs.add(endRaceLoc = config.getLocation("end_tp_loc"));
 		
 		List<Region> listReg = new ArrayList<Region>();
 		List<Integer> listInd = new ArrayList<Integer>();
@@ -62,8 +67,7 @@ public class GameElytra extends IGame {
 		config.getList("portals_locs").forEach(r -> listReg.add((Region) r));
 		config.getList("portals_indexs").forEach(i -> listInd.add((Integer) i));
 		
-		//config.getStringList("portals_locs").forEach(s -> listReg.add(getRegion(s)));
-		//config.getStringList("portals_indexs").forEach(s -> listInd.add(Integer.valueOf(s)));
+		listInd.forEach(i -> {if (i > lastPortalIndex) lastPortalIndex = i;});
 		
 		//register des régions
 		listReg.forEach(reg -> {
@@ -73,7 +77,7 @@ public class GameElytra extends IGame {
 				public ActionResult enters(Player p, Set<TrackedRegion> to) {
 					super.enters(p, to);
 					if (getPlayers().contains(p.getUniqueId()))
-						isEnteringPortal(p, reg);
+						enterPortal(p, reg);
 					
 					return ActionResult.ALLOW;
 				}
@@ -98,16 +102,7 @@ public class GameElytra extends IGame {
 		}.runTaskTimer(plugin, 10, 2);
 	}
 	
-	private int getMaxPortalIndex() {
-		int i = -1;
-		for (int i2 : portals.values())
-			if (i2 > i)
-				i = i2;
-		
-		return i;
-	} 
-	
-	private void isEnteringPortal(Player p, Region reg) {
+	private void enterPortal(Player p, Region reg) {
 		//int portalIndex = new ArrayList<Region>(portals.keySet()).indexOf(reg);
 		int portalIndex = portals.get(reg);
 		
@@ -115,9 +110,8 @@ public class GameElytra extends IGame {
 			p.sendMessage(gameType.getChatPrefix() + "§aPorte " + (portalIndex + 1) + " validée !");
 			nextPortal.put(p, portalIndex + 1);
 			
-			if (portalIndex + 1 == getMaxPortalIndex())
-				//p.setGliding(!p.isGliding());
-				p.setGliding(false);
+			if (portalIndex == lastPortalIndex)
+				fireEndGameWithSuccess(p);
 			
 		}else if (nextPortal.get(p) < portalIndex)
 			p.sendMessage(gameType.getChatPrefix() + "§cVous n'avez pas validé l'une des portes précédentes.§7 Retournez en arrière ou réinitialisez la partie.");
@@ -135,8 +129,6 @@ public class GameElytra extends IGame {
 		elytras.setItemMeta(meta);
 		
 		p.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, elytras);
-		//nextPortal.put(p.getPlayer(), 0);
-		//startTime.put(p.getPlayer(), System.currentTimeMillis() -startingDelay*1000);
 		
 		launchPreGame(p.getPlayer(), startingDelay);
 	}
@@ -150,14 +142,17 @@ public class GameElytra extends IGame {
 	
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
-		super.endGame(p, score, warpToSpawn);
+		super.endGame(p, score, false);
 		
 		p.getPlayer().removePotionEffect(PotionEffectType.LEVITATION);
 		nextPortal.remove(p.getPlayer());
 		startTime.remove(p.getPlayer());
 		
 		if (score > 0 && !warpToSpawn) {
+			p.getPlayer().setGliding(false);
 			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Téléportation au spawn dans 5 secondes...");
+			
+			p.getPlayer().teleport(endRaceLoc);
 			plugin.getTask().runTaskLater(() -> p.getPlayer().teleport(startingLoc), 100);
 		}
 	}
@@ -204,13 +199,17 @@ public class GameElytra extends IGame {
 			e.setCancelled(true);
 		
 		if (!e.isGliding())
-			if (nextPortal.get(e.getEntity()) > getMaxPortalIndex())
-				endGame(AccountProvider.get(e.getEntity().getUniqueId()), 
-						((double)(System.currentTimeMillis() - startTime.get(e.getEntity())))/1000d, false);
+			if (nextPortal.get(e.getEntity()) > lastPortalIndex)
+				fireEndGameWithSuccess((Player) e.getEntity());
 			else {
 				e.getEntity().sendMessage(gameType.getChatPrefix() + "§7Ne vous arrêtez pas de voler !");
 				restartGame(AccountProvider.get(e.getEntity().getUniqueId()));	
 			}
+	}
+	
+	private void fireEndGameWithSuccess(Player p) {
+		endGame(AccountProvider.get(p.getUniqueId()), 
+				((double)(System.currentTimeMillis() - startTime.get(p)))/1000d, false);
 	}
 
 	
@@ -221,6 +220,9 @@ public class GameElytra extends IGame {
 	
 	protected ConfigurationSection initConfig(ConfigurationSection config) {
 		config = super.initConfig(config);
+		
+		if (!config.contains("end_tp_loc"))
+			config.set("end_tp_loc", new Location(world, 0, 0, 0));
 		
 		if (!config.contains("tp_loc"))
 			config.set("tp_loc", new Location(world, 0, 0, 0));
@@ -361,6 +363,21 @@ public class GameElytra extends IGame {
 		config.set("tp_loc", loc);
 		
 		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de tp_loc a été définie en " +
+				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
+	}
+	
+	
+	@Cmd (player = true)
+	public void raceEndTpLoc(CommandContext cmd) {
+		Location loc = getPlayer().getLocation();//.getBlock().getLocation().add(0.5, 0, 0.5);
+		
+		allowedTpLocs.remove(endRaceLoc);
+		endRaceLoc = loc;
+		allowedTpLocs.add(endRaceLoc);
+		
+		config.set("end_race_loc", loc);
+		
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de end_race_loc a été définie en " +
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
 	}
 	

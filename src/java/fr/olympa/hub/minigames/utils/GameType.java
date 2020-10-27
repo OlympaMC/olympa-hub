@@ -12,11 +12,11 @@ import fr.olympa.hub.minigames.games.GameJump;
 import fr.olympa.hub.minigames.games.IGame;
 
 public enum GameType {
-	ELYTRA("score_elytra", "§6Course d'élytra", "de la ", true, true, GameElytra::new),
-	JUMP("score_jump", "§6Jump", "du ", true, true, GameJump::new),
-	ARENA("score_arena", "§6Arène 1vs1", "de l'", false, false, GameArena::new),
+	ELYTRA("score_elytra", "§6Course d'élytra", "§6de la ", true, true, GameElytra::new),
+	JUMP("score_jump", "§6Jump", "§6du ", true, true, GameJump::new),
+	ARENA("score_arena", "§6Arène 1vs1", "§6de l'", false, false, GameArena::new),
 	//LABY("score_laby", "§6Labyrinthe", "du ", false, true, null),
-	DAC("score_dac", "§6Dé à coudre", "du ", false, false, GameDac::new),
+	DAC("score_dac", "§6Dé à coudre", "§6du ", false, false, GameDac::new),
 	
 	;
 	
