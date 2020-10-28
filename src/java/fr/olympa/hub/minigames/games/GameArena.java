@@ -3,12 +3,14 @@ package fr.olympa.hub.minigames.games;
 import java.rmi.activation.ActivateFailedException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
@@ -21,8 +23,15 @@ import org.bukkit.potion.PotionEffectType;
 
 import fr.olympa.api.command.complex.Cmd;
 import fr.olympa.api.command.complex.CommandContext;
+import fr.olympa.api.editor.RegionEditor;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.provider.AccountProvider;
+import fr.olympa.api.region.Region;
+import fr.olympa.api.region.shapes.Cuboid;
+import fr.olympa.api.region.tracking.ActionResult;
+import fr.olympa.api.region.tracking.TrackedRegion;
+import fr.olympa.api.region.tracking.flags.Flag;
+import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
@@ -37,6 +46,7 @@ public class GameArena extends IGame{
 	
 	private Location pos1;
 	private Location pos2;
+	private Region arena;
 	
 	private final int queueCountInvIndex = 7;
 	
@@ -54,6 +64,28 @@ public class GameArena extends IGame{
 
 		allowedTpLocs.add(pos1);
 		allowedTpLocs.add(pos2);
+		
+		arena = (Region) config.get("arena");
+
+		OlympaCore.getInstance().getRegionManager().registerRegion(arena, "zone_" + gameType.toString().toLowerCase(), EventPriority.HIGHEST,
+			new Flag() {
+				@Override
+				public ActionResult leaves(Player p, Set<TrackedRegion> to) {
+					super.leaves(p, to);
+					if (!playingPlayers.contains(p))
+						return ActionResult.ALLOW;
+					else
+						return ActionResult.DENY;
+				}
+				@Override
+				public ActionResult enters(Player p, Set<TrackedRegion> to) {
+					super.leaves(p, to);
+					if (playingPlayers.contains(p))
+						return ActionResult.ALLOW;
+					else
+						return ActionResult.DENY;
+				}
+			});
 	}
 	
 	@Override
@@ -225,6 +257,9 @@ public class GameArena extends IGame{
 		if (!config.contains("player_2_spawn"))
 			config.set("player_2_spawn", new Location(world, 0, 0, 0));
 		
+		if (!config.contains("arena"))
+			config.set("arena", new Cuboid(world, 0, 0, 0, 1, 1, 1));
+		
 		return config;
 	}
 
@@ -258,6 +293,27 @@ public class GameArena extends IGame{
 		
 		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLa position de téléportation du joueur 2 a été définie en " +
 				pos2.getBlockX() + ", " + pos2.getBlockY() + ", " + pos2.getBlockZ());
+	}
+	
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void setArena(CommandContext cmd) {
+		Player p = getPlayer();
+		
+		p.sendMessage(gameType.getChatPrefix() + "§aSélectionnez la région de l'arène.");
+		  
+		new RegionEditor(p, region -> {
+			  if (region == null) 
+				  return;
+			  
+			  arena = region;
+			  config.set("arena", region);
+			p.sendMessage(gameType.getChatPrefix() + "§aRégion arena mise à jour avec succès.");
+			  
+			}).enterOrLeave();
 	}
 }
 

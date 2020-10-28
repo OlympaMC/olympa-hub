@@ -30,7 +30,7 @@ import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 public class GameDac extends IGame {
 
 	private final int minPlayers = 4;
-	private boolean isGameInProgress = false;
+	//private boolean isGameInProgress = false;
 	
 	private final int countdownDelay = 3;
 	private final int playDelay = 8;
@@ -80,7 +80,7 @@ public class GameDac extends IGame {
 
 		waitingPlayers.add(p.getPlayer());
 		
-		if (isGameInProgress)
+		if (playingPlayers.size() > 0)
 			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Une partie est déjà en cours...");
 		else
 			tryToInitGame();
@@ -95,24 +95,28 @@ public class GameDac extends IGame {
 		
 		if (playingPlayers.contains(p.getPlayer())) {
 			playingPlayers.remove(p.getPlayer());
-			playGameTurn(false);
+			
+			if (p.getPlayer().equals(playingPlayer))
+				playGameTurn();
 		}
 	} 
 	 
 	private void tryToInitGame() {
-		if (isGameInProgress || waitingPlayers.size() < minPlayers)
-			getPlayers().forEach(id -> Bukkit.getPlayer(id).sendMessage(gameType.getChatPrefix() + "§aNombres de joueurs : " + getPlayers().size() + "/" + minPlayers));
+		if (playingPlayers.size() > 0)
+			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§aUne partie est déjà en cours. Nombres de joueurs prêts pour la prochaine partie : " + waitingPlayers.size() + "/" + minPlayers));
+		else if (waitingPlayers.size() < minPlayers)
+			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§aNombre de joueurs prêts : " + waitingPlayers.size() + "/" + minPlayers));
 		else
 			startGame(countdownDelay);
 	}
 	
 	private void startGame(int countdown) {
-		if (isGameInProgress)
+		if (playingPlayers.size() > 0)
 			return;
 		
-		//s'il n'y a plus assez de joueurs pour commencer la partie, cancel de cette der
-		if (waitingPlayers.size() <= 1) 
-			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§7Plus assez de joueur pour commencer la partie..."));
+		//s'il n'y a plus assez de joueurs pour commencer la partie, cancel de cette dernière
+		if (waitingPlayers.size() < minPlayers) 
+			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§7Plus assez de joueur pour commencer la partie... (" + waitingPlayers.size() + "/" + minPlayers + ")"));
 		
 		//actions avant début de partie
 		if (countdown > 0) {
@@ -122,20 +126,20 @@ public class GameDac extends IGame {
 			plugin.getTask().runTaskLater(() -> startGame(countdown - 1), 1, TimeUnit.SECONDS);
 			
 		//actions de début de partie
-		}else {
-			isGameInProgress = true;
-			
+		}else {			
 			playingPlayers.addAll(waitingPlayers);
 			waitingPlayers.clear();
 			
 			playingPlayers.forEach(p -> p.teleport(tpLoc));
+
+			currentTurn = 0;
 			
-			playGameTurn(true);	
+			plugin.getTask().runTaskLater(() -> playGameTurn(), 2, TimeUnit.SECONDS);
 		}
 	}
 	
-	private void playGameTurn(boolean isInit) {
-		if (!isGameInProgress)
+	private void playGameTurn() {
+		if (playingPlayers.size() == 0)
 			return;
 		
 		//si plus qu'un seul joueur en lice, fin de jeu (ou reset du jeu si 0 joueurs restants)
@@ -144,7 +148,6 @@ public class GameDac extends IGame {
 				endGame(AccountProvider.get(playingPlayers.get(0).getUniqueId()), 1, true);
 			
 			//réinitialisation du jeu
-			isGameInProgress = false;
 			resetLandingArea();
 			playingPlayers.clear();
 			playingPlayer = null;
@@ -154,26 +157,19 @@ public class GameDac extends IGame {
 			return;
 		}
 		
-		if (isInit) {
-			currentTurn = 0;
-			plugin.getTask().runTaskLater(() -> playGameTurn(false), 1, TimeUnit.SECONDS);
-			return;
-			
-		}else {
-			playingPlayer = playingPlayers.get(0);
-			currentTurn++;
-		}
+		playingPlayer = playingPlayers.get(0);
+		currentTurn++;
 
 		hasJumped = false;
 		
-		playingPlayer.sendMessage(gameType.getChatPrefix() + "§aTour " + currentTurn + " : c'est à vous ! §7Sautez du pont, et tentez d'atterir dans l'eau !");
+		playingPlayer.sendMessage(gameType.getChatPrefix() + "§aTour " + currentTurn + " : c'est à vous ! §7Sautez du pont, et tentez d'atterir dans l'eau ! Vous avez " + playDelay + " secondes.");
 
-		//si le joueur a mis trop de temps à sauter, forfait
+		//si le joueur a mis trop de temps à sauter, expulsion
 		final int currentTurnBis = currentTurn;
 		
 		plugin.getTask().runTaskLater(() -> {
 			if (currentTurn == currentTurnBis)
-				if (playingPlayer != null)
+				if (playingPlayer != null && playingPlayer.isOnline())
 					endGame(AccountProvider.get(playingPlayer.getUniqueId()), 0, true);
 			
 		}, playDelay, TimeUnit.SECONDS);
@@ -189,11 +185,6 @@ public class GameDac extends IGame {
 			return;
 		
 		Block block = to.clone().add(0, -1, 0).getBlock();
-		/*
-		if (!hasJumped && block.getType() == Material.AIR) {
-			hasJumped = true;
-			return;
-		}*/
 		
 		if (hasJumped)
 			if (block.getType() == Material.WATER && jumpRegion.isIn(block.getLocation())) {
@@ -205,14 +196,14 @@ public class GameDac extends IGame {
 				
 				block.setType(Material.BEDROCK);
 				
-				plugin.getTask().runTaskLater(() -> playGameTurn(false), 500, TimeUnit.MILLISECONDS);
+				plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
 				
 			}else if (block.getType() != Material.AIR) {
 				playingPlayers.remove(0);
 				playingPlayer = null;
 				
 				endGame(AccountProvider.get(p.getUniqueId()), 0, true);
-				plugin.getTask().runTaskLater(() -> playGameTurn(false), 500, TimeUnit.MILLISECONDS);
+				plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
 			}
 	}
 	

@@ -74,7 +74,6 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	
 	protected ItemStack[] hotBarContent = new ItemStack[9];
 	private Map<UUID, ItemStack[]> players = new HashMap<UUID, ItemStack[]>();
-	//private List<UUID> ghostStarters = new ArrayList<UUID>(); //contient les joueurs pour lesquels il ne faut pas lancer le jeu même s'ils le déclenchent
 	
 	//scores map, must be sorted from the best to the worst
 	//la taille ne doit pas dépasser maxTopScoresStored
@@ -158,7 +157,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 				new FixedLine<HologramLine>("§7Commencez ici"));
 		
 		//gestion sortie de zone de jeu
-		region = OlympaCore.getInstance().getRegionManager().registerRegion(area, "zone_" + gameType.toString().toLowerCase(), EventPriority.HIGHEST,
+		OlympaCore.getInstance().getRegionManager().registerRegion(area, "zone_" + gameType.toString().toLowerCase(), EventPriority.HIGHEST,
 			new Flag() {
 				@Override
 				public ActionResult leaves(Player p, Set<TrackedRegion> to) {
