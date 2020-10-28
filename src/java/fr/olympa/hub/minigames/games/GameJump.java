@@ -162,7 +162,7 @@ public class GameJump extends IGame{
 		
 		if (!config.contains("checkpoints")) {
 			List<Location> list = new ArrayList<Location>();
-			list.add(startingLoc);
+			list.add(new Location(world, 0, 0, 0));
 			list.add(new Location(world, 1, 1, 1));
 			
 			config.set("checkpoints", list);	
@@ -190,7 +190,7 @@ public class GameJump extends IGame{
 	 * @param cmd
 	 */
 	@Cmd (player = true)
-	public void setTpLoc(CommandContext cmd) {
+	public void tpLoc(CommandContext cmd) {
 		tpLoc = getPlayer().getLocation();
 		allowedTpLocs.add(tpLoc);
 		

@@ -29,7 +29,7 @@ import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 
 public class GameDac extends IGame {
 
-	private final int minPlayers = 4;
+	private final int minPlayers = 2;
 	//private boolean isGameInProgress = false;
 	
 	private final int countdownDelay = 3;
@@ -43,16 +43,13 @@ public class GameDac extends IGame {
 	private Cuboid jumpRegion;
 	private Location tpLoc;
 	
-	private Cuboid barrierRegion;
-	
 	private Player playingPlayer = null;
 	private boolean hasJumped = false;
 	
 	public GameDac(OlympaHub plugin, ConfigurationSection configFromFile) throws ActivateFailedException {
 		super(plugin, GameType.DAC, configFromFile);
 
-		jumpRegion = (Cuboid) config.get("jump_region");		
-		barrierRegion = (Cuboid) config.get("barrier_region");
+		jumpRegion = (Cuboid) config.get("jump_region");
 		
 		allowedTpLocs.add(tpLoc = config.getLocation("tp_loc"));
 
@@ -60,6 +57,7 @@ public class GameDac extends IGame {
 
 		//cancel region entering if player isn't the one which should jump
 		//and set the jump marker to true
+		/*
 		OlympaCore.getInstance().getRegionManager().registerRegion(barrierRegion, "dac_barrier_area",
 				EventPriority.HIGH, new Flag() {
 			@Override
@@ -71,7 +69,7 @@ public class GameDac extends IGame {
 				}else
 					return ActionResult.DENY;
 			}
-		});
+		});*/
 	}
 
 	@Override
@@ -181,30 +179,47 @@ public class GameDac extends IGame {
 	 */
 	@Override
 	protected void onMoveHandler(Player p, Location from, Location to) {
+		//si un joueur a sauté
+		if (p.getLocation().add(0, -1, 0).getBlock().getType() == Material.AIR && 
+				p.getLocation().clone().add(0, -2, 0).getBlock().getType() == Material.AIR &&
+				p.getLocation().clone().add(0, -3, 0).getBlock().getType() == Material.AIR &&
+				p.getLocation().clone().add(0, -4, 0).getBlock().getType() == Material.AIR) {
+			
+			//détection de si c'est le joueur qui devait jouer qui a sauté
+			if (p.equals(playingPlayer))
+				hasJumped = true;
+			else {
+				p.teleport(tpLoc);
+				p.sendMessage(gameType.getChatPrefix() + "§7Ce n'est pas votre tour de sauter !");
+			}
+			
+			return;
+		}
+		
+		//si ce n'est pas le bon joueur ou s'il n'a pas sauté
 		if (!p.equals(playingPlayer) || !hasJumped)
 			return;
 		
 		Block block = to.clone().add(0, -1, 0).getBlock();
-		
-		if (hasJumped)
-			if (block.getType() == Material.WATER && jumpRegion.isIn(block.getLocation())) {
-				playingPlayers.add(playingPlayers.remove(0));
-				playingPlayer = null;
-				
-				p.teleport(tpLoc);
-				p.sendMessage(gameType.getChatPrefix() + "§aBien visé !");
-				
-				block.setType(Material.BEDROCK);
-				
-				plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
-				
-			}else if (block.getType() != Material.AIR) {
-				playingPlayers.remove(0);
-				playingPlayer = null;
-				
-				endGame(AccountProvider.get(p.getUniqueId()), 0, true);
-				plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
-			}
+
+		if (block.getType() == Material.WATER && jumpRegion.isIn(block.getLocation())) {
+			playingPlayers.add(playingPlayers.remove(0));
+			playingPlayer = null;
+			
+			p.teleport(tpLoc);
+			p.sendMessage(gameType.getChatPrefix() + "§aBien visé !");
+			
+			block.setType(Material.BEDROCK);
+			
+			plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
+			
+		}else if (block.getType() != Material.AIR) {
+			playingPlayers.remove(0);
+			playingPlayer = null;
+			
+			endGame(AccountProvider.get(p.getUniqueId()), 0, true);
+			plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
+		}
 	}
 	
 	private void resetLandingArea() {
@@ -224,8 +239,6 @@ public class GameDac extends IGame {
 
 		if (!config.contains("jump_region"))
 			config.set("jump_region", new Cuboid(world, 0, 0, 0, 1, 1, 1));	
-		if (!config.contains("barrier_region"))
-			config.set("barrier_region", new Cuboid(world, 0, 0, 0, 1, 1, 1));	
 		if (!config.contains("tp_loc"))
 			config.set("tp_loc", new Location(world, 0, 0, 0));	
 		
@@ -256,28 +269,6 @@ public class GameDac extends IGame {
 			config.set("jump_region", region);
 			
 			p.sendMessage(gameType.getChatPrefix() + "§aLa nouvelle zone de saut a bien été définie. §7Un redémarage est nécessaire.");
-		}).enterOrLeave();
-	}
-	
-	
-	/**
-	 * Internal function, do NOT call it
-	 * @param cmd
-	 */
-	@Cmd (player = true)
-	public void barrierArea(CommandContext cmd) {
-		Player p = getPlayer();
-
-		new RegionEditor(p, region -> {
-			if (region == null || !(region instanceof Cuboid)) {
-				p.sendMessage(gameType.getChatPrefix() + "§cLa sélection n'est pas valide. Ce doit être un cuboïde.");
-				return;
-			}
-			
-			barrierRegion = (Cuboid) region;
-			config.set("barrier_region", region);
-			
-			p.sendMessage(gameType.getChatPrefix() + "§aLa nouvelle région barrière a bien été définie. §7Un redémarage est nécessaire.");
 		}).enterOrLeave();
 	}
 

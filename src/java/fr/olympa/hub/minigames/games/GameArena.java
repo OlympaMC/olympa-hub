@@ -55,7 +55,14 @@ public class GameArena extends IGame{
 	public GameArena(OlympaHub plugin, ConfigurationSection fileConfig) throws ActivateFailedException {
 		super(plugin, GameType.ARENA, fileConfig);
 
-		region.getRegion().getWorld().setPVP(true);
+		
+		
+		/*
+		System.out.println("DEBUG : " + region);
+		System.out.println("DEBUG : " + region.getRegion());
+		System.out.println("DEBUG : " + region.getRegion().getWorld());*/
+
+		world.setPVP(true);
 		
 		pos1 = config.getLocation("player_1_spawn");
 		pos2 = config.getLocation("player_2_spawn");
@@ -67,7 +74,7 @@ public class GameArena extends IGame{
 		
 		arena = (Region) config.get("arena");
 
-		OlympaCore.getInstance().getRegionManager().registerRegion(arena, "zone_" + gameType.toString().toLowerCase(), EventPriority.HIGHEST,
+		OlympaCore.getInstance().getRegionManager().registerRegion(arena, "fightzone_" + gameType.toString().toLowerCase(), EventPriority.HIGHEST,
 			new Flag() {
 				@Override
 				public ActionResult leaves(Player p, Set<TrackedRegion> to) {

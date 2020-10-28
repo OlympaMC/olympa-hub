@@ -27,9 +27,9 @@ public class MiniGamesManager {
 	private static MiniGamesManager instance;
 	
 	private Map<GameType, IGame> games = new HashMap<GameType, IGame>(); 
-	
-	private YamlConfiguration config;
+
 	private File configFile;
+	private YamlConfiguration config;
 	
 	public MiniGamesManager(OlympaHub plugin) {
 		instance = this;

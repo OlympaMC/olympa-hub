@@ -82,7 +82,6 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	protected ConfigurationSection config;
 	protected final GameType gameType;
 	private Region area;
-	protected TrackedRegion region;
 	protected Location startingLoc;
 	
 	private Hologram scoresHolo;
@@ -105,11 +104,11 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		this.config = initConfig(configFromFile);
 		
 		this.isEnabled = config.getBoolean("isEnabled");
-		
 		if (!isEnabled)
 			throw new ActivateFailedException("");
 
 		this.area = (Region) config.get("area");
+		
 		this.startingLoc = config.getLocation("start_loc");
 		
 		//register listener
@@ -273,14 +272,14 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		if (gameType.isTimerScore()) {
 			if ((p.getScore(gameType) == 0 && score > 0) || p.getScore(gameType) > score) {
 				p.setScore(gameType, score);
-				new AccountProvider(p.getUniqueId()).saveToDb(p);
+				//new AccountProvider(p.getUniqueId()).saveToDb(p);
 				
 				hasScoreBeenImproved = true;
 			}	
 		}else {
 			if (score > 0) {
 				p.setScore(gameType, p.getScore(gameType) + 1);
-				new AccountProvider(p.getUniqueId()).saveToDb(p);
+				//new AccountProvider(p.getUniqueId()).saveToDb(p);
 				
 				hasScoreBeenImproved = true;
 			}	
@@ -298,7 +297,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 			else
 				oldPlayerRankString = Integer.toString(oldPlayerRank);
 			
-			if (updateScores(p.getInformation(), score, true)) {
+			if (updateScores(p.getInformation(), p.getScore(gameType), true)) {
 				
 				if (getPlayerRank(p) < oldPlayerRank || oldPlayerRank == 0)
 					p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place §c" + 
@@ -547,23 +546,20 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		if (config == null)
 			config = MiniGamesManager.getInstance().getConfig().createSection(gameType.toString().toLowerCase());
 		
-		if (!config.getKeys(true).contains("isEnabled")) 
+		if (!config.getKeys(false).contains("isEnabled")) 
 			config.set("isEnabled", true);
 	
-		if (!config.getKeys(true).contains("area")) 
+		if (!config.getKeys(false).contains("area")) 
 			config.set("area", new Cuboid(world, 0, 0, 0, 1, 1, 1));
 		
 
-		if (!config.getKeys(true).contains("holo_loc")) 
+		if (!config.getKeys(false).contains("holo_loc")) 
 			config.set("holo_loc", new Location(world, 0, 0, 0));	
 		
 
-		if (!config.getKeys(true).contains("start_loc")) 
+		if (!config.getKeys(false).contains("start_loc")) 
 			config.set("start_loc", new Location(world, 0, 0, 0));	
 		
-		
-		//plugin.getLogger().log(Level.INFO, "config après (dans fct) : " + config);
-
 		return config;
 	}
 
