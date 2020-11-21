@@ -10,7 +10,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import fr.olympa.api.groups.OlympaGroup;
-import fr.olympa.api.permission.OlympaCorePermissions;
+import fr.olympa.api.permission.OlympaAPIPermissions;
 import fr.olympa.api.permission.OlympaPermission;
 import fr.olympa.api.plugin.OlympaAPIPlugin;
 import fr.olympa.api.provider.AccountProvider;
@@ -55,7 +55,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
 		OlympaPermission.registerPermissions(HubPermissions.class);
-		
+
 		spawn = getConfig().getLocation("spawn");
 		lightning = getConfig().getLocation("lightning");
 
@@ -86,12 +86,12 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 		CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(ServerTrait.class).withName("server"));
 
-		OlympaCorePermissions.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
-		OlympaCorePermissions.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+		OlympaAPIPermissions.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+		OlympaAPIPermissions.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
 
 		games = new MiniGamesManager(this);
 	}
-	
+
 	@Override
 	public void onDisable() {
 		MiniGamesManager.getInstance().saveConfig(MiniGamesManager.getInstance().getConfig());
