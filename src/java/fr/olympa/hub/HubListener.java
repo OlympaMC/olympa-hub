@@ -5,6 +5,9 @@ import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,7 +35,8 @@ import fr.olympa.hub.minigames.utils.MiniGamesManager;
 
 public class HubListener implements Listener {
 	private ItemStack[] inventoryContents = new ItemStack[] { null, null, null, null, ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa") };
-
+	private BossBar bossBar = Bukkit.createBossBar("§e§lBon jeu sur §6§lOlympa§e§l !", BarColor.YELLOW, BarStyle.SOLID);
+	
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
@@ -40,12 +44,14 @@ public class HubListener implements Listener {
 		p.setHealth(20);
 		p.setFoodLevel(20);
 		p.setRemainingAir(300);
+		p.setWalkSpeed(0.22f);
 		p.setFlying(false);
 		p.setAllowFlight(false);
 		p.setCanPickupItems(false);
 		p.getInventory().setContents(inventoryContents);
 		p.getInventory().setHeldItemSlot(4);
 		p.sendTitle("§6§lOlympa", "§eBienvenue !", 2, 50, 7);
+		bossBar.addPlayer(p);
 	}
 	
 	@EventHandler

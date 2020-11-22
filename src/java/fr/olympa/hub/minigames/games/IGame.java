@@ -128,7 +128,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		}
 		
 		//création de l'holo scores
-		scoresHolo = OlympaCore.getInstance().getHologramsManager().createHologram(config.getLocation("holo_loc"), false, 
+		scoresHolo = OlympaCore.getInstance().getHologramsManager().createHologram(config.getLocation("holo_loc"), false, true,
 				new FixedLine<HologramLine>("§6Scores " + gameType.getNameWithArticle()), new FixedLine<HologramLine>(" "));
 		
 		for (int i = 0 ; i < maxDisplayedTopScores ; i++) {
@@ -151,7 +151,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		}
 		
 		//création de l'holo du début de partie
-		startHolo = OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, 
+		startHolo = OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, true,
 				new FixedLine<HologramLine>("§6Début " + gameType.getNameWithArticle()), 
 				new FixedLine<HologramLine>("§7Commencez ici"));
 		

@@ -11,20 +11,38 @@ servers:
     description: "Le créatif est un mode de jeux vous permettant d'exprimer au plus profond votre imagination. Créez des constructions toujours plus grandes et plus belles les unes que les autres, jouez avec vos amis en incarnant des personnages et en créant vos propres histoires."
     item: GRASS_BLOCK
     slot: 33
-  BUILDEUR:
-    description: "§cServeur staff : §abuildeurs"
-    item: DIAMOND_PICKAXE
-    slot: 43
+#   BUILDEUR:
+#     description: "§cServeur staff : §abuildeurs"
+#     item: DIAMOND_PICKAXE
+#     slot: 43
+
+minigames:
+  JUMP:
+    description: "§cSautez partout !"
+    item: FEATHER
+    slot: 47
+  ELYTRA:
+    description: "§cVolez comme un aigle !"
+    item: ELYTRA
+    slot: 48
+  DAC:
+    description: "§cSautez dans le vide... Et visez juste !"
+    item: TNT
+    slot: 50
+  ARENA:
+    description: "§cTapez vous dessus !"
+    item: IRON_SWORD
+    slot: 51
     
 zone:
   ==: fr.olympa.api.region.shapes.Cuboid
   world: "world"
-  xMin: -1000
+  xMin: -10000
   yMin: 0
-  zMin: -1000
-  xMax: 1000
+  zMin: -10000
+  xMax: 10000
   yMax: 1000
-  zMax: 1000
+  zMax: 10000
   
 spawn: world -4.5 29 5.5 0 0
 
