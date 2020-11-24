@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.bukkit.DyeColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -139,10 +138,6 @@ public class MenuGUI extends OlympaGUI {
 		
 		if (minigames.keySet().contains(slot))
 			if (minigames.get(slot) == GameType.LABY) {
-				if (!OlympaHub.getInstance().getConfig().getKeys(false).contains("laby_tp_loc")) {
-					OlympaHub.getInstance().getConfig().set("laby_tp_loc", new Location(OlympaHub.getInstance().spawn.getWorld(), 0, 0, 0));
-					OlympaHub.getInstance().saveConfig();
-				}	
 				p.teleport(OlympaHub.getInstance().getConfig().getLocation("laby_tp_loc"));
 			}
 			else if (OlympaHub.getInstance().games.getGame(minigames.get(slot)) != null)

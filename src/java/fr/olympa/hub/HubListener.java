@@ -93,8 +93,8 @@ public class HubListener implements Listener {
 
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
-		if (e.getSlot() == 4 && MiniGamesManager.getInstance().isPlaying((Player) e.getWhoClicked()) == null) {
-			Player player = (Player) e.getWhoClicked();
+		Player player = (Player) e.getWhoClicked();
+		if (e.getClickedInventory() == player.getInventory() && e.getSlot() == 4 && MiniGamesManager.getInstance().isPlaying(player) == null) {
 			new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player);
 			e.setCancelled(true);
 		}
