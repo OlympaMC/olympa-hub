@@ -22,6 +22,7 @@ public class OlympaPlayerHub extends OlympaPlayerObject {
 			.put("score_jump", "DOUBLE NOT NULL DEFAULT 0")
 			.put("score_arena", "DOUBLE NOT NULL DEFAULT 0")
 			.put("score_dac", "DOUBLE NOT NULL DEFAULT 0")
+			.put("score_laby", "DOUBLE NOT NULL DEFAULT 0")
 			
 			.build();
 	

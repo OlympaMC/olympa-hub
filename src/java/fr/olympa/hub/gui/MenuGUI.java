@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -103,7 +104,7 @@ public class MenuGUI extends OlympaGUI {
 		}
 		
 		ConfigurationSection minigamesConfig = OlympaHub.getInstance().getConfig().getConfigurationSection("minigames");
-		
+
 		for (String minigame : minigamesConfig.getKeys(false)) {
 			int slot = minigamesConfig.getInt(minigame + ".slot");
 			GameType game = GameType.valueOf(minigame);
@@ -112,6 +113,8 @@ public class MenuGUI extends OlympaGUI {
 			
 			inv.setItem(slot, ItemUtils.item(Material.getMaterial(minigamesConfig.getString(minigame+".item")), 
 					"§aDébut " + game.getNameWithArticle(), minigamesConfig.getString(minigame+".description")));
+			
+			//System.out.println(minigame + " - " + minigamesConfig.getString(minigame+".item") + " - " + minigamesConfig.getString(minigame+".description"));
 		}
 	}
 
@@ -135,7 +138,17 @@ public class MenuGUI extends OlympaGUI {
 		}
 		
 		if (minigames.keySet().contains(slot))
-			OlympaHub.getInstance().games.getGame(minigames.get(slot)).beginGame(p);
+			if (minigames.get(slot) == GameType.LABY) {
+				if (!OlympaHub.getInstance().getConfig().getKeys(false).contains("laby_tp_loc")) {
+					OlympaHub.getInstance().getConfig().set("laby_tp_loc", new Location(OlympaHub.getInstance().spawn.getWorld(), 0, 0, 0));
+					OlympaHub.getInstance().saveConfig();
+				}	
+				p.teleport(OlympaHub.getInstance().getConfig().getLocation("laby_tp_loc"));
+			}
+			else if (OlympaHub.getInstance().games.getGame(minigames.get(slot)) != null)
+				OlympaHub.getInstance().games.getGame(minigames.get(slot)).beginGame(p);
+			else
+				p.sendMessage(OlympaHub.getInstance().getPrefixConsole() + "§cUne erreur est survenue, veuillez contacter un membre du staff.");
 		return true;
 	}
 
