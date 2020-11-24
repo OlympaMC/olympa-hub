@@ -37,6 +37,10 @@ public class HubListener implements Listener {
 	private ItemStack[] inventoryContents = new ItemStack[] { null, null, null, null, ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa") };
 	private BossBar bossBar = Bukkit.createBossBar("§e§lBon jeu sur §6§lOlympa§e§l !", BarColor.YELLOW, BarStyle.SOLID);
 	
+	public HubListener() {
+		bossBar.setProgress(0);
+	}
+	
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
@@ -51,6 +55,8 @@ public class HubListener implements Listener {
 		p.getInventory().setContents(inventoryContents);
 		p.getInventory().setHeldItemSlot(4);
 		p.sendTitle("§6§lOlympa", "§eBienvenue !", 2, 50, 7);
+		p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.4f, 1);
+		p.playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1);
 		bossBar.addPlayer(p);
 	}
 	

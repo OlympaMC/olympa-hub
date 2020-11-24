@@ -3,4 +3,4 @@ main: fr.olympa.hub.OlympaHub
 version: 0.1
 api-version: 1.15
 authors: [SkytAsul]
-depend: [OlympaCore, Citizens]
+depend: [OlympaCore, Citizens, JukeBox]
