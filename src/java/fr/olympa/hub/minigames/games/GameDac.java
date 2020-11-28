@@ -282,10 +282,12 @@ public class GameDac extends IGame {
 
 		if (!config.contains("jump_region"))
 			config.set("jump_region", new Cuboid(world, 0, 0, 0, 1, 1, 1));	
+		
 		if (!config.contains("tp_loc"))
 			config.set("tp_loc", new Location(world, 0, 0, 0));	
+		
 		if (!config.contains("min_jump_y"))
-			config.set("min_jump_y", 0);	
+			config.set("min_jump_y", 0);
 		
 		return config;
 	}
