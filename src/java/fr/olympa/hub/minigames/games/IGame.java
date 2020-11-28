@@ -53,6 +53,7 @@ import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.utils.observable.SimpleObservable;
+import fr.olympa.api.utils.spigot.SpigotUtils;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.HubPermissions;
 import fr.olympa.hub.OlympaHub;
@@ -473,10 +474,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void playerMoveEvent(PlayerMoveEvent e) {
-		if (e.isCancelled() || (
-				e.getFrom().getBlockX() == e.getTo().getBlockX() && 
-				e.getFrom().getBlockY() == e.getTo().getBlockY() && 
-				e.getFrom().getBlockZ() == e.getTo().getBlockZ()))
+		if (e.isCancelled() || SpigotUtils.isSameLocation(e.getFrom(), e.getTo()))
 			return;
 
 		Player p = e.getPlayer();

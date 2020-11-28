@@ -2,54 +2,60 @@ package fr.olympa.hub.minigames.games;
 
 import java.rmi.activation.ActivateFailedException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventPriority;
 
 import fr.olympa.api.command.complex.Cmd;
 import fr.olympa.api.command.complex.CommandContext;
 import fr.olympa.api.editor.RegionEditor;
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.region.shapes.Cuboid;
-import fr.olympa.api.region.tracking.ActionResult;
-import fr.olympa.api.region.tracking.TrackedRegion;
-import fr.olympa.api.region.tracking.flags.Flag;
-import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 
 public class GameDac extends IGame {
 
+	private final List<Material> wools = Arrays.asList(Material.RED_WOOL, Material.YELLOW_WOOL, Material.BLUE_WOOL, Material.MAGENTA_WOOL, Material.LIME_WOOL, Material.ORANGE_WOOL, Material.WHITE_WOOL, Material.BLACK_WOOL);
 	private final int minPlayers = 2;
 	//private boolean isGameInProgress = false;
 	
 	private final int countdownDelay = 3;
-	private final int playDelay = 8;
+	private final int playDelay = 10;
 	
 	private int currentTurn = -1;
 
-	private List<Player> waitingPlayers = new ArrayList<Player>();
-	private List<Player> playingPlayers = new ArrayList<Player>();
+	private List<Player> waitingPlayers = new ArrayList<>();
+	private List<DacPlayer> playingPlayers = new ArrayList<>();
 	
 	private Cuboid jumpRegion;
 	private Location tpLoc;
+	private int minJumpY;
 	
-	private Player playingPlayer = null;
+	private DacPlayer playingPlayer = null;
 	private boolean hasJumped = false;
+	private int remainingTime;
+	
+	private BossBar bar = Bukkit.createBossBar("dac", BarColor.PURPLE, BarStyle.SEGMENTED_10);
 	
 	public GameDac(OlympaHub plugin, ConfigurationSection configFromFile) throws ActivateFailedException {
 		super(plugin, GameType.DAC, configFromFile);
 
 		jumpRegion = (Cuboid) config.get("jump_region");
+		minJumpY = config.getInt("minJumpY");
 		
 		allowedTpLocs.add(tpLoc = config.getLocation("tp_loc"));
 
@@ -91,11 +97,13 @@ public class GameDac extends IGame {
 
 		waitingPlayers.remove(p.getPlayer());
 		
-		if (playingPlayers.contains(p.getPlayer())) {
-			playingPlayers.remove(p.getPlayer());
-			
-			if (p.getPlayer().equals(playingPlayer))
-				playGameTurn();
+		for (Iterator<DacPlayer> iterator = playingPlayers.iterator(); iterator.hasNext();) {
+			DacPlayer dacPlayer = iterator.next();
+			if (dacPlayer.p == p.getPlayer()) {
+				bar.removePlayer(p.getPlayer());
+				iterator.remove();
+				if (dacPlayer == playingPlayer) playGameTurn();
+			}
 		}
 	} 
 	 
@@ -124,11 +132,16 @@ public class GameDac extends IGame {
 			plugin.getTask().runTaskLater(() -> startGame(countdown - 1), 1, TimeUnit.SECONDS);
 			
 		//actions de début de partie
-		}else {			
-			playingPlayers.addAll(waitingPlayers);
+	}else {
+		bar.setTitle("§5Dé à coudre");
+			for (int i = 0; i < waitingPlayers.size(); i++) {
+				DacPlayer dacPlayer = new DacPlayer(waitingPlayers.get(i), wools.get(i));
+				playingPlayers.add(dacPlayer);
+				dacPlayer.p.teleport(tpLoc);
+				dacPlayer.sendDacMessage("§eLe match de dé à coudre commence ! Sélection du tour...");
+				bar.addPlayer(dacPlayer.p);
+			}
 			waitingPlayers.clear();
-			
-			playingPlayers.forEach(p -> p.teleport(tpLoc));
 
 			currentTurn = 0;
 			
@@ -143,7 +156,7 @@ public class GameDac extends IGame {
 		//si plus qu'un seul joueur en lice, fin de jeu (ou reset du jeu si 0 joueurs restants)
 		if (playingPlayers.size() <= 1) {
 			if (playingPlayers.size() == 1)
-				endGame(AccountProvider.get(playingPlayers.get(0).getUniqueId()), 1, true);
+				endGame(AccountProvider.get(playingPlayers.get(0).p.getUniqueId()), 1, true);
 			
 			//réinitialisation du jeu
 			resetLandingArea();
@@ -158,19 +171,28 @@ public class GameDac extends IGame {
 		playingPlayer = playingPlayers.get(0);
 		currentTurn++;
 
+		bar.setTitle("§5Dé à coudre : §d§l" + playingPlayer.p.getName());
+		bar.setProgress(1);
+		
 		hasJumped = false;
 		
-		playingPlayer.sendMessage(gameType.getChatPrefix() + "§aTour " + currentTurn + " : c'est à vous ! §7Sautez du pont, et tentez d'atterir dans l'eau ! Vous avez " + playDelay + " secondes.");
-
+		playingPlayer.sendDacMessage("§a§lTour " + currentTurn + " : c'est à vous ! §7Sautez du pont, et tentez d'atterir dans l'eau ! Vous avez " + playDelay + " secondes.");
+		playingPlayers.stream().filter(x -> x != playingPlayer).forEach(player -> player.sendDacMessage("§aTour " + currentTurn + " : c'est à " + playingPlayer.p.getName() + " de jouer !"));
+		
 		//si le joueur a mis trop de temps à sauter, expulsion
 		final int currentTurnBis = currentTurn;
 		
-		plugin.getTask().runTaskLater(() -> {
-			if (currentTurn == currentTurnBis)
-				if (playingPlayer != null && playingPlayer.isOnline())
-					endGame(AccountProvider.get(playingPlayer.getUniqueId()), 0, true);
-			
-		}, playDelay, TimeUnit.SECONDS);
+		remainingTime = playDelay;
+		plugin.getTask().scheduleSyncRepeatingTask(() -> {
+			if (remainingTime == 0) {
+				if (currentTurn == currentTurnBis)
+					if (playingPlayer != null && playingPlayer.p.isOnline())
+						endGame(AccountProvider.get(playingPlayer.p.getUniqueId()), 0, true);
+			}else {
+				remainingTime--;
+				bar.setProgress(remainingTime / playDelay);
+			}
+		}, 1, 1, TimeUnit.SECONDS);
 	}
 	
 	/**
@@ -179,14 +201,20 @@ public class GameDac extends IGame {
 	 */
 	@Override
 	protected void onMoveHandler(Player p, Location from, Location to) {
+		if (playingPlayers.isEmpty()) return; // le jeu n'a pas commencé
 		//si un joueur a sauté
-		if (p.getLocation().add(0, -1, 0).getBlock().getType() == Material.AIR && 
-				p.getLocation().clone().add(0, -2, 0).getBlock().getType() == Material.AIR &&
-				p.getLocation().clone().add(0, -3, 0).getBlock().getType() == Material.AIR &&
-				p.getLocation().clone().add(0, -4, 0).getBlock().getType() == Material.AIR) {
+		World world = from.getWorld();
+		int x = from.getBlockX();
+		int y = from.getBlockY();
+		int z = from.getBlockZ();
+		if (y <= minJumpY &&
+				world.getBlockAt(x, y - 1, z).getType() == Material.AIR && 
+				world.getBlockAt(x, y - 2, z).getType() == Material.AIR &&
+				world.getBlockAt(x, y - 3, z).getType() == Material.AIR &&
+				world.getBlockAt(x, y - 4, z).getType() == Material.AIR) {
 			
 			//détection de si c'est le joueur qui devait jouer qui a sauté
-			if (p.equals(playingPlayer))
+			if (playingPlayer != null && p.equals(playingPlayer.p))
 				hasJumped = true;
 			else {
 				p.teleport(tpLoc);
@@ -197,23 +225,25 @@ public class GameDac extends IGame {
 		}
 		
 		//si ce n'est pas le bon joueur ou s'il n'a pas sauté
-		if (!p.equals(playingPlayer) || !hasJumped)
+		if (playingPlayer == null || !p.equals(playingPlayer.p) || !hasJumped)
 			return;
 		
 		Block block = to.clone().add(0, -1, 0).getBlock();
 
 		if (block.getType() == Material.WATER && jumpRegion.isIn(block.getLocation())) {
-			playingPlayers.add(playingPlayers.remove(0));
-			playingPlayer = null;
-			
 			p.teleport(tpLoc);
 			p.sendMessage(gameType.getChatPrefix() + "§aBien visé !");
 			
-			block.setType(Material.BEDROCK);
+			block.setType(playingPlayer.wool);
+			
+			playingPlayers.add(playingPlayers.remove(0));
+			playingPlayer = null;
 			
 			plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
 			
 		}else if (block.getType() != Material.AIR) {
+			playingPlayer.sendDacMessage("§cLoupé ! Vous n'avez pas atteri dans l'eau...");
+			
 			playingPlayers.remove(0);
 			playingPlayer = null;
 			
@@ -287,15 +317,18 @@ public class GameDac extends IGame {
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
 	}
 
+	class DacPlayer {
+		private Player p;
+		private Material wool;
+		
+		public DacPlayer(Player p, Material wool) {
+			this.p = p;
+			this.wool = wool;
+		}
+		
+		public void sendDacMessage(String msg) {
+			p.sendMessage(gameType.getChatPrefix() + msg);
+		}
+	}
+	
 }
-
-
-
-
-
-
-
-
-
-
-

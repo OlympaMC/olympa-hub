@@ -1,5 +1,11 @@
 package fr.olympa.hub;
 
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
@@ -16,6 +22,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -32,13 +39,16 @@ import fr.olympa.api.region.tracking.flags.PlayerBlockInteractFlag;
 import fr.olympa.api.region.tracking.flags.PlayerBlocksFlag;
 import fr.olympa.hub.gui.MenuGUI;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
+import fr.skytasul.music.CommandMusic;
 
 public class HubListener implements Listener {
-	private ItemStack[] inventoryContents = new ItemStack[] { null, null, null, null, ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa") };
+	private Map<Integer, Entry<ItemStack, Consumer<Player>>> items = new HashMap<>();
 	private BossBar bossBar = Bukkit.createBossBar("§e§lBon jeu sur §6§lOlympa§e§l !", BarColor.YELLOW, BarStyle.SOLID);
 	
 	public HubListener() {
 		bossBar.setProgress(0);
+		items.put(4, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa", "§7Accès rapide :", "§8● §7Serveurs de jeu Olympa", "§8● §7Mini-jeux d'attente", "§8● §7Profil du joueur"), player -> new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player)));
+		items.put(7, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.JUKEBOX, "§d♪ | §5§lJukeBox", " §7Profitez de la radio", " §7ou choisissez vos musiques !"), player -> CommandMusic.open(player)));
 	}
 	
 	@EventHandler
@@ -52,7 +62,7 @@ public class HubListener implements Listener {
 		p.setFlying(false);
 		p.setAllowFlight(false);
 		p.setCanPickupItems(false);
-		p.getInventory().setContents(inventoryContents);
+		items.forEach((slot, entry) -> p.getInventory().setItem(slot, entry.getKey()));
 		p.getInventory().setHeldItemSlot(4);
 		p.sendTitle("§6§lOlympa", "§eBienvenue !", 2, 50, 7);
 		p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.4f, 1);
@@ -90,19 +100,30 @@ public class HubListener implements Listener {
 	public void onPlayerInteract(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		if (e.getHand() == EquipmentSlot.HAND) {
-			if (player.getInventory().getHeldItemSlot() == 4 && MiniGamesManager.getInstance().isPlaying(e.getPlayer()) == null) {
-				new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player);
-				e.setCancelled(true);
+			if (MiniGamesManager.getInstance().isPlaying(e.getPlayer()) == null) {
+				Entry<ItemStack, Consumer<Player>> entry = items.get(player.getInventory().getHeldItemSlot());
+				if (entry != null) {
+					entry.getValue().accept(player);
+					e.setCancelled(true);
+				}
 			}
 		}
+	}
+	
+	@EventHandler
+	public void onSwapHands(PlayerSwapHandItemsEvent e) {
+		e.setCancelled(true);
 	}
 
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		Player player = (Player) e.getWhoClicked();
-		if (e.getClickedInventory() == player.getInventory() && e.getSlot() == 4 && MiniGamesManager.getInstance().isPlaying(player) == null) {
-			new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player);
-			e.setCancelled(true);
+		if (e.getClickedInventory() == player.getInventory() && MiniGamesManager.getInstance().isPlaying(player) == null) {
+			Entry<ItemStack, Consumer<Player>> entry = items.get(e.getSlot());
+			if (entry != null) {
+				entry.getValue().accept(player);
+				e.setCancelled(true);
+			}
 		}
 	}
 
