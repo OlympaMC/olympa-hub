@@ -44,7 +44,7 @@ public class GameDac extends IGame {
 	
 	private Cuboid jumpRegion;
 	private Location tpLoc;
-	//private int minJumpY;
+	private int minJumpY;
 	
 	private DacPlayer playingPlayer = null;
 	private boolean hasJumped = false;
@@ -57,7 +57,7 @@ public class GameDac extends IGame {
 		super(plugin, GameType.DAC, configFromFile);
 
 		jumpRegion = (Cuboid) config.get("jump_region");
-		//minJumpY = jumpRegion.getMax().getBlockY();
+		minJumpY = jumpRegion.getMax().getBlockY();
 		
 		allowedTpLocs.add(tpLoc = config.getLocation("tp_loc"));
 
@@ -212,7 +212,7 @@ public class GameDac extends IGame {
 		int x = from.getBlockX();
 		int y = from.getBlockY();
 		int z = from.getBlockZ();
-		if (/*y <= minJumpY &&*/
+		if (y <= minJumpY &&
 				world.getBlockAt(x, y - 1, z).getType() == Material.AIR && 
 				world.getBlockAt(x, y - 2, z).getType() == Material.AIR &&
 				world.getBlockAt(x, y - 3, z).getType() == Material.AIR &&
