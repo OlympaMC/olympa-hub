@@ -17,6 +17,7 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import fr.olympa.api.command.complex.Cmd;
 import fr.olympa.api.command.complex.CommandContext;
@@ -48,6 +49,7 @@ public class GameDac extends IGame {
 	private DacPlayer playingPlayer = null;
 	private boolean hasJumped = false;
 	private int remainingTime;
+	private BukkitTask timeTask = null;
 	
 	private BossBar bar = Bukkit.createBossBar("dac", BarColor.PURPLE, BarStyle.SEGMENTED_10);
 	
@@ -183,16 +185,18 @@ public class GameDac extends IGame {
 		final int currentTurnBis = currentTurn;
 		
 		remainingTime = playDelay;
-		plugin.getTask().scheduleSyncRepeatingTask(() -> {
+		timeTask = Bukkit.getScheduler().runTaskTimer(OlympaHub.getInstance(), () -> {
 			if (remainingTime == 0) {
 				if (currentTurn == currentTurnBis)
-					if (playingPlayer != null && playingPlayer.p.isOnline())
+					if (playingPlayer != null && playingPlayer.p.isOnline()) {
+						playingPlayer.sendDacMessage("§cVous avez attendu trop longtemps avant de sauter !");
 						endGame(AccountProvider.get(playingPlayer.p.getUniqueId()), 0, true);
+					}
 			}else {
 				remainingTime--;
-				bar.setProgress(remainingTime / playDelay);
+				bar.setProgress((double) remainingTime / (double) playDelay);
 			}
-		}, 1, 1, TimeUnit.SECONDS);
+		}, 20, 20);
 	}
 	
 	/**
@@ -228,9 +232,10 @@ public class GameDac extends IGame {
 		if (playingPlayer == null || !p.equals(playingPlayer.p) || !hasJumped)
 			return;
 		
-		Block block = to.clone().add(0, -1, 0).getBlock();
+		//Block block = to.clone().add(0, -1, 0).getBlock();
 
-		if (block.getType() == Material.WATER && jumpRegion.isIn(block.getLocation())) {
+		Block block = to.getBlock();
+		if (block.getType() == Material.WATER/* && jumpRegion.isIn(to)*/) {
 			p.teleport(tpLoc);
 			p.sendMessage(gameType.getChatPrefix() + "§aBien visé !");
 			
@@ -239,13 +244,17 @@ public class GameDac extends IGame {
 			playingPlayers.add(playingPlayers.remove(0));
 			playingPlayer = null;
 			
+			timeTask.cancel();
+			
 			plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
 			
-		}else if (block.getType() != Material.AIR) {
+		}else if (p.isOnGround()) {
 			playingPlayer.sendDacMessage("§cLoupé ! Vous n'avez pas atteri dans l'eau...");
 			
 			playingPlayers.remove(0);
 			playingPlayer = null;
+			
+			timeTask.cancel();
 			
 			endGame(AccountProvider.get(p.getUniqueId()), 0, true);
 			plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
