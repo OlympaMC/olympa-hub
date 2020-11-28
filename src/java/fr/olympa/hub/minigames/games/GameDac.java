@@ -44,7 +44,7 @@ public class GameDac extends IGame {
 	
 	private Cuboid jumpRegion;
 	private Location tpLoc;
-	private int minJumpY;
+	//private int minJumpY;
 	
 	private DacPlayer playingPlayer = null;
 	private boolean hasJumped = false;
@@ -57,7 +57,7 @@ public class GameDac extends IGame {
 		super(plugin, GameType.DAC, configFromFile);
 
 		jumpRegion = (Cuboid) config.get("jump_region");
-		minJumpY = config.getInt("minJumpY");
+		//minJumpY = jumpRegion.getMax().getBlockY();
 		
 		allowedTpLocs.add(tpLoc = config.getLocation("tp_loc"));
 
@@ -135,7 +135,7 @@ public class GameDac extends IGame {
 			
 		//actions de début de partie
 	}else {
-		bar.setTitle("§5Dé à coudre");
+		bar.setTitle(gameType.getName());
 			for (int i = 0; i < waitingPlayers.size(); i++) {
 				DacPlayer dacPlayer = new DacPlayer(waitingPlayers.get(i), wools.get(i));
 				playingPlayers.add(dacPlayer);
@@ -206,12 +206,13 @@ public class GameDac extends IGame {
 	@Override
 	protected void onMoveHandler(Player p, Location from, Location to) {
 		if (playingPlayers.isEmpty()) return; // le jeu n'a pas commencé
+
 		//si un joueur a sauté
 		World world = from.getWorld();
 		int x = from.getBlockX();
 		int y = from.getBlockY();
 		int z = from.getBlockZ();
-		if (y <= minJumpY &&
+		if (/*y <= minJumpY &&*/
 				world.getBlockAt(x, y - 1, z).getType() == Material.AIR && 
 				world.getBlockAt(x, y - 2, z).getType() == Material.AIR &&
 				world.getBlockAt(x, y - 3, z).getType() == Material.AIR &&
@@ -231,15 +232,18 @@ public class GameDac extends IGame {
 		//si ce n'est pas le bon joueur ou s'il n'a pas sauté
 		if (playingPlayer == null || !p.equals(playingPlayer.p) || !hasJumped)
 			return;
-		
-		//Block block = to.clone().add(0, -1, 0).getBlock();
 
 		Block block = to.getBlock();
 		if (block.getType() == Material.WATER/* && jumpRegion.isIn(to)*/) {
 			p.teleport(tpLoc);
 			p.sendMessage(gameType.getChatPrefix() + "§aBien visé !");
 			
-			block.setType(playingPlayer.wool);
+			//détermination du bloc le plus en haut de la zone
+			Location loc = block.getLocation().clone();
+			while(loc.clone().add(0, 1, 0).getBlock().getType() == Material.WATER)
+				loc = loc.add(0, 1, 0);
+			
+			loc.getBlock().setType(playingPlayer.wool);
 			
 			playingPlayers.add(playingPlayers.remove(0));
 			playingPlayer = null;
