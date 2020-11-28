@@ -57,7 +57,7 @@ public class GameDac extends IGame {
 		super(plugin, GameType.DAC, configFromFile);
 
 		jumpRegion = (Cuboid) config.get("jump_region");
-		minJumpY = jumpRegion.getMax().getBlockY();
+		minJumpY = config.getInt("min_jump_y");
 		
 		allowedTpLocs.add(tpLoc = config.getLocation("tp_loc"));
 
@@ -212,7 +212,7 @@ public class GameDac extends IGame {
 		int x = from.getBlockX();
 		int y = from.getBlockY();
 		int z = from.getBlockZ();
-		if (y <= minJumpY &&
+		if (y < minJumpY &&
 				world.getBlockAt(x, y - 1, z).getType() == Material.AIR && 
 				world.getBlockAt(x, y - 2, z).getType() == Material.AIR &&
 				world.getBlockAt(x, y - 3, z).getType() == Material.AIR &&
@@ -284,6 +284,8 @@ public class GameDac extends IGame {
 			config.set("jump_region", new Cuboid(world, 0, 0, 0, 1, 1, 1));	
 		if (!config.contains("tp_loc"))
 			config.set("tp_loc", new Location(world, 0, 0, 0));	
+		if (!config.contains("min_jump_y"))
+			config.set("min_jump_y", 0);	
 		
 		return config;
 	}
@@ -328,6 +330,21 @@ public class GameDac extends IGame {
 		
 		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLe point de téléportation a été défini en " +
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
+	}
+
+	/**
+	 * Internal function, do NOT call it
+	 * @param cmd
+	 */
+	@Cmd (player = true)
+	public void minYloc(CommandContext cmd) {
+		Location loc = getPlayer().getLocation();
+		
+		tpLoc = loc;
+		config.set("min_jump_y", tpLoc);
+		
+		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLe niveau Y minimal pour valider le saut est maintenant en y = " +
+				loc.getBlockY());
 	}
 
 	class DacPlayer {
