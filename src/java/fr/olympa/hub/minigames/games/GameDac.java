@@ -17,6 +17,8 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.scheduler.BukkitTask;
 
 import fr.olympa.api.command.complex.Cmd;
@@ -48,6 +50,7 @@ public class GameDac extends IGame {
 	
 	private DacPlayer playingPlayer = null;
 	private boolean hasJumped = false;
+	
 	private int remainingTime;
 	private BukkitTask timeTask = null;
 	
@@ -99,9 +102,14 @@ public class GameDac extends IGame {
 
 		waitingPlayers.remove(p.getPlayer());
 		
+		/*playingPlayers.remove(new DacPlayer(p.getPlayer(), null));
+		if (playingPlayer.equals(new DacPlayer(p.getPlayer(), null)))
+			playingPlayer = null;*/
+		
 		for (Iterator<DacPlayer> iterator = playingPlayers.iterator(); iterator.hasNext();) {
 			DacPlayer dacPlayer = iterator.next();
-			if (dacPlayer.p == p.getPlayer()) {
+			
+			if (dacPlayer.p.equals(p.getPlayer())) {
 				bar.removePlayer(p.getPlayer());
 				iterator.remove();
 				if (dacPlayer == playingPlayer) playGameTurn();
@@ -192,6 +200,7 @@ public class GameDac extends IGame {
 						playingPlayer.sendDacMessage("§cVous avez attendu trop longtemps avant de sauter !");
 						endGame(AccountProvider.get(playingPlayer.p.getUniqueId()), 0, true);
 					}
+				timeTask.cancel();
 			}else {
 				remainingTime--;
 				bar.setProgress((double) remainingTime / (double) playDelay);
@@ -207,32 +216,40 @@ public class GameDac extends IGame {
 	protected void onMoveHandler(Player p, Location from, Location to) {
 		if (playingPlayers.isEmpty()) return; // le jeu n'a pas commencé
 
+		//Bukkit.broadcastMessage("TO Y : " + to.getBlockY() + " - minJumpY : " + minJumpY);
+		
 		//si un joueur a sauté
 		World world = from.getWorld();
 		int x = from.getBlockX();
 		int y = from.getBlockY();
 		int z = from.getBlockZ();
-		if (y < minJumpY &&
+		if (to.getBlockY() < minJumpY &&
 				world.getBlockAt(x, y - 1, z).getType() == Material.AIR && 
 				world.getBlockAt(x, y - 2, z).getType() == Material.AIR &&
 				world.getBlockAt(x, y - 3, z).getType() == Material.AIR &&
 				world.getBlockAt(x, y - 4, z).getType() == Material.AIR) {
 			
+			//Bukkit.broadcastMessage("Detected jump : " + p.getName());
+			
 			//détection de si c'est le joueur qui devait jouer qui a sauté
-			if (playingPlayer != null && p.equals(playingPlayer.p))
+			if (playingPlayer != null && p.equals(playingPlayer.p)) {
+				//if (!hasJumped) Bukkit.broadcastMessage("Detected jump : " + p.getName());
 				hasJumped = true;
-			else {
+				
+			}else {
 				p.teleport(tpLoc);
 				p.sendMessage(gameType.getChatPrefix() + "§7Ce n'est pas votre tour de sauter !");
 			}
-			
-			return;
 		}
 		
+		//Bukkit.broadcastMessage("§8Detected move of the player : " + p.getName());
+		
 		//si ce n'est pas le bon joueur ou s'il n'a pas sauté
-		if (playingPlayer == null || !p.equals(playingPlayer.p) || !hasJumped)
+		if (!hasJumped || playingPlayer == null || !p.equals(playingPlayer.p))
 			return;
-
+		
+		//Bukkit.broadcastMessage("§7Detected move of playing player : " + p.getName());
+		
 		Block block = to.getBlock();
 		if (block.getType() == Material.WATER/* && jumpRegion.isIn(to)*/) {
 			p.teleport(tpLoc);
@@ -252,18 +269,31 @@ public class GameDac extends IGame {
 			
 			plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
 			
-		}else if (p.isOnGround()) {
-			playingPlayer.sendDacMessage("§cLoupé ! Vous n'avez pas atteri dans l'eau...");
-			
-			playingPlayers.remove(0);
-			playingPlayer = null;
-			
-			timeTask.cancel();
-			
-			endGame(AccountProvider.get(p.getUniqueId()), 0, true);
-			plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
-		}
+		}//else if (block.getType() != Material.AIR) {}
+		
 	}
+	
+	
+	//Si le joueur prend des dégâts de chute, c'est qu'il a fail son saut 
+	protected void onDamageHandler(EntityDamageEvent e) {
+		//return si ce n'est pas le joueur en train de sauter qui a pris des dégâts de chute, ou s'il a fini son saut et s'est fait retp en haut
+		if (e.getCause() != DamageCause.FALL || 
+				playingPlayer == null || !e.getEntity().equals(playingPlayer.p) || 
+				e.getEntity().getLocation().getBlockY() >= minJumpY)
+			return;
+		
+		playingPlayer.sendDacMessage("§cLoupé ! Vous n'avez pas atteri dans l'eau...");
+		
+		playingPlayers.remove(0);
+		playingPlayer = null;
+		
+		timeTask.cancel();
+		
+		endGame(AccountProvider.get(e.getEntity().getUniqueId()), 0, true);
+		plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
+	}
+	
+	
 	
 	private void resetLandingArea() {
 		for (int x = jumpRegion.getMin().getBlockX() ; x <= jumpRegion.getMax().getBlockX() ; x++)
@@ -342,8 +372,8 @@ public class GameDac extends IGame {
 	public void minYloc(CommandContext cmd) {
 		Location loc = getPlayer().getLocation();
 		
-		tpLoc = loc;
-		config.set("min_jump_y", tpLoc);
+		minJumpY = loc.getBlockY();
+		config.set("min_jump_y", minJumpY);
 		
 		getPlayer().sendMessage(gameType.getChatPrefix() + "§aLe niveau Y minimal pour valider le saut est maintenant en y = " +
 				loc.getBlockY());
@@ -360,6 +390,11 @@ public class GameDac extends IGame {
 		
 		public void sendDacMessage(String msg) {
 			p.sendMessage(gameType.getChatPrefix() + msg);
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			return o instanceof DacPlayer && p.equals(((DacPlayer)o).p);
 		}
 	}
 	
