@@ -77,6 +77,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		new ServerConfigCommand(this).register();
 
 		OlympaGroup.PLAYER.setRuntimePermission("jumppads.use");
+		OlympaGroup.PLAYER.setRuntimePermission("music.favorites", false);
 
 		OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), RedisChannel.BUNGEE_SEND_SERVERSINFOS.name());
 		//RedisAccess.INSTANCE.disconnect();

@@ -3,6 +3,7 @@ package fr.olympa.hub.minigames.games;
 import java.rmi.activation.ActivateFailedException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -10,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
@@ -24,12 +26,15 @@ import org.bukkit.scheduler.BukkitTask;
 import fr.olympa.api.command.complex.Cmd;
 import fr.olympa.api.command.complex.CommandContext;
 import fr.olympa.api.editor.RegionEditor;
+import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.hub.HubListener;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class GameDac extends IGame {
 
@@ -143,9 +148,10 @@ public class GameDac extends IGame {
 			
 			plugin.getTask().runTaskLater(() -> startGame(countdown - 1), 1, TimeUnit.SECONDS);
 			
-		//actions de début de partie
-	}else {
-		bar.setTitle(gameType.getName());
+			//actions de début de partie
+		}else {
+			bar.setTitle("§5Dé à coudre");
+			Collections.shuffle(waitingPlayers);
 			for (int i = 0; i < waitingPlayers.size(); i++) {
 				DacPlayer dacPlayer = new DacPlayer(waitingPlayers.get(i), wools.get(i));
 				playingPlayers.add(dacPlayer);
@@ -153,9 +159,10 @@ public class GameDac extends IGame {
 				dacPlayer.sendDacMessage("§eLe match de dé à coudre commence ! Sélection du tour...");
 				HubListener.bossBar.removePlayer(dacPlayer.p);
 				bar.addPlayer(dacPlayer.p);
+				dacPlayer.p.getInventory().setItem(4, ItemUtils.item(dacPlayer.wool, "§dDé à coudre", "§8> §7Vous êtes le", "  §7joueur §l" + i));
 			}
 			waitingPlayers.clear();
-
+			
 			currentTurn = 0;
 			
 			plugin.getTask().runTaskLater(() -> playGameTurn(), 2, TimeUnit.SECONDS);
@@ -190,7 +197,11 @@ public class GameDac extends IGame {
 		hasJumped = false;
 		
 		playingPlayer.sendDacMessage("§a§lTour " + currentTurn + " : c'est à vous ! §7Sautez du pont, et tentez d'atterir dans l'eau ! Vous avez " + playDelay + " secondes.");
-		playingPlayers.stream().filter(x -> x != playingPlayer).forEach(player -> player.sendDacMessage("§aTour " + currentTurn + " : c'est à " + playingPlayer.p.getName() + " de jouer !"));
+		playingPlayer.p.playSound(playingPlayer.p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 0.9f);
+		playingPlayers.stream().forEach(player -> {
+			player.p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§dTour de §5§l" + playingPlayer.p.getName()));
+			if (player != playingPlayer) player.sendDacMessage("§aTour " + currentTurn + " : c'est à " + playingPlayer.p.getName() + " de jouer !");
+		});
 		
 		//si le joueur a mis trop de temps à sauter, expulsion
 		final int currentTurnBis = currentTurn;
