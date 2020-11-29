@@ -26,6 +26,7 @@ import fr.olympa.api.command.complex.CommandContext;
 import fr.olympa.api.editor.RegionEditor;
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.region.shapes.Cuboid;
+import fr.olympa.hub.HubListener;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
@@ -105,12 +106,13 @@ public class GameDac extends IGame {
 		/*playingPlayers.remove(new DacPlayer(p.getPlayer(), null));
 		if (playingPlayer.equals(new DacPlayer(p.getPlayer(), null)))
 			playingPlayer = null;*/
+		bar.removePlayer(p.getPlayer());
+		HubListener.bossBar.addPlayer(p.getPlayer());
 		
 		for (Iterator<DacPlayer> iterator = playingPlayers.iterator(); iterator.hasNext();) {
 			DacPlayer dacPlayer = iterator.next();
 			
 			if (dacPlayer.p.equals(p.getPlayer())) {
-				bar.removePlayer(p.getPlayer());
 				iterator.remove();
 				if (dacPlayer == playingPlayer) playGameTurn();
 			}
@@ -149,6 +151,7 @@ public class GameDac extends IGame {
 				playingPlayers.add(dacPlayer);
 				dacPlayer.p.teleport(tpLoc);
 				dacPlayer.sendDacMessage("§eLe match de dé à coudre commence ! Sélection du tour...");
+				HubListener.bossBar.removePlayer(dacPlayer.p);
 				bar.addPlayer(dacPlayer.p);
 			}
 			waitingPlayers.clear();

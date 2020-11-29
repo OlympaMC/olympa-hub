@@ -43,7 +43,7 @@ import fr.skytasul.music.CommandMusic;
 
 public class HubListener implements Listener {
 	private Map<Integer, Entry<ItemStack, Consumer<Player>>> items = new HashMap<>();
-	private BossBar bossBar = Bukkit.createBossBar("§e§lBon jeu sur §6§lOlympa§e§l !", BarColor.YELLOW, BarStyle.SOLID);
+	public static BossBar bossBar = Bukkit.createBossBar("§e§lBon jeu sur §6§lOlympa§e§l !", BarColor.YELLOW, BarStyle.SOLID);
 	
 	public HubListener() {
 		bossBar.setProgress(0);
