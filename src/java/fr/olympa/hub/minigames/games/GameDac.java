@@ -42,7 +42,8 @@ public class GameDac extends IGame {
 	private final int minPlayers = 2;
 	//private boolean isGameInProgress = false;
 	
-	private final int countdownDelay = 3;
+	private boolean inCountdown = false;
+	private final int countdownDelay = 10;
 	private final int playDelay = 10;
 	
 	private int currentTurn = -1;
@@ -125,12 +126,14 @@ public class GameDac extends IGame {
 	} 
 	 
 	private void tryToInitGame() {
-		if (playingPlayers.size() > 0)
+		if (playingPlayers.size() > 0) {
 			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§aUne partie est déjà en cours. Nombres de joueurs prêts pour la prochaine partie : " + waitingPlayers.size() + "/" + minPlayers));
-		else if (waitingPlayers.size() < minPlayers)
+		}else {
+			if (waitingPlayers.size() >= minPlayers && !inCountdown) {
+				startGame(countdownDelay);
+			}
 			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§aNombre de joueurs prêts : " + waitingPlayers.size() + "/" + minPlayers));
-		else
-			startGame(countdownDelay);
+		}
 	}
 	
 	private void startGame(int countdown) {
@@ -138,8 +141,12 @@ public class GameDac extends IGame {
 			return;
 		
 		//s'il n'y a plus assez de joueurs pour commencer la partie, cancel de cette dernière
-		if (waitingPlayers.size() < minPlayers) 
+		if (waitingPlayers.size() < minPlayers) {
 			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§7Plus assez de joueur pour commencer la partie... (" + waitingPlayers.size() + "/" + minPlayers + ")"));
+			inCountdown = false;
+			return;
+		}
+		inCountdown = true;
 		
 		//actions avant début de partie
 		if (countdown > 0) {
