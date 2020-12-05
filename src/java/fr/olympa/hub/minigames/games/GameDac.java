@@ -157,6 +157,7 @@ public class GameDac extends IGame {
 			
 			//actions de début de partie
 		}else {
+			inCountdown = false;
 			bar.setTitle("§5Dé à coudre");
 			Collections.shuffle(waitingPlayers);
 			for (int i = 0; i < waitingPlayers.size(); i++) {

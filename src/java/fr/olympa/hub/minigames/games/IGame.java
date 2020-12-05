@@ -502,7 +502,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		
 	}
 	
-	@EventHandler
+	@EventHandler (priority = EventPriority.LOWEST)
 	public void onDamage(EntityDamageEvent e) {
 		if (players.containsKey(e.getEntity().getUniqueId()))
 			onDamageHandler(e);
