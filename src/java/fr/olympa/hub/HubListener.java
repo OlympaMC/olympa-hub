@@ -49,6 +49,7 @@ public class HubListener implements Listener {
 		bossBar.setProgress(0);
 		items.put(4, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa", "§7Accès rapide :", "§8● §7Serveurs de jeu Olympa", "§8● §7Mini-jeux d'attente", "§8● §7Profil du joueur"), player -> new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player)));
 		items.put(7, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.JUKEBOX, "§d♪ | §5§lJukeBox", " §7Profitez de la radio", " §7ou choisissez vos musiques !"), player -> CommandMusic.open(player)));
+		items.put(8, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.YELLOW_BED, "§8Ω | §7Téléportation au §lspawn"), player -> player.teleport(OlympaHub.getInstance().spawn)));
 	}
 	
 	@EventHandler

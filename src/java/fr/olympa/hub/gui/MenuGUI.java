@@ -34,12 +34,8 @@ public class MenuGUI extends OlympaGUI {
 		
 		ItemStack orangeSeparator = ItemUtils.itemSeparator(DyeColor.ORANGE);
 		ItemStack yellowSeparator = ItemUtils.itemSeparator(DyeColor.YELLOW);
-		/*for (int slot = 0; slot < 54; slot++)
-			basicContents[slot] = orangeSeparator;
-		for (int slot : new int[] { 2, 11, 10, 9, 18, 27, 36, 45, 46, 47, 48, 49, 50, 51, 52, 53, 44, 35, 26, 17, 16, 15, 6 })
-			basicContents[slot] = yellowSeparator;*/
+
 		for (int slot = 9; slot < 18; slot++) basicContents[slot] = yellowSeparator;
-		//for (int slot = 36; slot < 45; slot++) basicContents[slot] = orangeSeparator;
 		
 		basicContents[0] = ItemUtils.skullCustom("§bTwitter",
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2M3NDVhMDZmNTM3YWVhODA1MDU1NTkxNDllYTE2YmQ0YTg0ZDQ0OTFmMTIyMjY4MThjMzg4MWMwOGU4NjBmYyJ9fX0=");
