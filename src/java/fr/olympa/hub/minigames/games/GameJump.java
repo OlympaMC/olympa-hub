@@ -27,10 +27,10 @@ public class GameJump extends IGame{
 	private Location tpLoc;
 	private List<Location> checkpoints = new ArrayList<Location>();
 
-	private Map<Player, Long> playersCPTimeInit = new HashMap<Player, Long>();
+	private Map<Player, Long> playerCPTimeInit = new HashMap<Player, Long>();
 	private Map<Player, Long> playerLastCPTime = new HashMap<Player, Long>();
 	
-	private Map<Player, Integer> playersLastCheckPoint = new HashMap<Player, Integer>();
+	private Map<Player, Integer> playerLastCheckPoint = new HashMap<Player, Integer>();
 	
 	public GameJump(OlympaHub plugin, ConfigurationSection fileConfig) throws ActivateFailedException {
 		super(plugin, GameType.JUMP, fileConfig);
@@ -48,10 +48,10 @@ public class GameJump extends IGame{
 	protected void startGame(OlympaPlayerHub p) {
 		super.startGame(p);
 		
-		playersCPTimeInit.put(p.getPlayer(), System.currentTimeMillis());
+		playerCPTimeInit.put(p.getPlayer(), System.currentTimeMillis());
 		playerLastCPTime.put(p.getPlayer(), 0l);
 		
-		playersLastCheckPoint.put(p.getPlayer(), 0);
+		playerLastCheckPoint.put(p.getPlayer(), 0);
 		
 		p.getPlayer().teleport(tpLoc);
 		p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Objectif : finissez le jump le plus rapidement possible !");
@@ -62,10 +62,10 @@ public class GameJump extends IGame{
 	protected void restartGame(OlympaPlayerHub p) {
 		super.restartGame(p);
 		
-		playersCPTimeInit.put(p.getPlayer(), System.currentTimeMillis());
+		playerCPTimeInit.put(p.getPlayer(), System.currentTimeMillis());
 		playerLastCPTime.put(p.getPlayer(), 0l);
 		
-		playersLastCheckPoint.put(p.getPlayer(), 0);
+		playerLastCheckPoint.put(p.getPlayer(), 0);
 		
 		p.getPlayer().teleport(tpLoc);
 	}
@@ -74,38 +74,41 @@ public class GameJump extends IGame{
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		super.endGame(p, score, warpToSpawn);
 		
-		playersCPTimeInit.remove(p.getPlayer());
+		playerCPTimeInit.remove(p.getPlayer());
 		playerLastCPTime.remove(p.getPlayer());
 		
-		playersLastCheckPoint.remove(p.getPlayer());
+		playerLastCheckPoint.remove(p.getPlayer());
+		
+		if (score > 0 && !warpToSpawn) {
+			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Téléportation au spawn dans 5 secondes...");
+			plugin.getTask().runTaskLater(() -> p.getPlayer().teleport(startingLoc), 100);	
+		}
 	}
 	
 	@Override
 	protected void onMoveHandler(Player p, Location from, Location to) {
 		int check = getCheckpointIndex(to);
 		
-		if (check == 0 || getCurrentCPTime(p) == -1)
+		if (check == 0 || getCurrentCPTime(p) < 1000)
 			return;
 		
-		if (playersLastCheckPoint.get(p) + 1 == check) 
+		if (playerLastCheckPoint.get(p) + 1 == check) 
 			if (check == checkpoints.size() - 1) {
-				endGame(AccountProvider.get(p.getUniqueId()), (playerLastCPTime.get(p) + getCurrentCPTime(p))/1000d, false);
 				
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Téléportation au spawn dans 5 secondes...");
-				plugin.getTask().runTaskLater(() -> p.teleport(startingLoc), 100);
+				endGame(AccountProvider.get(p.getUniqueId()), (playerLastCPTime.get(p) + getCurrentCPTime(p))/1000d, false);
 				
 			}else {
 				playerLastCPTime.put(p, playerLastCPTime.get(p) + getCurrentCPTime(p));
-				playersCPTimeInit.put(p, System.currentTimeMillis());
+				playerCPTimeInit.put(p, System.currentTimeMillis());
 				
-				playersLastCheckPoint.put(p, check);
+				playerLastCheckPoint.put(p, check);
 				
 				p.sendMessage(gameType.getChatPrefix() + "§aCheckpoint " + check + " atteint ! Temps total : " + new DecimalFormat("#.##").format(playerLastCPTime.get(p)/1000d) + "s");
 			}
-		else if (playersLastCheckPoint.get(p) > check)
+		else if (playerLastCheckPoint.get(p) > check)
 			p.sendMessage(gameType.getChatPrefix() + "§7Vous avez déjà validé ce checkpoint !");
-		else if (playersLastCheckPoint.get(p) + 1 < check)
-			p.sendMessage(gameType.getChatPrefix() + "§cNe brûlez pas les étapes ! §7Vous devez d'abord vous rendre au point " + (playersLastCheckPoint.get(p) + 1));
+		else if (playerLastCheckPoint.get(p) + 1 < check)
+			p.sendMessage(gameType.getChatPrefix() + "§cNe brûlez pas les étapes ! §7Vous devez d'abord vous rendre au point " + (playerLastCheckPoint.get(p) + 1));
 	}
 	
 	private int getCheckpointIndex(Location toCheck) {
@@ -117,15 +120,15 @@ public class GameJump extends IGame{
 	}
 	
 	/**
-	 * Return seconds player took since the begining of the last checkpoint
+	 * Return seconds player took since the begining of the last CheckPoint
 	 * @param p
 	 * @return
 	 */
 	private long getCurrentCPTime(Player p) {
-		if (!playersCPTimeInit.containsKey(p))
+		if (!playerCPTimeInit.containsKey(p))
 			return -1;
 		
-		return (long) (System.currentTimeMillis() - playersCPTimeInit.get(p));
+		return System.currentTimeMillis() - playerCPTimeInit.get(p);
 	}
 	
 	@Override
@@ -143,9 +146,9 @@ public class GameJump extends IGame{
 	}
 	
 	private void tpToLastCheckpoint(Player p) {
-		playersCPTimeInit.put(p, System.currentTimeMillis());
+		playerCPTimeInit.put(p, System.currentTimeMillis());
 		
-		int check = playersLastCheckPoint.get(p);
+		int check = playerLastCheckPoint.get(p);
 		p.teleport(checkpoints.get(check));
 		
 		p.sendMessage(gameType.getChatPrefix() + "§2Téléportation au checkpoint " + check + 

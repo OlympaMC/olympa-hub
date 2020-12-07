@@ -97,7 +97,7 @@ public class MiniGamesManager {
 	 */
 	public GameType isPlaying(Player p) {
 		for (IGame game : games.values())
-			if (game.getPlayers().contains(p.getUniqueId()))
+			if (game.getPlayers().contains(p))
 				return game.getType();
 		
 		return null;

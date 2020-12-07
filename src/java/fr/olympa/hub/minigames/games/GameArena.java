@@ -198,9 +198,9 @@ public class GameArena extends IGame{
 	
 	private void startGame(List<Player> startingPlayers, int countdown) {
 		//cancel si l'un des joueurs n'est plus dans la partie
-		if (startingPlayers.size() != 2 || !getPlayers().contains(startingPlayers.get(0).getUniqueId()) || !getPlayers().contains(startingPlayers.get(1).getUniqueId())) {
+		if (startingPlayers.size() != 2 || !getPlayers().contains(startingPlayers.get(0)) || !getPlayers().contains(startingPlayers.get(1))) {
 			startingPlayers.forEach(p -> {
-				if (getPlayers().contains(p.getUniqueId())) {
+				if (getPlayers().contains(p)) {
 					p.sendMessage(gameType.getChatPrefix() + "§cVotre adversaire a annulé la partie ! §7En attente d'un nouvau joueur...");
 					queuedPlayers.add(0, p);
 				}

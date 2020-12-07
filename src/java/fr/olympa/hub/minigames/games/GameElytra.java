@@ -8,7 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -51,6 +53,7 @@ public class GameElytra extends IGame {
 	
 	private Map<Player, Integer> nextPortal = new HashMap<Player, Integer>();
 	private Map<Player, Long> startTime = new HashMap<Player, Long>();
+	private Map<Player, Location> lastKnownLoc = new HashMap<Player, Location>();
 	
 	private int lastPortalIndex = 0;
 	
@@ -76,7 +79,7 @@ public class GameElytra extends IGame {
 				@Override
 				public ActionResult enters(Player p, Set<TrackedRegion> to) {
 					super.enters(p, to);
-					if (getPlayers().contains(p.getUniqueId()))
+					if (getPlayers().contains(p))
 						enterPortal(p, reg);
 					
 					return ActionResult.ALLOW;
@@ -100,6 +103,22 @@ public class GameElytra extends IGame {
 				});
 			}
 		}.runTaskTimer(plugin, 10, 2);
+		
+		//task de test si le joueur est toujours en train de voler ou non (test effectué sur ses positions successives)
+		new BukkitRunnable() {
+
+			@Override
+			public void run() {
+				getPlayers().forEach(p -> {
+					if (p.getLocation().distance(lastKnownLoc.get(p)) <= 0.5 && getPlayerTimeMillis(p) > 1500) {
+						p.sendMessage(gameType.getChatPrefix() + "§7Ne vous arrêtez pas de voler !");
+						restartGame(AccountProvider.get(p.getUniqueId()));
+					}
+					
+					lastKnownLoc.put(p, p.getLocation().clone());
+				});
+			}
+		}.runTaskTimer(plugin, 20, 10);
 	}
 	
 	private void enterPortal(Player p, Region reg) {
@@ -123,13 +142,6 @@ public class GameElytra extends IGame {
 	protected void startGame(OlympaPlayerHub p) {
 		super.startGame(p);
 		
-		ItemStack elytras = new ItemStack(Material.ELYTRA);
-		ItemMeta meta = elytras.getItemMeta();
-		meta.setUnbreakable(true);
-		elytras.setItemMeta(meta);
-		
-		p.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, elytras);
-		
 		launchPreGame(p.getPlayer(), startingDelay);
 	}
 	
@@ -142,61 +154,82 @@ public class GameElytra extends IGame {
 	
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
-		super.endGame(p, score, false);
+		super.endGame(p, score, warpToSpawn);
 		
 		p.getPlayer().removePotionEffect(PotionEffectType.LEVITATION);
+		p.getPlayer().getInventory().setChestplate(new ItemStack(Material.AIR));
+		p.getPlayer().setGliding(false);
+		
 		nextPortal.remove(p.getPlayer());
 		startTime.remove(p.getPlayer());
+		lastKnownLoc.remove(p.getPlayer());
 		
 		if (score > 0 && !warpToSpawn) {
-			p.getPlayer().setGliding(false);
 			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Téléportation au spawn dans 5 secondes...");
 			
 			p.getPlayer().teleport(endRaceLoc);
-			plugin.getTask().runTaskLater(() -> p.getPlayer().teleport(startingLoc), 100);
+			
+			plugin.getTask().runTaskLater(() -> {
+				p.getPlayer().teleport(startingLoc);
+				p.getPlayer().setGliding(false);	
+			}, 100);
 		}
 	}
 	
 	
-	
-	
 	private void launchPreGame(Player p, int timeLeft) {
-		if (!getPlayers().contains(p.getUniqueId()))
+		if (!getPlayers().contains(p))
 			return;
 		
+		//actions exécutées une seule fois au début du timer
 		if (timeLeft == startingDelay) {
+			p.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, new ItemStack(Material.AIR));
+			p.setGliding(false);
+			
 			p.getPlayer().removePotionEffect(PotionEffectType.LEVITATION);
 			p.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, startingDelay*20, 0, false, false));
 			
 			nextPortal.put(p.getPlayer(), 0);
 			startTime.put(p.getPlayer(), System.currentTimeMillis() + startingDelay*1000);
-			
-			p.setGliding(false);
+			lastKnownLoc.put(p, p.getLocation().clone());
+
 			p.teleport(startRaceLoc);
-		}	
+		}
 		
 		if (timeLeft > 0) {
 			p.sendTitle("§c" + timeLeft, "§7La course débute dans...", 0, 22, 0);
 			
 			plugin.getTask().runTaskLater(() -> launchPreGame(p, timeLeft - 1), 20);
 		}else {
-			//p.removePotionEffect(PotionEffectType.LEVITATION);
+			p.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, new ItemStack(Material.ELYTRA));
 			p.sendMessage(gameType.getChatPrefix() + "§eDébut de la course !");
 		}
 		
 	}
+
+
+	@Override //relance le jeu pour le joueur s'il sort de la zone de jeu alors qu'il était en vol
+	protected boolean exitGameArea(Player p) {
+		if (getPlayerTimeMillis(p) > 0) {
+			restartGame(AccountProvider.get(p.getUniqueId()));
+			return false;	
+		}else {
+			return super.exitGameArea(p);
+		}
+	}
+	
+	/*@Override
+	protected void onMoveHandler(Player p, Location from, Location to) {
+		if (getPlayerTimeMillis(p) < 0 && from.getBlockX() != to.getBlockX() && from.getBlockZ() != to.getBlockZ())
+			p.setGliding(false);
+	}*/
 	
 	
-	
-	
-	
+	/*
 	@EventHandler //actions à effectuer si le joueur atterit
 	public void onGlideToogle(EntityToggleGlideEvent e) {
-		if (!getPlayers().contains(e.getEntity().getUniqueId()))
+		if (!getPlayers().contains(e.getEntity()))
 			return;
-		
-		if (System.currentTimeMillis() - startTime.get(e.getEntity()) < 0)
-			e.setCancelled(true);
 		
 		if (!e.isGliding())
 			if (nextPortal.get(e.getEntity()) > lastPortalIndex)
@@ -205,11 +238,18 @@ public class GameElytra extends IGame {
 				e.getEntity().sendMessage(gameType.getChatPrefix() + "§7Ne vous arrêtez pas de voler !");
 				restartGame(AccountProvider.get(e.getEntity().getUniqueId()));	
 			}
+	}*/
+	
+	private long getPlayerTimeMillis(Player p) {
+		if (!startTime.containsKey(p))
+			return -1;
+		
+		return System.currentTimeMillis() - startTime.get(p);
 	}
 	
 	private void fireEndGameWithSuccess(Player p) {
 		endGame(AccountProvider.get(p.getUniqueId()), 
-				((double)(System.currentTimeMillis() - startTime.get(p)))/1000d, false);
+				((double)(getPlayerTimeMillis(p)))/1000d, false);
 	}
 
 	

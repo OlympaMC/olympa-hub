@@ -74,7 +74,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	private SimpleObservable observable = new SimpleObservable();
 	
 	protected ItemStack[] hotBarContent = new ItemStack[9];
-	private Map<UUID, ItemStack[]> players = new HashMap<UUID, ItemStack[]>();
+	private Map<Player, ItemStack[]> players = new HashMap<Player, ItemStack[]>();
 	
 	//scores map, must be sorted from the best to the worst
 	//la taille ne doit pas dépasser maxTopScoresStored
@@ -163,7 +163,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 				public ActionResult leaves(Player p, Set<TrackedRegion> to) {
 					super.leaves(p, to);
 					
-					if (!players.keySet().contains(p.getUniqueId()))
+					if (!players.keySet().contains(p))
 						return ActionResult.ALLOW;
 					
 					if (exitGameArea(p)) {
@@ -183,7 +183,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		allowedTpLocs.add(startingLoc);
 	}
 	
-	public Set<UUID> getPlayers(){
+	public Set<Player> getPlayers(){
 		return Collections.unmodifiableSet(players.keySet());
 	}
 	
@@ -203,7 +203,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		if (MiniGamesManager.getInstance().getGame(previousGame) != null)
 			MiniGamesManager.getInstance().getGame(previousGame).endGame(p, -1, false);
 		
-		players.put(p.getUniqueId(), p.getPlayer().getInventory().getContents());
+		players.put(p.getPlayer(), p.getPlayer().getInventory().getContents());
 		p.getPlayer().getInventory().clear();
 		p.getPlayer().getInventory().setContents(hotBarContent);
 		
@@ -229,11 +229,11 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	 * @return true if player finished the game, false otherwise
 	 */
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
-		if (!players.keySet().contains(p.getUniqueId()))
+		if (!players.keySet().contains(p.getPlayer()))
 			return;
 		
 		p.getPlayer().getInventory().clear();
-		p.getPlayer().getInventory().setContents(players.remove(p.getUniqueId()));
+		p.getPlayer().getInventory().setContents(players.remove(p.getPlayer()));
 		
 		if (warpToSpawn)
 			p.getPlayer().teleport(startingLoc);
@@ -407,7 +407,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	
 	@EventHandler(priority = EventPriority.LOWEST) //handle player interract with its hotbar
 	public void onInterract(PlayerInteractEvent e) {
-		if (!players.keySet().contains(e.getPlayer().getUniqueId()))
+		if (!players.keySet().contains(e.getPlayer()))
 			return;
 		
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)
@@ -441,16 +441,16 @@ public abstract class IGame extends ComplexCommand implements Listener{
 
 	@EventHandler
 	public void onInterractInventory(InventoryClickEvent e) {
-		if (!players.containsKey(e.getWhoClicked().getUniqueId()))
+		if (!players.containsKey(e.getWhoClicked()))
 			return;
 		
 		e.setCancelled(true);
 	}
 	
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.LOW)
 	public void onTeleport(PlayerTeleportEvent e) {
 		
-		if (players.containsKey(e.getPlayer().getUniqueId())) {
+		if (players.containsKey(e.getPlayer())) {
 			if (e.getFrom() == null || e.getTo() == null || e.isCancelled() || e.getFrom().distance(e.getTo()) < 0.7)
 				return;
 
@@ -472,23 +472,21 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.LOW)
 	public void playerMoveEvent(PlayerMoveEvent e) {
 		if (e.isCancelled() || SpigotUtils.isSameLocation(e.getFrom(), e.getTo()))
 			return;
 
 		Player p = e.getPlayer();
-		//Bukkit.broadcastMessage("starting loc : " + startingLoc);
-		//Bukkit.broadcastMessage(p + " moved - from : " + e.getTo().getBlock().getLocation() + " - to : " + startingLoc.getBlock());
 		
 		if (e.getTo().getBlock().equals(startingLoc.getBlock())) {
 			
-			if (!players.containsKey(p.getUniqueId()))
+			if (!players.containsKey(p))
 				startGame((OlympaPlayerHub)AccountProvider.get(p.getUniqueId()));
 			//else
 				//restartGame(AccountProvider.get(p.getUniqueId()));
 			
-		}else if (players.containsKey(p.getUniqueId()))
+		}else if (players.containsKey(p))
 			onMoveHandler(p, e.getFrom(), e.getTo());
 	}
 	
@@ -502,9 +500,9 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		
 	}
 	
-	@EventHandler (priority = EventPriority.LOWEST)
+	@EventHandler (priority = EventPriority.LOW)
 	public void onDamage(EntityDamageEvent e) {
-		if (players.containsKey(e.getEntity().getUniqueId()))
+		if (players.containsKey(e.getEntity()))
 			onDamageHandler(e);
 	}
 	
