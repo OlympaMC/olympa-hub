@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -500,7 +499,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		
 	}
 	
-	@EventHandler (priority = EventPriority.LOW)
+	@EventHandler (priority = EventPriority.HIGH)
 	public void onDamage(EntityDamageEvent e) {
 		if (players.containsKey(e.getEntity()))
 			onDamageHandler(e);

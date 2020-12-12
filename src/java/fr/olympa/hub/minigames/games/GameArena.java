@@ -131,6 +131,7 @@ public class GameArena extends IGame{
 	protected void onDamageHandler(EntityDamageEvent e) {
 		if (!playingPlayers.contains(e.getEntity()))
 			return;
+		e.setCancelled(false);
 		
 		Player p = (Player) e.getEntity();
 		
