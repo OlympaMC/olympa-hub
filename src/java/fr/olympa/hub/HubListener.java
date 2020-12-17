@@ -39,24 +39,60 @@ import fr.olympa.api.region.tracking.flags.GameModeFlag;
 import fr.olympa.api.region.tracking.flags.PhysicsFlag;
 import fr.olympa.api.region.tracking.flags.PlayerBlockInteractFlag;
 import fr.olympa.api.region.tracking.flags.PlayerBlocksFlag;
+import fr.olympa.api.utils.Prefix;
 import fr.olympa.hub.gui.MenuGUI;
+import fr.olympa.hub.gui.VanishManager;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.skytasul.music.CommandMusic;
 
 public class HubListener implements Listener {
-	private Map<Integer, Entry<ItemStack, Consumer<Player>>> items = new HashMap<>();
+	//private Map<Integer, Entry<ItemStack, Consumer<Player>>> items = new HashMap<>();
 	public static BossBar bossBar = Bukkit.createBossBar("§e§lBon jeu sur §6§lOlympa§e§l !", BarColor.YELLOW, BarStyle.SOLID);
+	
+	private Map<ItemStack, Entry<Integer, Consumer<Player>>> menuItems = new HashMap<ItemStack, Map.Entry<Integer,Consumer<Player>>>();
 	
 	public HubListener() {
 		bossBar.setProgress(0);
-		items.put(4, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa", "§7Accès rapide :", "§8● §7Serveurs de jeu Olympa", "§8● §7Mini-jeux d'attente", "§8● §7Profil du joueur"), player -> new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player)));
+
+		menuItems.put(ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa", "§7Accès rapide :", "§8● §7Serveurs de jeu Olympa", "§8● §7Mini-jeux d'attente", "§8● §7Profil du joueur"), 
+				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(4, p -> new MenuGUI(AccountProvider.get(p.getUniqueId())).create(p)));
+		
+		menuItems.put(ItemUtils.item(Material.JUKEBOX, "§d♪ | §5§lJukeBox", " §7Profitez de la radio", " §7ou choisissez vos musiques !"), 
+				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(7, p -> CommandMusic.open(p)));
+		
+		menuItems.put(ItemUtils.item(Material.YELLOW_BED, "§8Ω | §7Téléportation au §lspawn"), 
+				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(8, p -> {
+					Location location = OlympaHub.getInstance().spawn;
+					p.teleport(location);
+					p.playSound(location, Sound.ENTITY_ENDER_DRAGON_SHOOT, 0.2f, 1);
+					p.spawnParticle(Particle.SMOKE_LARGE, location, 7, 0.1, 0.1, 0.1, 0.3);
+				}));
+
+		final ItemStack vanishYes = ItemUtils.item(Material.ENDER_EYE, "§dΩ | §5Montrer les joueurs");
+		final ItemStack vanishNo = ItemUtils.item(Material.SUNFLOWER, "§dΩ | §5Cacher les joueurs");
+
+		menuItems.put(vanishNo, 
+				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(6, p -> {
+					if (OlympaHub.getInstance().vanishManager.toogleVanish(p))
+						p.getInventory().setItem(6, vanishYes);
+				}));
+		menuItems.put(vanishYes, 
+				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(-1, p -> {
+					if (OlympaHub.getInstance().vanishManager.toogleVanish(p))
+						p.getInventory().setItem(6, vanishNo);
+				}));
+		
+		/*items.put(6, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.GREEN_DYE, "§dΩ | §5Cacher les joueurs"), p -> {
+			if (VanishManager.getInstance().toogleVanish(p))
+		}));*/
+		/*
 		items.put(7, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.JUKEBOX, "§d♪ | §5§lJukeBox", " §7Profitez de la radio", " §7ou choisissez vos musiques !"), player -> CommandMusic.open(player)));
 		items.put(8, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.YELLOW_BED, "§8Ω | §7Téléportation au §lspawn"), player -> {
 			Location location = OlympaHub.getInstance().spawn;
 			player.teleport(location);
 			player.playSound(location, Sound.ENTITY_ENDER_DRAGON_SHOOT, 0.2f, 1);
 			player.spawnParticle(Particle.SMOKE_LARGE, location, 7, 0.1, 0.1, 0.1, 0.3);
-		}));
+		}));*/
 	}
 	
 	@EventHandler
@@ -70,7 +106,10 @@ public class HubListener implements Listener {
 		p.setFlying(false);
 		p.setAllowFlight(false);
 		p.setCanPickupItems(false);
-		items.forEach((slot, entry) -> p.getInventory().setItem(slot, entry.getKey()));
+		menuItems.forEach((key, value) -> {
+			if (value.getKey() >= 0)
+				p.getInventory().setItem(value.getKey(), key);
+		});
 		p.getInventory().setHeldItemSlot(4);
 		p.sendTitle("§6§lOlympa", "§eBienvenue !", 2, 50, 7);
 		p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.4f, 1);
@@ -108,12 +147,8 @@ public class HubListener implements Listener {
 	public void onPlayerInteract(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		if (e.getHand() == EquipmentSlot.HAND) {
-			if (MiniGamesManager.getInstance().isPlaying(e.getPlayer()) == null) {
-				Entry<ItemStack, Consumer<Player>> entry = items.get(player.getInventory().getHeldItemSlot());
-				if (entry != null) {
-					entry.getValue().accept(player);
-					e.setCancelled(true);
-				}
+			if (MiniGamesManager.getInstance().isPlaying(e.getPlayer()) == null && menuItems.containsKey(player.getInventory().getItemInMainHand())) {
+				menuItems.get(player.getInventory().getItemInMainHand()).getValue().accept(player);
 			}
 		}
 	}
@@ -128,7 +163,7 @@ public class HubListener implements Listener {
 		Player player = (Player) e.getWhoClicked();
 		
 		if (e.getClickedInventory() == player.getInventory() && MiniGamesManager.getInstance().isPlaying(player) == null) {
-			Entry<ItemStack, Consumer<Player>> entry = items.get(e.getSlot());
+			Entry<Integer, Consumer<Player>> entry = menuItems.get(player.getInventory().getItemInMainHand());
 			if (entry != null) {
 				entry.getValue().accept(player);
 				e.setCancelled(true);

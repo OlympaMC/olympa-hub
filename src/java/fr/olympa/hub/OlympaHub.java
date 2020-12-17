@@ -28,6 +28,7 @@ import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.scoreboard.sign.ScoreboardManager;
 import fr.olympa.core.spigot.OlympaCore;
+import fr.olympa.hub.gui.VanishManager;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import fr.olympa.hub.pads.LaunchPadManager;
@@ -48,12 +49,14 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 	}
 
 	public ServerInfosListener serversInfos;
-
+	public VanishManager vanishManager;
+	
 	public Location spawn, lightning;
 
 	public MiniGamesManager games;
 	public ScoreboardManager<OlympaPlayer> scoreboards;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -98,6 +101,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		OlympaAPIPermissions.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
 
 		games = new MiniGamesManager(this);
+		vanishManager = new VanishManager();
 		
 		scoreboards = new ScoreboardManager<>(this, "§e◆ §6§lOlympa§e ◆");
 		scoreboards.addLines(
