@@ -9,7 +9,9 @@ import java.util.function.Consumer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -49,7 +51,12 @@ public class HubListener implements Listener {
 		bossBar.setProgress(0);
 		items.put(4, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa", "§7Accès rapide :", "§8● §7Serveurs de jeu Olympa", "§8● §7Mini-jeux d'attente", "§8● §7Profil du joueur"), player -> new MenuGUI(AccountProvider.get(player.getUniqueId())).create(player)));
 		items.put(7, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.JUKEBOX, "§d♪ | §5§lJukeBox", " §7Profitez de la radio", " §7ou choisissez vos musiques !"), player -> CommandMusic.open(player)));
-		items.put(8, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.YELLOW_BED, "§8Ω | §7Téléportation au §lspawn"), player -> player.teleport(OlympaHub.getInstance().spawn)));
+		items.put(8, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.YELLOW_BED, "§8Ω | §7Téléportation au §lspawn"), player -> {
+			Location location = OlympaHub.getInstance().spawn;
+			player.teleport(location);
+			player.playSound(location, Sound.ENTITY_ENDER_DRAGON_SHOOT, 0.2f, 1);
+			player.spawnParticle(Particle.SMOKE_LARGE, location, 7, 0.1, 0.1, 0.1, 0.3);
+		}));
 	}
 	
 	@EventHandler
