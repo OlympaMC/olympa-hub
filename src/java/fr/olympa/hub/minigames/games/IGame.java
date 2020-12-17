@@ -484,7 +484,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	public void playerMoveEvent(PlayerMoveEvent e) {
 		if (e.isCancelled() || SpigotUtils.isSameLocation(e.getFrom(), e.getTo()))
 			return;
-
+ 
 		Player p = e.getPlayer();
 		
 		if (!players.containsKey(p)) {
