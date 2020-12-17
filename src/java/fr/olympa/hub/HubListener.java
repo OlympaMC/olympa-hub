@@ -68,8 +68,8 @@ public class HubListener implements Listener {
 					p.spawnParticle(Particle.SMOKE_LARGE, location, 7, 0.1, 0.1, 0.1, 0.3);
 				}));
 
-		final ItemStack vanishYes = ItemUtils.item(Material.ENDER_EYE, "§dΩ | §5Montrer les joueurs");
-		final ItemStack vanishNo = ItemUtils.item(Material.SUNFLOWER, "§dΩ | §5Cacher les joueurs");
+		final ItemStack vanishYes = ItemUtils.item(Material.ENDER_EYE, "§aΩ | §2Montrer les joueurs");
+		final ItemStack vanishNo = ItemUtils.item(Material.SUNFLOWER, "§aΩ | §2Cacher les joueurs");
 
 		menuItems.put(vanishNo, 
 				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(6, p -> {

@@ -1,14 +1,14 @@
 package fr.olympa.hub.gui;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.reflect.MethodUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.reflect.FieldUtils;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,11 +18,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import fr.olympa.api.utils.Prefix;
 import fr.olympa.hub.OlympaHub;
-import net.minecraft.server.v1_15_R1.DataWatcher;
-import net.minecraft.server.v1_15_R1.DataWatcherObject;
-import net.minecraft.server.v1_15_R1.DataWatcherRegistry;
-import net.minecraft.server.v1_15_R1.EntityPlayer;
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_15_R1.EntityHuman;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_15_R1.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntity;
 
 public class VanishManager implements Listener {
 	
@@ -63,19 +62,37 @@ public class VanishManager implements Listener {
 	}
 	
 	private void sendPacket(Player p, Player target) {
-		if (p.equals(target))
-			return;
-		
-        EntityPlayer targ = ((CraftPlayer)target).getHandle(); //Target entity
-        DataWatcher w = targ.getDataWatcher(); //Target entity datawatcher
+		List<Player> list = new ArrayList<Player>();
+		list.add(target);
+		sendPacket(p, list);
+	}
+	
+	private void sendPacket(Player p, List<Player> targets) {
+		targets.remove(p);
+        //EntityPlayer targ = ((CraftPlayer)target).getHandle(); //Target entity
+        
+        /*DataWatcher w = targ.getDataWatcher(); //Target entity datawatcher
         
         if (isUsingVanish(p))
         	w.set(new DataWatcherObject<>(0, DataWatcherRegistry.a), (byte) 0x20); //0x20 makes player invisible but still rendered
         else
         	w.set(new DataWatcherObject<>(0, DataWatcherRegistry.a), (byte) 0x0); //0x0 makes player visible
         
-        ((CraftPlayer)p).getHandle().playerConnection.sendPacket(new PacketPlayOutEntityMetadata(targ.getId(), w, true));
+        ((CraftPlayer)p).getHandle().playerConnection.sendPacket(new PacketPlayOutEntityMetadata(targ.getId(), w, true));*/
         //((CraftPlayer)p).getHandle().playerConnection.sendPacket(new packetplayout
+        
+		if (isUsingVanish(p)) {
+	        int[] ps = new int[targets.size()];
+	        
+	        for (int i = 0 ; i < targets.size() ; i++)
+	        	ps[i] = ((CraftPlayer)targets.get(i)).getHandle().getId();
+	        
+	        //delete entities packet
+	        ((CraftPlayer)p).getHandle().playerConnection.sendPacket(new PacketPlayOutEntityDestroy(ps));	
+		}else 
+			targets.forEach(pp -> ((CraftPlayer)p).getHandle().playerConnection
+					.sendPacket(new PacketPlayOutNamedEntitySpawn((EntityHuman) ((CraftEntity)pp).getHandle())));
+		
 	}
 	
 	/*private void sendVisiblePacket(Player p, Player target) {
@@ -91,13 +108,11 @@ public class VanishManager implements Listener {
 	public void onJoin(PlayerJoinEvent e) {
 		lastToogle.put(e.getPlayer(), System.currentTimeMillis() - 10000);
 		
-		playersUsingVanish.forEach(p -> sendPacket(p, e.getPlayer()));
+		OlympaHub.getInstance().getTask().runTaskLater(() -> playersUsingVanish.forEach(p -> sendPacket(p, e.getPlayer())), 5);
 	}
 	
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
 		lastToogle.remove(e.getPlayer());
-		
-		playersUsingVanish.forEach(p -> sendPacket(p, e.getPlayer()));
 	}
 }
