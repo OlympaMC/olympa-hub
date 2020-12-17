@@ -61,7 +61,9 @@ public class GameDac extends IGame {
 	private int remainingTime;
 	private BukkitTask timeTask = null;
 	
-	private BossBar bar = Bukkit.createBossBar("dac", BarColor.PURPLE, BarStyle.SEGMENTED_10);
+	private BossBar bar = Bukkit.createBossBar("dac", BarColor.PINK, BarStyle.SEGMENTED_10);
+	
+	private int winnerScore = 0;
 	
 	public GameDac(OlympaHub plugin, ConfigurationSection configFromFile) throws ActivateFailedException {
 		super(plugin, GameType.DAC, configFromFile);
@@ -72,27 +74,13 @@ public class GameDac extends IGame {
 		allowedTpLocs.add(tpLoc = config.getLocation("tp_loc"));
 
 		resetLandingArea();
-
-		//cancel region entering if player isn't the one which should jump
-		//and set the jump marker to true
-		/*
-		OlympaCore.getInstance().getRegionManager().registerRegion(barrierRegion, "dac_barrier_area",
-				EventPriority.HIGH, new Flag() {
-			@Override
-			public ActionResult enters(Player p, Set<TrackedRegion> to) {
-				super.enters(p, to);
-				if (p.equals(playingPlayer) && !hasJumped) {
-					hasJumped = true;
-					return ActionResult.ALLOW;
-				}else
-					return ActionResult.DENY;
-			}
-		});*/
 	}
 
 	@Override
-	protected void startGame(OlympaPlayerHub p) {
-		super.startGame(p);
+	protected boolean startGame(OlympaPlayerHub p) {
+		if (!super.startGame(p))
+			return false;
+		
 
 		waitingPlayers.add(p.getPlayer());
 		
@@ -100,6 +88,8 @@ public class GameDac extends IGame {
 			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Une partie est déjà en cours...");
 		else
 			tryToInitGame();
+		
+		return true;
 	}
 	 
 	
@@ -160,13 +150,18 @@ public class GameDac extends IGame {
 			inCountdown = false;
 			bar.setTitle("§5Dé à coudre");
 			Collections.shuffle(waitingPlayers);
+			
+			winnerScore = waitingPlayers.size() - 1;
+			
 			for (int i = 0; i < waitingPlayers.size(); i++) {
 				DacPlayer dacPlayer = new DacPlayer(waitingPlayers.get(i), wools.get(i));
 				playingPlayers.add(dacPlayer);
 				dacPlayer.p.teleport(tpLoc);
 				dacPlayer.sendDacMessage("§eLe match de dé à coudre commence ! Sélection du tour...");
+				
 				HubListener.bossBar.removePlayer(dacPlayer.p);
 				bar.addPlayer(dacPlayer.p);
+				
 				dacPlayer.p.getInventory().setItem(4, ItemUtils.item(dacPlayer.wool, "§dDé à coudre", "§8> §7Vous êtes le", "  §7joueur §l" + i));
 			}
 			waitingPlayers.clear();
@@ -184,7 +179,7 @@ public class GameDac extends IGame {
 		//si plus qu'un seul joueur en lice, fin de jeu (ou reset du jeu si 0 joueurs restants)
 		if (playingPlayers.size() <= 1) {
 			if (playingPlayers.size() == 1)
-				endGame(AccountProvider.get(playingPlayers.get(0).p.getUniqueId()), 1, true);
+				endGame(AccountProvider.get(playingPlayers.get(0).p.getUniqueId()), winnerScore, true);
 			
 			//réinitialisation du jeu
 			resetLandingArea();
@@ -206,6 +201,7 @@ public class GameDac extends IGame {
 		
 		playingPlayer.sendDacMessage("§a§lTour " + currentTurn + " : c'est à vous ! §7Sautez du pont, et tentez d'atterir dans l'eau ! Vous avez " + playDelay + " secondes.");
 		playingPlayer.p.playSound(playingPlayer.p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 0.9f);
+		
 		playingPlayers.stream().forEach(player -> {
 			player.p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§dTour de §5§l" + playingPlayer.p.getName()));
 			if (player != playingPlayer) player.sendDacMessage("§aTour " + currentTurn + " : c'est à " + playingPlayer.p.getName() + " de jouer !");
@@ -225,6 +221,9 @@ public class GameDac extends IGame {
 				timeTask.cancel();
 			}else {
 				remainingTime--;
+				if (remainingTime == 3)
+					playingPlayer.sendDacMessage("§eSautez vite, vous n'avez plus que 3 secondes !");
+				
 				bar.setProgress((double) remainingTime / (double) playDelay);
 			}
 		}, 20, 20);
@@ -264,16 +263,12 @@ public class GameDac extends IGame {
 			}
 		}
 		
-		//Bukkit.broadcastMessage("§8Detected move of the player : " + p.getName());
-		
 		//si ce n'est pas le bon joueur ou s'il n'a pas sauté
 		if (!hasJumped || playingPlayer == null || !p.equals(playingPlayer.p))
 			return;
 		
-		//Bukkit.broadcastMessage("§7Detected move of playing player : " + p.getName());
-		
 		Block block = to.getBlock();
-		if (block.getType() == Material.WATER/* && jumpRegion.isIn(to)*/) {
+		if (block.getType() == Material.WATER) {
 			p.teleport(tpLoc);
 			p.sendMessage(gameType.getChatPrefix() + "§aBien visé !");
 			
@@ -291,7 +286,7 @@ public class GameDac extends IGame {
 			
 			plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
 			
-		}//else if (block.getType() != Material.AIR) {}
+		}
 		
 	}
 	
@@ -304,7 +299,12 @@ public class GameDac extends IGame {
 				e.getEntity().getLocation().getBlockY() >= minJumpY)
 			return;
 		
-		playingPlayer.sendDacMessage("§cLoupé ! Vous n'avez pas atteri dans l'eau...");
+		playingPlayers.forEach(p -> {
+			if (p.equals(playingPlayer))
+				p.sendDacMessage("§cLoupé ! Vous n'avez pas atteri dans l'eau...");
+			else
+				p.sendDacMessage("§7" + playingPlayer.p.getName() + " a été éliminé, " + (playingPlayers.size() - 1) + " joueurs restants.");
+		});
 		
 		playingPlayers.remove(0);
 		playingPlayer = null;

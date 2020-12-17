@@ -96,13 +96,17 @@ public class GameArena extends IGame{
 	}
 	
 	@Override
-	protected void startGame(OlympaPlayerHub p) {
-		super.startGame(p);
+	protected boolean startGame(OlympaPlayerHub p) {
+		if (!super.startGame(p))
+			return false;
+		
 		
 		queuedPlayers.add(p.getPlayer());
 		updateGameStartDelay();
 		
 		tryToInitGame();
+		
+		return true;
 	}
 	
 	@Override

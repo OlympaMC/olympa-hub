@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -194,19 +195,27 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	 * Start the game for the specified player.
 	 * 
 	 * @param p
+	 * @return true if initialisation has been a success, false otherwise
 	 */
-	protected void startGame(OlympaPlayerHub p) {
+	protected boolean startGame(OlympaPlayerHub p) {
 		GameType previousGame = MiniGamesManager.getInstance().isPlaying(p.getPlayer());
 	
 		//cancel previous game if exists
 		if (MiniGamesManager.getInstance().getGame(previousGame) != null)
 			MiniGamesManager.getInstance().getGame(previousGame).endGame(p, -1, false);
 		
+		if (p.getPlayer().getAllowFlight() || p.getPlayer().getGameMode() != GameMode.ADVENTURE) {
+			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§cVous devez être en gamemode aventure et sans fly pour pouvoir jouer !");
+			return false;	
+		}
+		
 		players.put(p.getPlayer(), p.getPlayer().getInventory().getContents());
 		p.getPlayer().getInventory().clear();
 		p.getPlayer().getInventory().setContents(hotBarContent);
 		
 		p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aVous venez de rejoindre le jeu ! Faites de votre mieux !");
+		
+		return true;
 	}
 	
 	/**
@@ -257,11 +266,11 @@ public abstract class IGame extends ComplexCommand implements Listener{
 						new DecimalFormat("#.##").format(p.getScore(gameType)) + "s à " + new DecimalFormat("#.##").format(score) + "s. Félicitations !");
 		
 		}else {
-			if (score == 1)
+			if (score >= 1)
 				if (p.getScore(gameType) == 0)
-					p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aFélicitations pour votre première victoire !");
+					p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aFélicitations pour votre première victoire ! Vous remportez " + score + " points.");
 				else
-					p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Et une victoire de plus ! Nouveau compte de victoires : " + new DecimalFormat("#").format(p.getScore(gameType) + 1));
+					p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Et une victoire de plus ! Nouveau compte de points : " + new DecimalFormat("#").format(p.getScore(gameType) + score));
 			else
 				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aC'est perdu, mais vous ferez mieux la prochaine fois !");	
 		}
@@ -278,7 +287,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 			}	
 		}else {
 			if (score > 0) {
-				p.setScore(gameType, p.getScore(gameType) + 1);
+				p.setScore(gameType, p.getScore(gameType) + score);
 				//new AccountProvider(p.getUniqueId()).saveToDb(p);
 				
 				hasScoreBeenImproved = true;
@@ -478,15 +487,18 @@ public abstract class IGame extends ComplexCommand implements Listener{
 
 		Player p = e.getPlayer();
 		
-		if (e.getTo().getBlock().equals(startingLoc.getBlock())) {
-			
-			if (!players.containsKey(p))
+		if (!players.containsKey(p)) {
+			if (e.getTo().getBlock().equals(startingLoc.getBlock()))
 				startGame((OlympaPlayerHub)AccountProvider.get(p.getUniqueId()));
-			//else
-				//restartGame(AccountProvider.get(p.getUniqueId()));
 			
-		}else if (players.containsKey(p))
-			onMoveHandler(p, e.getFrom(), e.getTo());
+		}else {
+			if (p.getAllowFlight() || p.getGameMode() != GameMode.ADVENTURE) {
+				p.sendMessage(gameType.getChatPrefix() + "§cNe profitez pas de vos permissions pour vous mettre en fly !");
+				endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, false);
+				
+			}else
+				onMoveHandler(p, e.getFrom(), e.getTo());
+		}
 	}
 	
 	/**
@@ -526,6 +538,15 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	protected boolean exitGameArea(Player p) {
 		return true;
 	}
+	
+	/*
+	@EventHandler
+	public void onChangeGamemode(PlayerGameModeChangeEvent e) {
+		if (players.containsKey(e.getPlayer())) {
+			e.getPlayer().sendMessage(gameType.getChatPrefix() + "§cNe profitez pas de vos permissions pour changer de gamemode !");
+			endGame(AccountProvider.get(e.getPlayer().getUniqueId()), 0, true);	
+		}
+	}*/
 	
 	///////////////////////////////////////////////////////////
 	//                      CONFIG INIT                      //

@@ -139,10 +139,13 @@ public class GameElytra extends IGame {
 	}
 	
 	@Override
-	protected void startGame(OlympaPlayerHub p) {
-		super.startGame(p);
+	protected boolean startGame(OlympaPlayerHub p) {
+		if (!super.startGame(p))
+			return false;
 		
 		launchPreGame(p.getPlayer(), startingDelay);
+		
+		return true;
 	}
 	
 	@Override

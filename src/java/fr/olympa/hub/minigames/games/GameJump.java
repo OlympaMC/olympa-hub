@@ -45,8 +45,9 @@ public class GameJump extends IGame{
 	}
 
 	@Override
-	protected void startGame(OlympaPlayerHub p) {
-		super.startGame(p);
+	protected boolean startGame(OlympaPlayerHub p) {
+		if (!super.startGame(p))
+			return false;
 		
 		playerCPTimeInit.put(p.getPlayer(), System.currentTimeMillis());
 		playerLastCPTime.put(p.getPlayer(), 0l);
@@ -55,7 +56,8 @@ public class GameJump extends IGame{
 		
 		p.getPlayer().teleport(tpLoc);
 		p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Objectif : finissez le jump le plus rapidement possible !");
-		//p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2" + checkpoints.size() + " checkpoints sont prévus, n'hésitez pas à les utiliser !");
+		
+		return true;
 	}
 	
 	@Override
