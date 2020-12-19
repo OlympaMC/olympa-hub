@@ -2,8 +2,10 @@ package fr.olympa.hub.minigames.utils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import fr.olympa.api.provider.AccountProvider;
+import fr.olympa.api.sql.SQLColumn;
 import fr.olympa.api.sql.statement.OlympaStatement;
 import fr.olympa.hub.minigames.games.GameArena;
 import fr.olympa.hub.minigames.games.GameDac;
@@ -28,6 +30,7 @@ public enum GameType {
 	private boolean isRestartable;
 	private boolean isTimerScore;
 	
+	private final SQLColumn<OlympaPlayerHub> scoreColumn;
 	private PreparedStatement bddStatement;
 	
 	GameType(String bddKey, String name, String art, boolean isRestartable, boolean isTimerScore, GameProvider constructor){
@@ -45,8 +48,9 @@ public enum GameType {
 		else
 			sort = "DESC";
 		
+		scoreColumn = new SQLColumn<OlympaPlayerHub>(bddKey, "DOUBLE NOT NULL DEFAULT 0", Types.DOUBLE).setUpdatable();
 		try {
-			bddStatement = new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPlayerProviderTableName() + 
+			bddStatement = new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPluginPlayerTable().getQuotedName() + 
 			 " WHERE " + bddKey + " != 0 ORDER BY " + bddKey + " " + sort + " LIMIT " + IGame.maxTopScoresStored + ";").getStatement();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -63,6 +67,10 @@ public enum GameType {
 	
 	public GameProvider getGameProvider(){
 		return constructor;
+	}
+	
+	public SQLColumn<OlympaPlayerHub> getScoreColumn() {
+		return scoreColumn;
 	}
 	
 	public String getBddKey() {

@@ -1,30 +1,20 @@
 package fr.olympa.hub.minigames.utils;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import org.bukkit.Bukkit;
-
-import com.google.common.collect.ImmutableMap;
+import java.util.stream.Collectors;
 
 import fr.olympa.api.provider.OlympaPlayerObject;
+import fr.olympa.api.sql.SQLColumn;
 
 public class OlympaPlayerHub extends OlympaPlayerObject {
-
-	public static final Map<String, String> COLUMNS = ImmutableMap.<String, String>builder()
-			.put("score_elytra", "DOUBLE NOT NULL DEFAULT 0")
-			.put("score_jump", "DOUBLE NOT NULL DEFAULT 0")
-			.put("score_arena", "DOUBLE NOT NULL DEFAULT 0")
-			.put("score_dac", "DOUBLE NOT NULL DEFAULT 0")
-			.put("score_laby", "DOUBLE NOT NULL DEFAULT 0")
-			
-			.build();
+	
+	public static final List<SQLColumn<OlympaPlayerHub>> COLUMNS = Arrays.stream(GameType.values()).map(GameType::getScoreColumn).collect(Collectors.toList());
 	
 	private Map<GameType, Double> scores = new HashMap<GameType, Double>();
 	
@@ -39,20 +29,6 @@ public class OlympaPlayerHub extends OlympaPlayerObject {
 	public void loadDatas(ResultSet resultSet) throws SQLException {
 		for (GameType game : GameType.values())
 			scores.put(game, resultSet.getDouble(game.getBddKey()));
-	}
-	
-	@Override
-	public void saveDatas(PreparedStatement statement) throws SQLException {
-		List<String> keys = new ArrayList<String>(COLUMNS.keySet());
-		
-		for (int i = 0 ; i < COLUMNS.size() ; i++) {
-			GameType game = GameType.getGameTypeOfBddKey(keys.get(i));
-			
-			if (game != null)
-				statement.setDouble(i + 1, scores.get(game));
-			
-			//Bukkit.broadcastMessage("§2SAVE TO BDD " + getPlayer().getName() + " - " + game + " : " + scores.get(game));
-		}
 	}
 	
 	/**
@@ -72,6 +48,11 @@ public class OlympaPlayerHub extends OlympaPlayerObject {
 	 */
 	public void setScore(GameType game, double score) {
 		scores.put(game, score);
+		try {
+			game.getScoreColumn().updateValue(this, score);
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }
 
