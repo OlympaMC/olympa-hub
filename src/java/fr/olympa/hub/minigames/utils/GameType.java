@@ -50,7 +50,7 @@ public enum GameType {
 		
 		scoreColumn = new SQLColumn<OlympaPlayerHub>(bddKey, "DOUBLE NOT NULL DEFAULT 0", Types.DOUBLE).setUpdatable();
 		try {
-			bddStatement = new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPluginPlayerTable().getQuotedName() + 
+			bddStatement = new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPluginPlayerTable().getName() + 
 			 " WHERE " + bddKey + " != 0 ORDER BY " + bddKey + " " + sort + " LIMIT " + IGame.maxTopScoresStored + ";").getStatement();
 		} catch (SQLException e) {
 			e.printStackTrace();
