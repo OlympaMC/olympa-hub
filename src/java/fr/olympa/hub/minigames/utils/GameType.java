@@ -42,27 +42,28 @@ public enum GameType {
 		this.isRestartable = isRestartable;
 		this.isTimerScore = isTimerScore;
 		
+		scoreColumn = new SQLColumn<OlympaPlayerHub>(bddKey, "DOUBLE NOT NULL DEFAULT 0", Types.DOUBLE).setUpdatable();
+	}
+	
+	public static GameType getGameTypeOfBddKey(String key) {
+		for (GameType game : GameType.values()) if (game.getBddKey().equals(key))
+			return game;
+		
+		return null;
+	}
+	
+	public void initBddStatement() {
 		String sort;
 		if (isTimerScore)
 			sort = "ASC";
 		else
 			sort = "DESC";
-		
-		scoreColumn = new SQLColumn<OlympaPlayerHub>(bddKey, "DOUBLE NOT NULL DEFAULT 0", Types.DOUBLE).setUpdatable();
 		try {
 			bddStatement = new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPluginPlayerTable().getName() + 
 			 " WHERE " + bddKey + " != 0 ORDER BY " + bddKey + " " + sort + " LIMIT " + IGame.maxTopScoresStored + ";").getStatement();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public static GameType getGameTypeOfBddKey(String key) {
-		for (GameType game : GameType.values())
-			if (game.getBddKey().equals(key))
-				return game;
-		
-		return null;
 	}
 	
 	public GameProvider getGameProvider(){
