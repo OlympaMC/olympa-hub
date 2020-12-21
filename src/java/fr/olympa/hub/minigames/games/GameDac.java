@@ -211,8 +211,10 @@ public class GameDac extends IGame {
 		final int currentTurnBis = currentTurn;
 		
 		remainingTime = playDelay;
+		timeTask.cancel();
+		
 		timeTask = Bukkit.getScheduler().runTaskTimer(OlympaHub.getInstance(), () -> {
-			if (remainingTime == 0) {
+			if (remainingTime <= 0) {
 				if (currentTurn == currentTurnBis)
 					if (playingPlayer != null && playingPlayer.p.isOnline()) {
 						playingPlayer.sendDacMessage("§cVous avez attendu trop longtemps avant de sauter !");
@@ -221,7 +223,7 @@ public class GameDac extends IGame {
 				timeTask.cancel();
 			}else {
 				remainingTime--;
-				if (remainingTime == 3)
+				if (remainingTime == 3 && playingPlayer != null)
 					playingPlayer.sendDacMessage("§eSautez vite, vous n'avez plus que 3 secondes !");
 				
 				bar.setProgress((double) remainingTime / (double) playDelay);
@@ -282,8 +284,6 @@ public class GameDac extends IGame {
 			playingPlayers.add(playingPlayers.remove(0));
 			playingPlayer = null;
 			
-			timeTask.cancel();
-			
 			plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
 			
 		}
@@ -308,8 +308,6 @@ public class GameDac extends IGame {
 		
 		playingPlayers.remove(0);
 		playingPlayer = null;
-		
-		timeTask.cancel();
 		
 		endGame(AccountProvider.get(e.getEntity().getUniqueId()), 0, true);
 		plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
