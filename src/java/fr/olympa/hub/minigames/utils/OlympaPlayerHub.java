@@ -48,11 +48,7 @@ public class OlympaPlayerHub extends OlympaPlayerObject {
 	 */
 	public void setScore(GameType game, double score) {
 		scores.put(game, score);
-		try {
-			game.getScoreColumn().updateValue(this, score);
-		}catch (SQLException e) {
-			e.printStackTrace();
-		}
+		game.getScoreColumn().updateAsync(this, score, null, null);
 	}
 }
 
