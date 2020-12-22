@@ -27,6 +27,7 @@ import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.scoreboard.sign.ScoreboardManager;
+import fr.olympa.api.server.OlympaServer;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.gui.VanishManager;
 import fr.olympa.hub.minigames.utils.GameType;
@@ -62,7 +63,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 	public void onEnable() {
 		instance = this;
 		super.onEnable();
-
+		
+		OlympaCore.getInstance().setOlympaServer(OlympaServer.LOBBY);
 		AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
 		for (GameType game : GameType.values()) game.initBddStatement();
 		OlympaPermission.registerPermissions(HubPermissions.class);

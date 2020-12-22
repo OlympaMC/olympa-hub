@@ -161,6 +161,7 @@ public class GameElytra extends IGame {
 		
 		p.getPlayer().removePotionEffect(PotionEffectType.LEVITATION);
 		p.getPlayer().getInventory().setChestplate(new ItemStack(Material.AIR));
+		p.getPlayer().setGliding(true);
 		p.getPlayer().setGliding(false);
 		
 		nextPortal.remove(p.getPlayer());

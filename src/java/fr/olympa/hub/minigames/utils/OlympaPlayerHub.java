@@ -14,7 +14,9 @@ import fr.olympa.api.sql.SQLColumn;
 
 public class OlympaPlayerHub extends OlympaPlayerObject {
 	
-	public static final List<SQLColumn<OlympaPlayerHub>> COLUMNS = Arrays.stream(GameType.values()).map(GameType::getScoreColumn).collect(Collectors.toList());
+	public static final List<SQLColumn<OlympaPlayerHub>> COLUMNS = Arrays.stream(GameType.values())
+			.map(GameType::getScoreColumn)
+			.collect(Collectors.toList());
 	
 	private Map<GameType, Double> scores = new HashMap<GameType, Double>();
 	
