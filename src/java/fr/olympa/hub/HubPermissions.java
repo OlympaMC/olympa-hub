@@ -9,7 +9,7 @@ public class HubPermissions {
 	public static final OlympaPermission LAUNCHPADS_COMMAND = new OlympaPermission(OlympaGroup.DEV);
 
 	public static final OlympaPermission SPAWN_COMMAND = new OlympaPermission(OlympaGroup.PLAYER);
-
+ 
 	public static final OlympaPermission EDIT_MINIGAMES = new OlympaPermission(OlympaGroup.DEV);
 
 }
