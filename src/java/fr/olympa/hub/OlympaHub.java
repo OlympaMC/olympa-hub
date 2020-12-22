@@ -37,6 +37,7 @@ import fr.olympa.hub.servers.ServerConfigCommand;
 import fr.olympa.hub.servers.ServerInfosListener;
 import fr.olympa.hub.servers.ServerTrait;
 import fr.skytasul.music.JukeBox;
+import fr.skytasul.music.PlayerData;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.trait.TraitInfo;
 import net.md_5.bungee.api.ChatMessageType;
@@ -114,7 +115,12 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 				FixedLine.EMPTY_LINE,
 				new FixedLine<>("§d§lRadio:"),
 				new TimerLine<>(x -> {
-					String songName = JukeBox.getInstance().datas.getDatas(x.getOlympaPlayer().getUniqueId()).getListeningSongName();
+					PlayerData datas = JukeBox.getInstance().datas.getDatas(x.getOlympaPlayer().getUniqueId());
+					if (datas == null) {
+						sendMessage("§cPas de données lors de la mise à jour du scoreboard musique pour %s.", x.getOlympaPlayer().getName());
+						return "§cpas de données";
+					}
+					String songName = datas.getListeningSongName();
 					return "§7● " + (songName == null ? "§oarrêtée" : WordUtils.wrap(songName, 20, "\n§7", false));
 				}, this, 20));
 		scoreboards.addFooters(FixedLine.EMPTY_LINE, CyclingLine.olympaAnimation());
