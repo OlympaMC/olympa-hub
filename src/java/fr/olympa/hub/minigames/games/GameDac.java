@@ -42,6 +42,8 @@ public class GameDac extends IGame {
 	private final int minPlayers = 2;
 	//private boolean isGameInProgress = false;
 	
+	private BukkitTask countdownTask = null;
+	private int countdown;
 	private boolean inCountdown = false;
 	private final int countdownDelay = 10;
 	private final int playDelay = 10;
@@ -84,10 +86,13 @@ public class GameDac extends IGame {
 
 		waitingPlayers.add(p.getPlayer());
 		
-		if (playingPlayers.size() > 0)
+		if (playingPlayers.size() > 0) {
 			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Une partie est déjà en cours...");
-		else
+		}else {
 			tryToInitGame();
+			waitingPlayers.forEach(wp -> wp.sendMessage(gameType.getChatPrefix() + "§a§l" + p.getName() + " §a rejoint la partie !"));
+			countdown = 10; // remet au début du timer dès qu'un joueur rejoint pour laisser le temps à d'autres
+		}
 		
 		return true;
 	}
@@ -119,57 +124,56 @@ public class GameDac extends IGame {
 		if (playingPlayers.size() > 0) {
 			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§aUne partie est déjà en cours. Nombres de joueurs prêts pour la prochaine partie : " + waitingPlayers.size() + "/" + minPlayers));
 		}else {
-			if (waitingPlayers.size() >= minPlayers && !inCountdown) {
-				startGame(countdownDelay);
+			if (waitingPlayers.size() >= minPlayers && countdownTask == null) {
+				startGame();
 			}
 			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§aNombre de joueurs prêts : " + waitingPlayers.size() + "/" + minPlayers));
 		}
 	}
 	
-	private void startGame(int countdown) {
+	private void startGame() {
 		if (playingPlayers.size() > 0)
 			return;
 		
-		//s'il n'y a plus assez de joueurs pour commencer la partie, cancel de cette dernière
-		if (waitingPlayers.size() < minPlayers) {
-			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§7Plus assez de joueur pour commencer la partie... (" + waitingPlayers.size() + "/" + minPlayers + ")"));
-			inCountdown = false;
-			return;
-		}
-		inCountdown = true;
-		
-		//actions avant début de partie
-		if (countdown > 0) {
-			waitingPlayers.forEach(p -> p.sendTitle("§c" + countdown, "§7Début du match dans...", 0, 21, 0));
-			waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§aDébut du match dans " + countdown));
-			
-			plugin.getTask().runTaskLater(() -> startGame(countdown - 1), 1, TimeUnit.SECONDS);
-			
-			//actions de début de partie
-		}else {
-			inCountdown = false;
-			bar.setTitle("§5Dé à coudre");
-			Collections.shuffle(waitingPlayers);
-			
-			winnerScore = waitingPlayers.size() - 1;
-			
-			for (int i = 0; i < waitingPlayers.size(); i++) {
-				DacPlayer dacPlayer = new DacPlayer(waitingPlayers.get(i), wools.get(i));
-				playingPlayers.add(dacPlayer);
-				dacPlayer.p.teleport(tpLoc);
-				dacPlayer.sendDacMessage("§eLe match de dé à coudre commence ! Sélection du tour...");
-				
-				HubListener.bossBar.removePlayer(dacPlayer.p);
-				bar.addPlayer(dacPlayer.p);
-				
-				dacPlayer.p.getInventory().setItem(4, ItemUtils.item(dacPlayer.wool, "§dDé à coudre", "§8> §7Vous êtes le", "  §7joueur §l" + i));
+		this.countdown = countdownDelay;
+		countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+			if (waitingPlayers.size() < minPlayers) {
+				waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§7Plus assez de joueur pour commencer la partie... (" + waitingPlayers.size() + "/" + minPlayers + ")"));
+				countdownTask.cancel();
+				countdownTask = null;
+				return;
 			}
-			waitingPlayers.clear();
-			
-			currentTurn = 0;
-			
-			plugin.getTask().runTaskLater(() -> playGameTurn(), 2, TimeUnit.SECONDS);
-		}
+			if (countdown > 0) {
+				waitingPlayers.forEach(p -> p.sendTitle("§c" + countdown, "§7Début du match dans...", 0, 21, 0));
+				if (countdown == 10 || countdown <= 3) waitingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§aDébut du match dans §l" + countdown));
+				
+				countdown--;
+			}else {
+				countdownTask.cancel();
+				countdownTask = null;
+				bar.setTitle("§5Dé à coudre");
+				Collections.shuffle(waitingPlayers);
+				
+				winnerScore = waitingPlayers.size() - 1;
+				
+				for (int i = 0; i < waitingPlayers.size(); i++) {
+					DacPlayer dacPlayer = new DacPlayer(waitingPlayers.get(i), wools.get(i));
+					playingPlayers.add(dacPlayer);
+					dacPlayer.p.teleport(tpLoc);
+					dacPlayer.sendDacMessage("§eLe match de dé à coudre commence ! Sélection du tour...");
+					
+					HubListener.bossBar.removePlayer(dacPlayer.p);
+					bar.addPlayer(dacPlayer.p);
+					
+					dacPlayer.p.getInventory().setItem(4, ItemUtils.item(dacPlayer.wool, "§dDé à coudre", "§8> §7Vous êtes le", "  §7joueur §l" + i));
+				}
+				waitingPlayers.clear();
+				
+				currentTurn = 0;
+				
+				plugin.getTask().runTaskLater(() -> playGameTurn(), 2, TimeUnit.SECONDS);
+			}
+		}, 0, 20);
 	}
 	
 	private void playGameTurn() {
@@ -211,7 +215,7 @@ public class GameDac extends IGame {
 		final int currentTurnBis = currentTurn;
 		
 		remainingTime = playDelay;
-		timeTask.cancel();
+		if (timeTask != null) timeTask.cancel();
 		
 		timeTask = Bukkit.getScheduler().runTaskTimer(OlympaHub.getInstance(), () -> {
 			if (remainingTime <= 0) {
