@@ -307,7 +307,7 @@ public class GameDac extends IGame {
 			if (p.equals(playingPlayer))
 				p.sendDacMessage("§cLoupé ! Vous n'avez pas atteri dans l'eau...");
 			else
-				p.sendDacMessage("§7" + playingPlayer.p.getName() + " a été éliminé, " + (playingPlayers.size() - 1) + " joueurs restants.");
+				p.sendDacMessage("§7§l" + playingPlayer.p.getName() + " §r§7a été éliminé, " + (playingPlayers.size() - 1) + " joueurs restants.");
 		});
 		
 		playingPlayers.remove(0);
