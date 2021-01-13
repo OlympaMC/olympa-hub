@@ -38,6 +38,7 @@ import fr.olympa.hub.servers.ServerConfigCommand;
 import fr.olympa.hub.servers.ServerInfosListener;
 import fr.olympa.hub.servers.ServerTrait;
 import fr.skytasul.music.JukeBox;
+import fr.skytasul.music.JukeBoxDatas;
 import fr.skytasul.music.PlayerData;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.trait.TraitInfo;
@@ -117,7 +118,9 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 				FixedLine.EMPTY_LINE,
 				new FixedLine<>("§d§lRadio:"),
 				new TimerLine<>(x -> {
-					PlayerData datas = JukeBox.getInstance().datas.getDatas(x.getOlympaPlayer().getUniqueId());
+					JukeBoxDatas datasManager = JukeBox.getInstance().datas;
+					if (datasManager == null) return "§§cnon fonctionnel";
+					PlayerData datas = datasManager.getDatas(x.getOlympaPlayer().getUniqueId());
 					if (datas == null) {
 						sendMessage("§cPas de données lors de la mise à jour du scoreboard musique pour %s.", x.getOlympaPlayer().getName());
 						return "§cpas de données";
