@@ -54,7 +54,7 @@ public class ServerConfigCommand extends ComplexCommand {
 			sendError("Vous devez sélectionner un NPC.");
 			return;
 		}
-		ServerTrait trait = npc.getTrait(ServerTrait.class);
+		ServerTrait trait = npc.getOrAddTrait(ServerTrait.class);
 		npc.data().setPersistent(NPC.NAMEPLATE_VISIBLE_METADATA, false);
 		ServerInfo server = cmd.getArgument(0);
 		trait.setServer(server);

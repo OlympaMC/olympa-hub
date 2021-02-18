@@ -19,8 +19,6 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -39,9 +37,7 @@ import fr.olympa.api.region.tracking.flags.GameModeFlag;
 import fr.olympa.api.region.tracking.flags.PhysicsFlag;
 import fr.olympa.api.region.tracking.flags.PlayerBlockInteractFlag;
 import fr.olympa.api.region.tracking.flags.PlayerBlocksFlag;
-import fr.olympa.api.utils.Prefix;
 import fr.olympa.hub.gui.MenuGUI;
-import fr.olympa.hub.gui.VanishManager;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.skytasul.music.CommandMusic;
 
@@ -131,15 +127,7 @@ public class HubListener implements Listener {
 	@EventHandler
 	public void onWorldLoad(WorldTrackingEvent e) {
 		e.getWorld().setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-		e.getRegion().registerFlags(new PlayerBlocksFlag(true), new PhysicsFlag(true), new FoodFlag(true, true), new GameModeFlag(GameMode.ADVENTURE), new DropFlag(true), new PlayerBlockInteractFlag(false, true, true), new DamageFlag(false) {
-			@Override
-			public void damageEvent(EntityDamageEvent event) {
-				if (event.getCause() == DamageCause.VOID) {
-					event.getEntity().teleport(OlympaHub.getInstance().spawn);
-				}
-				super.damageEvent(event);
-			}
-		});
+		e.getRegion().registerFlags(new PlayerBlocksFlag(true), new PhysicsFlag(true), new FoodFlag(true, true), new GameModeFlag(GameMode.ADVENTURE), new DropFlag(true), new PlayerBlockInteractFlag(false, true, true), new DamageFlag(false));
 	}
 	
 	
