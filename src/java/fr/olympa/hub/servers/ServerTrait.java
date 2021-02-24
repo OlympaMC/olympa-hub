@@ -37,7 +37,9 @@ public class ServerTrait extends Trait {
 	private void showHologram() {
 		removeHologram();
 		if (server != null) {
-			this.hologram = OlympaCore.getInstance().getHologramsManager().createHologram(npc.getEntity().getLocation().add(0, npc.getEntity().getHeight() + 0.2, 0), false, new FixedLine<>("§e§l" + server.getServer().getNameCaps()), FixedLine.EMPTY_LINE, new DynamicLine<>((x) -> "§7§l" + (server.getOnlinePlayers() == -1 ? "§cx" : server.getOnlinePlayers()) + " §7joueurs en ligne", server));
+			this.hologram =
+					OlympaCore.getInstance().getHologramsManager().createHologram(npc.getEntity().getLocation().add(0, npc.getEntity().getHeight() + 0.2, 0), false, true, new FixedLine<>("§e§l"
+							+ server.getServer().getNameCaps()), FixedLine.EMPTY_LINE, new DynamicLine<>(x -> server.getOnlineString(), server));
 		}
 	}
 

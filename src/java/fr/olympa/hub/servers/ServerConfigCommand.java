@@ -28,9 +28,8 @@ public class ServerConfigCommand extends ComplexCommand {
 				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(OlympaServer.valueOf(x));
 				if (server != null) return server;
 			}catch (IllegalArgumentException ex) {}
-			sendError("Le serveur %s n'existe pas.", x);
 			return null;
-		});
+		}, x -> String.format("Le serveur %s n'existe pas.", x));
 	}
 
 	@Cmd (player = true, min = 1, args = "SERVER", syntax = "<server>")
@@ -55,7 +54,7 @@ public class ServerConfigCommand extends ComplexCommand {
 			sendError("Vous devez sélectionner un NPC.");
 			return;
 		}
-		ServerTrait trait = npc.getTrait(ServerTrait.class);
+		ServerTrait trait = npc.getOrAddTrait(ServerTrait.class);
 		npc.data().setPersistent(NPC.NAMEPLATE_VISIBLE_METADATA, false);
 		ServerInfo server = cmd.getArgument(0);
 		trait.setServer(server);

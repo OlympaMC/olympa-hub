@@ -8,6 +8,7 @@ import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.inventory.ItemStack;
@@ -69,6 +70,10 @@ public class ServerInfo extends AbstractObservable {
 	public ServerStatus getStatus() {
 		return status;
 	}
+	
+	public String getOnlineString() {
+		return (this.online == -1 ? "§cx" : "§a§l" + online) + " §7joueur" + Utils.withOrWithoutS(online) + " en ligne";
+	}
 
 	public void update(int online, ServerStatus status) {
 		if (this.online == online && this.status == status) return;
@@ -79,9 +84,10 @@ public class ServerInfo extends AbstractObservable {
 		lore.add(SEPARATOR);
 		lore.addAll(description);
 		lore.add(SEPARATOR);
-		lore.add("§7§l" + (this.online == -1 ? "§cx" : online) + " §7joueur" + Utils.withOrWithoutS( online) + " en ligne");
+		lore.add(getOnlineString());
 		if (status != ServerStatus.OPEN) lore.add("§7Statut : " + status.getNameColored());
 		menuItem = ItemUtils.item(item, "§6§l" + getServer().getNameCaps(), lore.toArray(new String[0]));
+		ItemUtils.addEnchant(menuItem, Enchantment.DURABILITY, 0);
 
 		update();
 	}
@@ -132,7 +138,9 @@ public class ServerInfo extends AbstractObservable {
 					return super.enters(p, to);
 				}
 			});
-			this.hologram = OlympaCore.getInstance().getHologramsManager().createHologram(holoLocation.clone().add(0, 1, 0), false, new FixedLine<>("§e§l" + getServer().getNameCaps()), FixedLine.EMPTY_LINE, new DynamicLine<>((x) -> "§7§l" + (online == -1 ? "§cx" : online) + " §7joueurs en ligne", ServerInfo.this));
+			this.hologram =
+					OlympaCore.getInstance().getHologramsManager().createHologram(holoLocation.clone().add(0, 1, 0), false, true, new FixedLine<>("§e§l"
+							+ getServer().getNameCaps()), FixedLine.EMPTY_LINE, new DynamicLine<>(x -> getOnlineString(), ServerInfo.this));
 		}
 
 		public void destroy() {

@@ -1,31 +1,59 @@
 servers:
   ZTA:
     description: "Découvrez un monde au bord du chaos, meurtri par des hordes de zombies. Votre mission : survivre coûte que coûte, défendre votre clan et attaquer ceux des autres. Farmez et devenez l'homme le plus puissant de Greenfield !"
-    item: FIREWORK_ROCKET
+    item: ZOMBIE_HEAD
     slot: 29
   PVPFAC:
     description: "Créez votre faction avec vos amis, fabriquez des usines, des équipements, les bases les plus impénétrables possible et attaquez celles des autres. Battez vos ennemis et construisez un véritable empire pour accumuler les richesses, et devenez la plus grande faction de ce monde !"
-    item: GOLDEN_HELMET
+    item: CROSSBOW
     slot: 31
   CREATIF:
     description: "Le créatif est un mode de jeux vous permettant d'exprimer au plus profond votre imagination. Créez des constructions toujours plus grandes et plus belles les unes que les autres, jouez avec vos amis en incarnant des personnages et en créant vos propres histoires."
-    item: GRASS_BLOCK
+    item: CRAFTING_TABLE
     slot: 33
-  BUILDEUR:
-    description: "§cServeur staff : §abuildeurs"
-    item: DIAMOND_PICKAXE
-    slot: 43
-    
+  PVPKIT:
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec sodales odio. Etiam porttitor magna eget ante euismod elementum. Fusce lacinia fringilla velit vestibulum hendrerit. Proin gravida diam quam, vitae convallis felis congue vitae. Morbi."
+    item: IRON_SWORD
+    slot: 32
+#   BUILDEUR:
+#     description: "§cServeur staff : §abuildeurs"
+#     item: DIAMOND_PICKAXE
+#     slot: 43
+
+minigames:
+  JUMP:
+    description: "§cSautez partout !"
+    item: FEATHER
+    slot: 47
+  ELYTRA:
+    description: "§cVolez comme un aigle !"
+    item: ELYTRA
+    slot: 48
+  LABY:
+    description: "§cCherchez la sortie !"
+    item: COMPASS
+    slot: 49
+  DAC:
+    description: "§cSautez dans le vide... Et visez juste !"
+    item: TNT
+    slot: 50
+  ARENA:
+    description: "§cTapez vous dessus !"
+    item: IRON_SWORD
+    slot: 51
+
 zone:
   ==: fr.olympa.api.region.shapes.Cuboid
   world: "world"
-  xMin: -1000
+  xMin: -10000
   yMin: 0
-  zMin: -1000
-  xMax: 1000
+  zMin: -10000
+  xMax: 10000
   yMax: 1000
-  zMax: 1000
+  zMax: 10000
   
 spawn: world -4.5 29 5.5 0 0
 
 lightning: world 71 170 48
+
+laby_tp_loc: world -95.5 16 66

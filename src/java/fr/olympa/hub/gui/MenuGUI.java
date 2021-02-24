@@ -2,10 +2,15 @@ package fr.olympa.hub.gui;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
@@ -14,6 +19,7 @@ import fr.olympa.api.gui.OlympaGUI;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.player.OlympaPlayer;
 import fr.olympa.hub.OlympaHub;
+import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.servers.ServerInfo;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -25,14 +31,12 @@ public class MenuGUI extends OlympaGUI {
 	private static ItemStack[] basicContents = new ItemStack[54];
 	private static TextComponent twitter, discord, website, yt;
 	static {
+		
 		ItemStack orangeSeparator = ItemUtils.itemSeparator(DyeColor.ORANGE);
 		ItemStack yellowSeparator = ItemUtils.itemSeparator(DyeColor.YELLOW);
-		for (int slot = 0; slot < 54; slot++) { // fill du orange partout
-			basicContents[slot] = orangeSeparator;
-		}
-		for (int slot : new int[] { 2, 11, 10, 9, 18, 27, 36, 45, 46, 47, 48, 49, 50, 51, 52, 53, 44, 35, 26, 17, 16, 15, 6 }) { // fait le contour jaune
-			basicContents[slot] = yellowSeparator;
-		}
+
+		for (int slot = 9; slot < 18; slot++) basicContents[slot] = yellowSeparator;
+		
 		basicContents[0] = ItemUtils.skullCustom("§bTwitter",
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2M3NDVhMDZmNTM3YWVhODA1MDU1NTkxNDllYTE2YmQ0YTg0ZDQ0OTFmMTIyMjY4MThjMzg4MWMwOGU4NjBmYyJ9fX0=");
 		basicContents[1] = ItemUtils.skullCustom("§5Discord",
@@ -69,25 +73,44 @@ public class MenuGUI extends OlympaGUI {
 	}
 
 	private OlympaPlayer player;
+	
+	private Map<Integer, GameType> minigames = new HashMap<Integer, GameType>();
 
 	public MenuGUI(OlympaPlayer player) {
 		super("Ω | Menu Olympa", 6);
 		this.player = player;
 		inv.setContents(basicContents);
 
-		ItemUtils.skull(x -> inv.setItem(13, x), "§eMon profil", player.getName(),
+		ItemUtils.skull(x -> inv.setItem(4, x), "§eMon profil", player.getName(),
 				"§8> §7" + player.getName(),
-				"§8> §7" + player.getGroupName(),
+				"§8> §7" + player.getGroupsToHumainString(),
 				"",
 				"§8> §7Membre depuis le " + DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.FRANCE).format(new Date(player.getFirstConnection() * 1000)),
 				"",
-				"§8> §7" + (player.getEmail() == null ? "§oMail non spécifié" : player.getEmail())/*,
-				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié")*/);
-
+				"§8> §7" + (player.getEmail() == null ? "§oMail non spécifié" : player.getEmail()),
+				"§8> §7Compte Teamspeak " + (player.getTeamspeakId() == 0 ? "lié !" : "non relié"),
+				"§8> §7Version " + (player.getPremiumUniqueId() != null ? "Premium" : "Crack"));
+		//				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
+		
 		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers) {
-			if (!server.getServer().canConnect(player)) continue;
+			if (!server.getServer().canConnect(player))
+				continue;
 			setServerItem(server);
 			server.observe("gui_" + hashCode(), () -> setServerItem(server));
+		}
+		
+		ConfigurationSection minigamesConfig = OlympaHub.getInstance().getConfig().getConfigurationSection("minigames");
+
+		for (String minigame : minigamesConfig.getKeys(false)) {
+			int slot = minigamesConfig.getInt(minigame + ".slot");
+			GameType game = GameType.valueOf(minigame);
+			
+			minigames.put(slot, game);
+			
+			inv.setItem(slot, ItemUtils.item(Material.getMaterial(minigamesConfig.getString(minigame+".item")), 
+					"§aDébut " + game.getNameWithArticle(), minigamesConfig.getString(minigame+".description")));
+			
+			//System.out.println(minigame + " - " + minigamesConfig.getString(minigame+".item") + " - " + minigamesConfig.getString(minigame+".description"));
 		}
 	}
 
@@ -104,21 +127,31 @@ public class MenuGUI extends OlympaGUI {
 		}
 		try {
 			Optional<ServerInfo> server = OlympaHub.getInstance().serversInfos.servers.stream().filter(x -> x.slot == slot && x.getServer().canConnect(player)).findFirst();
-			if (server.isPresent()) {
-				if (server.get().connect(p)) {
+			if (server.isPresent())
+				if (server.get().connect(p))
 					p.closeInventory();
-				}
-			}
 		} catch (IndexOutOfBoundsException ex) {
 		}
+		
+		if (minigames.keySet().contains(slot))
+			if (minigames.get(slot) == GameType.LABY) {
+				if(!OlympaHub.getInstance().getConfig().getKeys(false).contains("laby_tp_loc")) {
+					OlympaHub.getInstance().getConfig().set("laby_tp_loc", new Location(OlympaHub.getInstance().spawn.getWorld(), 0, 0, 0));
+					OlympaHub.getInstance().saveConfig();
+				}	
+				p.teleport(OlympaHub.getInstance().getConfig().getLocation("laby_tp_loc"));
+			}
+			else if (OlympaHub.getInstance().games.getGame(minigames.get(slot)) != null)
+				OlympaHub.getInstance().games.getGame(minigames.get(slot)).beginGame(p);
+			else
+				p.sendMessage(OlympaHub.getInstance().getPrefixConsole() + "§cUne erreur est survenue, veuillez contacter un membre du staff.");
 		return true;
 	}
 
 	@Override
 	public boolean onClose(Player p) {
-		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers) {
+		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers)
 			server.unobserve("gui_" + hashCode());
-		}
 		return super.onClose(p);
 	}
 

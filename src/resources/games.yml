@@ -1,20 +1,481 @@
-game_jump:
-  start_loc: world 1 30 12
-  holo_loc: world 3 29 9
-  area: world -2 0 7 5 255 23
-    
+elytra:
+  area:
+    ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 2947
+    yMin: 0
+    zMax: 3113
+    world: world
+    yMax: 253
+    xMax: 671
+    xMin: -29
+  holo_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: 5.5
+    y: 30.0
+    z: -16.5
+    pitch: 0.0
+    yaw: 0.0
+  start_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: 3.5
+    y: 30.0
+    z: -18.5
+    pitch: 0.0
+    yaw: 0.0
+  tp_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: 1.529444077478682
+    y: 248.0
+    z: 3000.514052630011
+    pitch: 26.249922
+    yaw: -88.7998
+  portals_locs:
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 2996
+    yMin: 240
+    zMax: 3004
+    world: world
+    yMax: 248
+    xMax: 3
+    xMin: 3
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 2996
+    yMin: 226
+    zMax: 3004
+    world: world
+    yMax: 234
+    xMax: 35
+    xMin: 35
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 2997
+    yMin: 223
+    zMax: 3005
+    world: world
+    yMax: 231
+    xMax: 58
+    xMin: 58
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 2997
+    yMin: 222
+    zMax: 3005
+    world: world
+    yMax: 230
+    xMax: 80
+    xMin: 80
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3001
+    yMin: 211
+    zMax: 3007
+    world: world
+    yMax: 211
+    xMax: 105
+    xMin: 95
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3001
+    yMin: 179
+    zMax: 3010
+    world: world
+    yMax: 180
+    xMax: 115
+    xMin: 106
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3006
+    yMin: 146
+    zMax: 3014
+    world: world
+    yMax: 154
+    xMax: 141
+    xMin: 141
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3034
+    yMin: 141
+    zMax: 3042
+    world: world
+    yMax: 149
+    xMax: 245
+    xMin: 245
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3005
+    yMin: 129
+    zMax: 3005
+    world: world
+    yMax: 137
+    xMax: 292
+    xMin: 284
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 2978
+    yMin: 124
+    zMax: 2986
+    world: world
+    yMax: 132
+    xMax: 305
+    xMin: 305
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3011
+    yMin: 117
+    zMax: 3011
+    world: world
+    yMax: 126
+    xMax: 320
+    xMin: 313
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3034
+    yMin: 110
+    zMax: 3042
+    world: world
+    yMax: 118
+    xMax: 326
+    xMin: 326
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3040
+    yMin: 93
+    zMax: 3048
+    world: world
+    yMax: 99
+    xMax: 348
+    xMin: 348
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3032
+    yMin: 81
+    zMax: 3038
+    world: world
+    yMax: 81
+    xMax: 404
+    xMin: 398
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3037
+    yMin: 20
+    zMax: 3043
+    world: world
+    yMax: 26
+    xMax: 423
+    xMin: 417
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3042
+    yMin: 77
+    zMax: 3049
+    world: world
+    yMax: 85
+    xMax: 374
+    xMin: 374
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3038
+    yMin: 74
+    zMax: 3047
+    world: world
+    yMax: 82
+    xMax: 385
+    xMin: 385
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3045
+    yMin: 21
+    zMax: 3053
+    world: world
+    yMax: 29
+    xMax: 464
+    xMin: 464
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3049
+    yMin: 15
+    zMax: 3057
+    world: world
+    yMax: 23
+    xMax: 498
+    xMin: 498
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3050
+    yMin: 14
+    zMax: 3058
+    world: world
+    yMax: 22
+    xMax: 506
+    xMin: 506
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3055
+    yMin: 10
+    zMax: 3063
+    world: world
+    yMax: 18
+    xMax: 547
+    xMin: 547
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3062
+    yMin: 6
+    zMax: 3070
+    world: world
+    yMax: 14
+    xMax: 598
+    xMin: 598
+  - ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 3067
+    yMin: 5
+    zMax: 3075
+    world: world
+    yMax: 13
+    xMax: 629
+    xMin: 629
+  portals_indexs:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+  isEnabled: true
+  end_tp_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    pitch: 0.0
+    yaw: 0.0
+  end_race_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: 659.6411463585783
+    y: 2.0
+    z: 3077.631514447201
+    pitch: 5.249986
+    yaw: 109.35037
+
+dac:
+  holo_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: -106.5
+    y: 76.0
+    z: 125.5
+    pitch: 0.0
+    yaw: 0.0
+  start_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: -103.5
+    y: 76.0
+    z: 127.5
+    pitch: 0.0
+    yaw: 0.0
+  jump_region:
+    ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 145
+    yMin: 74
+    zMax: 153
+    world: world
+    yMax: 74
+    xMax: -59
+    xMin: -69
+  barrier_region:
+    ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 147
+    yMin: 90
+    zMax: 151
+    world: world
+    yMax: 99
+    xMax: -60
+    xMin: -60
+  tp_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: -54.61168234586089
+    y: 90.0
+    z: 149.50986304363758
+    pitch: 1.6502429
+    yaw: 90.59991
+  minJumpY: 88
+  isEnabled: true
+  area:
+    ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: 0
+    yMin: 0
+    zMax: 1
+    world: world
+    yMax: 1
+    xMax: 1
+    xMin: 0
+
+jump:
+  isEnabled: true
+  area:
+    ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: -108
+    yMin: 6
+    zMax: 63
+    world: world
+    yMax: 200
+    xMax: -102
+    xMin: -219
+  holo_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: -78.5
+    y: 32.0
+    z: -90.5
+    pitch: 0.0
+    yaw: 0.0
+  start_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: -76.5
+    y: 32.0
+    z: -92.5
+    pitch: 0.0
+    yaw: 0.0
   checkpoints:
-   - world 1 30 12
-   - world 3 31 18
-   - world 3 35 13
-   - world 2 35 20
-   - world 0 35 16
-   
-   
-game_arena:
-  start_loc: world -15 29 15
-  holo_loc: world -18 29 15
-  area: world -26 0 3 -12 255 16
-  
-  player_1_spawn: world -24 30 9
-  player_2_spawn: world -20 30 9
+  - &id001
+    ==: org.bukkit.Location
+    world: world
+    x: -111.68308232694747
+    y: 65.0625
+    z: -95.42274467024215
+    pitch: -4.9499593
+    yaw: 89.7002
+  - ==: org.bukkit.Location
+    world: world
+    x: -157.5831717970366
+    y: 73.0
+    z: -79.08437578568558
+    pitch: 15.899885
+    yaw: 10.3501005
+  - ==: org.bukkit.Location
+    world: world
+    x: -175.57445634474126
+    y: 82.0
+    z: -27.987233855698932
+    pitch: 46.64987
+    yaw: 3.1501029
+  - ==: org.bukkit.Location
+    world: world
+    x: -182.59512982471477
+    y: 8.0
+    z: 1.5656322914793495
+    pitch: 7.1998935
+    yaw: 1.3500994
+  - ==: org.bukkit.Location
+    world: world
+    x: -205.38677400564677
+    y: 17.0
+    z: 41.6687362801567
+    pitch: 6.149891
+    yaw: -34.349888
+  - ==: org.bukkit.Location
+    world: world
+    x: -202.43200384670462
+    y: 27.0
+    z: 58.79233869687284
+    pitch: 8.849901
+    yaw: -10.499898
+  tp_loc: *id001
+
+arena:
+  isEnabled: true
+  area:
+    ==: fr.olympa.api.region.shapes.Cuboid
+    zMin: -95
+    yMin: 7
+    zMax: 12
+    world: world
+    yMax: 200
+    xMax: 151
+    xMin: 44
+  holo_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: 121.5
+    y: 28.0
+    z: -21.5
+    pitch: 0.0
+    yaw: 0.0
+  start_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: 117.5
+    y: 28.0
+    z: -26.5
+    pitch: 0.0
+    yaw: 0.0
+  player_1_spawn:
+    ==: org.bukkit.Location
+    world: world
+    x: 118.19772047810734
+    y: 31.0
+    z: -83.07691495158598
+    pitch: -1.800103
+    yaw: -268.79962
+  player_2_spawn:
+    ==: org.bukkit.Location
+    world: world
+    x: 89.34369899442362
+    y: 31.0
+    z: -83.58286926896515
+    pitch: -9.068102E-5
+    yaw: -89.549576
+  arena:
+    ==: fr.olympa.api.region.shapes.Polygon
+    world: world
+    minY: 0
+    maxY: 256
+    points:
+    - 122|-90
+    - 122|-78
+    - 121|-77
+    - 120|-76
+    - 119|-75
+    - 118|-74
+    - 116|-73
+    - 114|-72
+    - 112|-71
+    - 108|-70
+    - 104|-69
+    - 98|-70
+    - 94|-71
+    - 92|-72
+    - 90|-73
+    - 88|-74
+    - 87|-75
+    - 86|-76
+    - 85|-77
+    - 84|-78
+    - 84|-90
+    - 85|-91
+    - 86|-92
+    - 87|-93
+    - 88|-94
+    - 89|-94
+    - 91|-95
+    - 93|-96
+    - 94|-97
+    - 98|-98
+    - 102|-99
+    - 104|-99
+    - 106|-98
+    - 108|-98
+    - 109|-97
+    - 112|-97
+    - 113|-96
+    - 114|-96
+    - 116|-95
+    - 117|-94
+    - 119|-93
+    - 120|-92
+    - 121|-91

@@ -1,13 +1,15 @@
 package fr.olympa.hub;
 
 import fr.olympa.api.groups.OlympaGroup;
-import fr.olympa.api.permission.OlympaPermission;
+import fr.olympa.api.permission.OlympaSpigotPermission;
 
 public class HubPermissions {
 
-	public static final OlympaPermission SERVER_CONFIG_COMMAND = new OlympaPermission(OlympaGroup.RESP_TECH);
-	public static final OlympaPermission LAUNCHPADS_COMMAND = new OlympaPermission(OlympaGroup.DEV);
+	public static final OlympaSpigotPermission SERVER_CONFIG_COMMAND = new OlympaSpigotPermission(OlympaGroup.RESP_TECH);
+	public static final OlympaSpigotPermission LAUNCHPADS_COMMAND = new OlympaSpigotPermission(OlympaGroup.DEV);
 
-	public static final OlympaPermission SPAWN_COMMAND = new OlympaPermission(OlympaGroup.PLAYER);
+	public static final OlympaSpigotPermission SPAWN_COMMAND = new OlympaSpigotPermission(OlympaGroup.PLAYER);
+ 
+	public static final OlympaSpigotPermission EDIT_MINIGAMES = new OlympaSpigotPermission(OlympaGroup.DEV);
 
 }
