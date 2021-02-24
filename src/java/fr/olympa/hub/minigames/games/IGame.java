@@ -1,6 +1,7 @@
 package fr.olympa.hub.minigames.games;
 
 import java.rmi.activation.ActivateFailedException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -116,8 +117,8 @@ public abstract class IGame extends ComplexCommand implements Listener{
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		
 		//init best scores
-		try {
-			ResultSet query = gameType.getStatement().executeQuery();
+		try (PreparedStatement statement = gameType.getStatement().createStatement()) {
+			ResultSet query = gameType.getStatement().executeQuery(statement);
 			while (query.next()) {
 				OlympaPlayerInformations p = AccountProvider.getPlayerInformations(query.getLong("player_id"));
 				

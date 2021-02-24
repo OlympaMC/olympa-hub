@@ -31,7 +31,7 @@ public enum GameType {
 	private boolean isTimerScore;
 	
 	private final SQLColumn<OlympaPlayerHub> scoreColumn;
-	private PreparedStatement bddStatement;
+	private OlympaStatement bddStatement;
 	
 	GameType(String bddKey, String name, String art, boolean isRestartable, boolean isTimerScore, GameProvider constructor){
 		this.constructor = constructor;
@@ -58,12 +58,8 @@ public enum GameType {
 			sort = "ASC";
 		else
 			sort = "DESC";
-		try {
-			bddStatement = new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPluginPlayerTable().getName() + 
-			 " WHERE " + bddKey + " != 0 ORDER BY " + bddKey + " " + sort + " LIMIT " + IGame.maxTopScoresStored + ";").getStatement();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		bddStatement = new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPluginPlayerTable().getName() + 
+				" WHERE " + bddKey + " != 0 ORDER BY " + bddKey + " " + sort + " LIMIT " + IGame.maxTopScoresStored + ";");
 	}
 	
 	public GameProvider getGameProvider(){
@@ -90,7 +86,7 @@ public enum GameType {
 		return isTimerScore;
 	}
 	
-	public PreparedStatement getStatement() {
+	public OlympaStatement getStatement() {
 		return bddStatement;
 	}
 	
