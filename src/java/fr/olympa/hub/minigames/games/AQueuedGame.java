@@ -3,6 +3,7 @@ package fr.olympa.hub.minigames.games;
 import java.rmi.activation.ActivateFailedException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -40,16 +41,14 @@ public abstract class AQueuedGame extends AGame {
 	protected boolean startGame(OlympaPlayerHub p) {
 		if (!super.startGame(p))
 			return false;
+
+		waitingPlayers.forEach(wp -> sendMessage(wp, "§a§l" + p.getName() + " §aa rejoint la file d'attente !"));
+		waitingPlayers.add(p.getPlayer());	
 		
-		waitingPlayers.add(p.getPlayer());
-		
-		if (playingPlayers.size() > 0) {
+		if (playingPlayers.size() > 0) 
 			sendMessage(p.getPlayer(), "§7Une partie est déjà en cours...");
-		}else {
-			tryToInitGame();
-			waitingPlayers.forEach(wp -> sendMessage(wp, "§a§l" + p.getName() + " §a rejoint la partie !"));
-			countdown = 10; // remet au début du timer dès qu'un joueur rejoint pour laisser le temps à d'autres
-		}
+		else 
+			tryToInitGame();	
 		
 		return true;
 	}
@@ -79,9 +78,6 @@ public abstract class AQueuedGame extends AGame {
 			//démarre le compte à rebours avant lancement de la partie
 			if (waitingPlayers.size() >= minPlayers && countdownTask == null) {
 				
-				if (playingPlayers.size() > 0)
-					return;
-				
 				countdown = countdownDelay;
 				countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
 					
@@ -104,12 +100,16 @@ public abstract class AQueuedGame extends AGame {
 						countdownTask.cancel();
 						countdownTask = null;
 						
-						for (int i = 0 ; i < waitingPlayers.size() ; i++)
-							if (i < maxPlayers) {
-								sendMessage(waitingPlayers.get(0), "§aVous rejoignez la partie !");
-								playingPlayers.add(waitingPlayers.remove(0));	
+						for (Iterator<Player> i = waitingPlayers.iterator(); i.hasNext();) {
+							Player p = i.next();
+							
+							if (playingPlayers.size() < maxPlayers) {
+								playingPlayers.add(p);
+								i.remove();
+								sendMessage(p, "§aVous rejoignez la partie !");
 							}else
-								sendMessage(waitingPlayers.get(i - maxPlayers), "§7Votre place dans la file ne vous a pas permis de rejoindre la partie, veuillez patienter...");
+								sendMessage(p, "§7Votre place dans la file ne vous a pas permis de rejoindre la partie, veuillez patienter...");	
+						}
 
 						Collections.shuffle(playingPlayers);
 

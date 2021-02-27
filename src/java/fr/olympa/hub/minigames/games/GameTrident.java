@@ -10,11 +10,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.craftbukkit.v1_16_R3.CraftParticle;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import net.minecraft.server.v1_16_R3.EntityThrownTrident;
@@ -37,6 +39,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 
@@ -61,7 +64,7 @@ public class GameTrident extends AQueuedGame {
 	private Region exteriorRegion;
 	private Region interiorRegion;
 	
-	private Map<Player, UUID> playersTridents = new HashMap<Player, UUID>();
+	private Map<Player, Entity> playersTridents = new HashMap<Player, Entity>();
 	
 	public GameTrident(OlympaHub plugin, ConfigurationSection gameConfig) throws ActivateFailedException {
 		super(plugin, GameType.TRIDENT, gameConfig, 2, 15);
@@ -112,11 +115,11 @@ public class GameTrident extends AQueuedGame {
 			PacketPlayOutSpawnEntity packet = (PacketPlayOutSpawnEntity) pckt;
 			
 			try {
-				Field entityId = PacketPlayOutSpawnEntity.class.getField("b");
+				Field entityId = PacketPlayOutSpawnEntity.class.getDeclaredField("b");
 				entityId.setAccessible(true);
 				
 				//TODO vérifier que ça fonctionne bien sans le cast des en int
-				if (!playersTridents.get(p).equals(entityId.get(packet)))
+				if (!entityId.get(packet).equals(playersTridents.get(p)))
 					return false;
 				
 			} catch (Exception e) {
@@ -137,10 +140,14 @@ public class GameTrident extends AQueuedGame {
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		super.endGame(p, score, warpToSpawn);
 		
-		UUID id = playersTridents.remove(p.getPlayer());
-		world.getEntities().stream().filter(ent -> ent.getUniqueId().equals(id)).findFirst().ifPresent(ent -> ent.remove());
+		Entity trident = playersTridents.remove(p.getPlayer());
+		if (trident != null)
+			trident.remove();
+		//world.getEntities().stream().filter(ent -> ent.getUniqueId().equals(id)).findFirst().ifPresent(ent -> ent.remove());
 		p.getPlayer().setAllowFlight(false);
 		p.getPlayer().setHealth(20d);
+		p.getPlayer().removePotionEffect(PotionEffectType.REGENERATION);
+		p.getPlayer().getInventory().remove(Material.TRIDENT);
 	}
 
 	@Override
@@ -148,8 +155,6 @@ public class GameTrident extends AQueuedGame {
 		for (Player p : playingPlayers) {
 			p.setAllowFlight(true);
 			p.setFlying(true);
-			
-			p.teleport(interiorRegion.getRandomLocation());
 			
 			//donne l'item de bataille au joueur
 			ItemStack hoe = ItemUtils.item(Material.DIAMOND_HOE, "§5Excalibur");
@@ -162,21 +167,39 @@ public class GameTrident extends AQueuedGame {
 			ItemStack it = new ItemStack(Material.TRIDENT);
 			it = ItemUtils.addEnchant(it, Enchantment.LOYALTY, 1);
 			
-			//spawn le trident dans le monde
+			//crée le trident à spawn
 			WorldServer worldServer = ((CraftWorld)world).getHandle();
 			
 			EntityThrownTrident trident = new EntityThrownTrident(worldServer, ((CraftPlayer)p).getHandle(), CraftItemStack.asNMSCopy(it));
-			playersTridents.put(p, trident.getUniqueID());
+			playersTridents.put(p, trident.getBukkitEntity());
 			
 			ThreadLocalRandom random = ThreadLocalRandom.current(); 
 			
-			trident.setLocation(
-					p.getLocation().getX() + (random.nextBoolean() ? random.nextDouble(30, 50) : -random.nextDouble(30, 50)), 
+			/*trident.setLocation(
+					p.getLocation().getX() + (random.nextBoolean() ? random.nextDouble(15, 30) : -random.nextDouble(15, 30)), 
 					p.getLocation().getY() + (random.nextBoolean() ? random.nextDouble(10, 15) : -random.nextDouble(10, 15)), 
-					p.getLocation().getZ() + (random.nextBoolean() ? random.nextDouble(30, 50) : -random.nextDouble(30, 50)), 
-					0, 0);
+					p.getLocation().getZ() + (random.nextBoolean() ? random.nextDouble(15, 30) : -random.nextDouble(15, 30)), 
+					0, 0);*/
+			Location tridentLoc = p.getLocation().clone().subtract(
+					p.getLocation().getX() + (random.nextBoolean() ? random.nextDouble(5, 10) : -random.nextDouble(5, 10)), 
+					p.getLocation().getY(), 
+					p.getLocation().getZ() + (random.nextBoolean() ? random.nextDouble(5, 10) : -random.nextDouble(5, 10)));
 			
+			//définit la position du trident puis le fais spawn
+			trident.setLocation(tridentLoc.getX(), tridentLoc.getY(), tridentLoc.getZ(), 0, 0);
 			worldServer.addEntity(trident, CreatureSpawnEvent.SpawnReason.CUSTOM);
+
+			//teleport the player in the fly area and make him face to his trident
+			Location loc = null;
+			do {
+				loc = interiorRegion.getRandomLocation();
+				
+				Vector dirBetweenLocations = tridentLoc.toVector().subtract(loc.clone().toVector()).multiply(-1);
+				loc.setDirection(dirBetweenLocations);
+				
+			}while (loc.getBlock().getType() != Material.AIR || loc.clone().add(0, 1, 0).getBlock().getType() != Material.AIR);
+			
+			teleport(p, loc);
 		}
 	}
 
@@ -185,6 +208,7 @@ public class GameTrident extends AQueuedGame {
 		//remove all tridents
 		//playersTridents.values().forEach(uuid -> world.getEntities().stream().filter(ent -> ent.getUniqueId().equals(uuid)).findFirst().get().remove());
 		playersTridents.clear();
+		world.getEntities().stream().filter(e -> e.getType() == EntityType.TRIDENT).forEach(e -> e.remove());
 	}
 	
 	//Spawns barrier particles if player is too close from the exterior region border
@@ -193,18 +217,18 @@ public class GameTrident extends AQueuedGame {
 		Set<Float> yLimits = new HashSet<Float>();
 		Set<Float> zLimits = new HashSet<Float>();
 
-		xLimits.add((float) exteriorRegion.getMin().getBlockX() - 1);
-		xLimits.add((float) exteriorRegion.getMax().getBlockX() + 1);
-		yLimits.add((float) exteriorRegion.getMin().getBlockY() - 1);
-		yLimits.add((float) exteriorRegion.getMax().getBlockY() + 1);
-		zLimits.add((float) exteriorRegion.getMin().getBlockZ() - 1);
-		zLimits.add((float) exteriorRegion.getMax().getBlockZ() + 1);
+		xLimits.add((float) exteriorRegion.getMin().getBlockX());
+		xLimits.add((float) exteriorRegion.getMax().getBlockX());
+		yLimits.add((float) exteriorRegion.getMin().getBlockY());
+		yLimits.add((float) exteriorRegion.getMax().getBlockY());
+		zLimits.add((float) exteriorRegion.getMin().getBlockZ());
+		zLimits.add((float) exteriorRegion.getMax().getBlockZ());
 		
-		for (float x = p.getLocation().getBlockX() - 6 ; x <= p.getLocation().getBlockX() + 6 ; x++)
-			for (float y = p.getLocation().getBlockY() - 6 ; y <= p.getLocation().getBlockY() + 6 ; y++)
-				for (float z = p.getLocation().getBlockZ() - 6 ; z <= p.getLocation().getBlockZ() + 6 ; z++)
-					if (xLimits.contains(x) || yLimits.contains(y) || zLimits.contains(z)) {
-						PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(CraftParticle.toNMS(Particle.BARRIER), true, x, y, z, 0f, 0f, 0f, 1f, 1);
+		for (float x = p.getLocation().getBlockX() - 4 ; x <= p.getLocation().getBlockX() + 4 ; x++)
+			for (float y = p.getLocation().getBlockY() - 4 ; y <= p.getLocation().getBlockY() + 4 ; y++)
+				for (float z = p.getLocation().getBlockZ() - 4 ; z <= p.getLocation().getBlockZ() + 4 ; z++)
+					if ((xLimits.contains(x) || yLimits.contains(y) || zLimits.contains(z)) && exteriorRegion.isIn(world, (int)x, (int)y, (int)z)) {
+						PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(CraftParticle.toNMS(Particle.BARRIER), true, x + 0.5, y, z + 0.5, 0f, 0f, 0f, 1f, 1);
 						((CraftPlayer)p).getHandle().playerConnection.sendPacket(packet);
 					}
 	}
@@ -214,10 +238,10 @@ public class GameTrident extends AQueuedGame {
 	@EventHandler //détecte si l'entité supprimée est un trident appartenant à un joueur en jeu
 	public void onEntityRemove(EntityRemoveFromWorldEvent e) {
 		
-		if (playersTridents.containsValue(e.getEntity().getUniqueId()))
-			for (Entry<Player,UUID> entry : playersTridents.entrySet())
+		if (playersTridents.containsValue(e.getEntity()))
+			for (Entry<Player,Entity> entry : playersTridents.entrySet())
 				
-				if (entry.getValue().equals(e.getEntity().getUniqueId())) {
+				if (entry.getValue().equals(e.getEntity())) {
 					if (playingPlayers.size() > 1) {
 						sendMessage(entry.getKey(), "§7Dommage, vous avez été rattrapé par votre trident !");
 						endGame(AccountProvider.get(entry.getKey().getUniqueId()), 0, false);	

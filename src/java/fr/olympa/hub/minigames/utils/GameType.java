@@ -1,7 +1,5 @@
 package fr.olympa.hub.minigames.utils;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Types;
 
 import fr.olympa.api.provider.AccountProvider;
@@ -20,7 +18,7 @@ public enum GameType {
 	ARENA("score_arena", "§6Arène 1vs1", "§6de l'", false, false, GameArena::new),
 	LABY("score_laby", "§6Labyrinthe", "§6du ", false, true, null),
 	DAC("score_dac", "§6Dé à coudre", "§6du ", false, false, GameDac::new), 
-	TRIDENT("score_trident", "§6Trident Run", "§6du", false, false, GameTrident::new),
+	TRIDENT("score_trident", "§6Trident Run", "§6du ", false, false, GameTrident::new),
 	
 	;
 	

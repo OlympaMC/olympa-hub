@@ -190,8 +190,24 @@ public abstract class AGame extends ComplexCommand implements Listener{
 		return Collections.unmodifiableSet(players.keySet());
 	}
 	
+	/**
+	 * Send a message to the player using the game chat prefix
+	 * @param p
+	 * @param msg
+	 */
 	protected void sendMessage(Player p, String msg) {
 		p.sendMessage(gameType.getChatPrefix() + msg);
+	}
+	
+	/**
+	 * Teleport the player to the defined location, bypassing teleport restrictions
+	 * @param p
+	 * @param loc
+	 */
+	protected void teleport(Player p, Location loc) {
+		allowedTpLocs.add(loc);
+		p.teleport(loc);
+		allowedTpLocs.remove(loc);
 	}
 	
 	///////////////////////////////////////////////////////////
@@ -211,9 +227,9 @@ public abstract class AGame extends ComplexCommand implements Listener{
 		if (MiniGamesManager.getInstance().getGame(previousGame) != null)
 			MiniGamesManager.getInstance().getGame(previousGame).endGame(p, -1, false);
 		
-		if (p.getPlayer().getAllowFlight() || p.getPlayer().getGameMode() != GameMode.ADVENTURE) {
+		if ((!allowFly && p.getPlayer().isFlying()) || p.getPlayer().getGameMode() != GameMode.ADVENTURE) {
 			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§cVous devez être en gamemode aventure et sans fly pour pouvoir jouer !");
-			return false;	
+			return false;
 		}
 		
 		players.put(p.getPlayer(), p.getPlayer().getInventory().getContents());
@@ -499,7 +515,7 @@ public abstract class AGame extends ComplexCommand implements Listener{
 				startGame((OlympaPlayerHub)AccountProvider.get(p.getUniqueId()));
 			
 		}else {
-			if ((!allowFly && p.getAllowFlight()) || p.getGameMode() != GameMode.ADVENTURE) {
+			if ((!allowFly && p.isFlying()) || p.getGameMode() != GameMode.ADVENTURE) {
 				p.sendMessage(gameType.getChatPrefix() + "§cNe profitez pas de vos permissions pour vous mettre en fly !");
 				endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, false);
 				

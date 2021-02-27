@@ -87,6 +87,7 @@ public class GameArena extends AQueuedGame{
 	
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
+		p.getPlayer().setHealth(20d);
 		if (score == -1 && playingPlayers.contains(p.getPlayer()))
 			fireLostFor(p.getPlayer());
 		else 
@@ -158,9 +159,9 @@ public class GameArena extends AQueuedGame{
 		if (!playingPlayers.contains(p))
 			return;
 		
-		playingPlayers.forEach(pp -> pp.setHealth(20d));
-
-		endGame(AccountProvider.get(getOtherPlayingPlayer(p).getUniqueId()), 1, true);
+		if (getOtherPlayingPlayer(p) != null)
+			endGame(AccountProvider.get(getOtherPlayingPlayer(p).getUniqueId()), 1, true);
+		
 		endGame(AccountProvider.get(p.getUniqueId()), 0, true);
 		
 		playingPlayers.clear();
