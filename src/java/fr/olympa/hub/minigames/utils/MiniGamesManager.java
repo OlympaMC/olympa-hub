@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -19,20 +20,24 @@ import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.HubPermissions;
 import fr.olympa.hub.OlympaHub;
-import fr.olympa.hub.minigames.games.IGame;
+import fr.olympa.hub.minigames.games.AGame;
 import redis.clients.jedis.Jedis;
 
 public class MiniGamesManager {
 
 	private static MiniGamesManager instance;
 	
-	private Map<GameType, IGame> games = new HashMap<GameType, IGame>(); 
+	private Map<GameType, AGame> games = new HashMap<GameType, AGame>(); 
 
 	private File configFile;
 	private YamlConfiguration config;
 	
+	private PacketsListener packetsListener;
+	
 	public MiniGamesManager(OlympaHub plugin) {
 		instance = this;
+		packetsListener = new PacketsListener(plugin);
+		Bukkit.getWorlds().forEach(w -> w.setPVP(true));
 		
         configFile = new File(plugin.getDataFolder(), "games.yml");
         
@@ -62,7 +67,7 @@ public class MiniGamesManager {
         for (GameType game : GameType.values())
         	if (game.getGameProvider() != null) {
         		try {
-        			IGame iGame = game.getGameProvider().getGame(plugin, config.getConfigurationSection(game.toString().toLowerCase()));
+        			AGame iGame = game.getGameProvider().getGame(plugin, config.getConfigurationSection(game.toString().toLowerCase()));
         					
             		iGame.register(); //register game commands
             		games.put(game, iGame);	
@@ -96,14 +101,14 @@ public class MiniGamesManager {
 	 * @return GameType of the game, or null if player isn't playing any game
 	 */
 	public GameType isPlaying(Player p) {
-		for (IGame game : games.values())
+		for (AGame game : games.values())
 			if (game.getPlayers().contains(p))
 				return game.getType();
 		
 		return null;
 	}
 	
-	public IGame getGame(GameType game) {
+	public AGame getGame(GameType game) {
 		return games.get(game);
 	}
 	
@@ -126,5 +131,9 @@ public class MiniGamesManager {
 			OlympaHub.getInstance().getLogger().log(Level.SEVERE, "Failed to save games.yml, please check authorizations.");
 			e.printStackTrace();
 		}
+	}
+	
+	public PacketsListener getPacketsListener() {
+		return packetsListener;
 	}
 }

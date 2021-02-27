@@ -63,7 +63,7 @@ import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import redis.clients.jedis.Jedis;
 
-public abstract class IGame extends ComplexCommand implements Listener{
+public abstract class AGame extends ComplexCommand implements Listener{
 	
 	private static final int maxDisplayedTopScores = 10;
 	public static final int maxTopScoresStored = 100; 
@@ -71,7 +71,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	protected final boolean isEnabled;
 	
 	protected OlympaHub plugin;
-	protected final IGame instance;
+	protected final AGame instance;
 	private SimpleObservable observable = new SimpleObservable();
 	
 	protected ItemStack[] hotBarContent = new ItemStack[9];
@@ -93,8 +93,10 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	
 	protected World world;
 	
+	protected boolean allowFly = false; //if set to true, players will be allowed to use fly mode during the game
+	
 	@SuppressWarnings("unchecked")
-	public IGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile) throws ActivateFailedException {
+	public AGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile) throws ActivateFailedException {
 		super(plugin, game.toString().toLowerCase(), "Accès à la config " + game.getNameWithArticle(), HubPermissions.EDIT_MINIGAMES);
 		
 		this.plugin = plugin;
@@ -186,6 +188,10 @@ public abstract class IGame extends ComplexCommand implements Listener{
 	
 	public Set<Player> getPlayers(){
 		return Collections.unmodifiableSet(players.keySet());
+	}
+	
+	protected void sendMessage(Player p, String msg) {
+		p.sendMessage(gameType.getChatPrefix() + msg);
 	}
 	
 	///////////////////////////////////////////////////////////
@@ -493,7 +499,7 @@ public abstract class IGame extends ComplexCommand implements Listener{
 				startGame((OlympaPlayerHub)AccountProvider.get(p.getUniqueId()));
 			
 		}else {
-			if (p.getAllowFlight() || p.getGameMode() != GameMode.ADVENTURE) {
+			if ((!allowFly && p.getAllowFlight()) || p.getGameMode() != GameMode.ADVENTURE) {
 				p.sendMessage(gameType.getChatPrefix() + "§cNe profitez pas de vos permissions pour vous mettre en fly !");
 				endGame(AccountProvider.get(e.getPlayer().getUniqueId()), -1, false);
 				

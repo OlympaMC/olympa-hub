@@ -11,14 +11,16 @@ import fr.olympa.hub.minigames.games.GameArena;
 import fr.olympa.hub.minigames.games.GameDac;
 import fr.olympa.hub.minigames.games.GameElytra;
 import fr.olympa.hub.minigames.games.GameJump;
-import fr.olympa.hub.minigames.games.IGame;
+import fr.olympa.hub.minigames.games.GameTrident;
+import fr.olympa.hub.minigames.games.AGame;
 
 public enum GameType {
 	ELYTRA("score_elytra", "§6Course d'élytra", "§6de la ", true, true, GameElytra::new),
 	JUMP("score_jump", "§6Jump", "§6du ", true, true, GameJump::new),
 	ARENA("score_arena", "§6Arène 1vs1", "§6de l'", false, false, GameArena::new),
-	LABY("score_laby", "§6Labyrinthe", "du ", false, true, null),
-	DAC("score_dac", "§6Dé à coudre", "§6du ", false, false, GameDac::new),
+	LABY("score_laby", "§6Labyrinthe", "§6du ", false, true, null),
+	DAC("score_dac", "§6Dé à coudre", "§6du ", false, false, GameDac::new), 
+	TRIDENT("score_trident", "§6Trident Run", "§6du", false, false, GameTrident::new),
 	
 	;
 	
@@ -59,7 +61,7 @@ public enum GameType {
 		else
 			sort = "DESC";
 		bddStatement = new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPluginPlayerTable().getName() + 
-				" WHERE " + bddKey + " != 0 ORDER BY " + bddKey + " " + sort + " LIMIT " + IGame.maxTopScoresStored + ";");
+				" WHERE " + bddKey + " != 0 ORDER BY " + bddKey + " " + sort + " LIMIT " + AGame.maxTopScoresStored + ";");
 	}
 	
 	public GameProvider getGameProvider(){

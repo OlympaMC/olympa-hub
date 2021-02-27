@@ -5,10 +5,10 @@ import java.rmi.activation.ActivateFailedException;
 import org.bukkit.configuration.ConfigurationSection;
 
 import fr.olympa.hub.OlympaHub;
-import fr.olympa.hub.minigames.games.IGame;
+import fr.olympa.hub.minigames.games.AGame;
 
 @FunctionalInterface
 public interface GameProvider {
 
-	IGame getGame(OlympaHub plugin, ConfigurationSection config) throws ActivateFailedException;
+	AGame getGame(OlympaHub plugin, ConfigurationSection config) throws ActivateFailedException;
 }

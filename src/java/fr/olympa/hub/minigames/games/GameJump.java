@@ -22,7 +22,7 @@ import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 
-public class GameJump extends IGame{
+public class GameJump extends AGame{
 
 	private Location tpLoc;
 	private List<Location> checkpoints = new ArrayList<Location>();

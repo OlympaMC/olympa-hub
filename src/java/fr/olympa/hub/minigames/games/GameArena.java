@@ -1,8 +1,6 @@
 package fr.olympa.hub.minigames.games;
 
 import java.rmi.activation.ActivateFailedException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Location;
@@ -36,11 +34,7 @@ import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 
-public class GameArena extends IGame{
-	
-	private List<Player> queuedPlayers = new ArrayList<Player>();
-
-	private List<Player> playingPlayers = new ArrayList<Player>();
+public class GameArena extends AQueuedGame{
 
 	//private Region arena;
 	
@@ -53,16 +47,7 @@ public class GameArena extends IGame{
 	boolean isGameStarting = false;
 	
 	public GameArena(OlympaHub plugin, ConfigurationSection fileConfig) throws ActivateFailedException {
-		super(plugin, GameType.ARENA, fileConfig);
-
-		
-		
-		/*
-		System.out.println("DEBUG : " + region);
-		System.out.println("DEBUG : " + region.getRegion());
-		System.out.println("DEBUG : " + region.getRegion().getWorld());*/
-
-		world.setPVP(true);
+		super(plugin, GameType.ARENA, fileConfig, 2, 10);
 		
 		pos1 = config.getLocation("player_1_spawn");
 		pos2 = config.getLocation("player_2_spawn");
@@ -97,32 +82,45 @@ public class GameArena extends IGame{
 	
 	@Override
 	protected boolean startGame(OlympaPlayerHub p) {
-		if (!super.startGame(p))
-			return false;
-		
-		
-		queuedPlayers.add(p.getPlayer());
-		updateGameStartDelay();
-		
-		tryToInitGame();
-		
-		return true;
+		return super.startGame(p);
 	}
 	
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		if (score == -1 && playingPlayers.contains(p.getPlayer()))
 			fireLostFor(p.getPlayer());
-		else {
+		else 
 			super.endGame(p, score, warpToSpawn);
-			
-			queuedPlayers.remove(p.getPlayer());
-			//startingPlayers.remove(p.getPlayer());
-			playingPlayers.remove(p.getPlayer());
-			
-			updateGameStartDelay();	
-		}
 	}
+
+	@Override
+	protected void startGame() {
+		ItemStack potHeal = new ItemStack(Material.SPLASH_POTION);
+		PotionMeta meta = (PotionMeta) potHeal.getItemMeta();
+		meta.addCustomEffect(new PotionEffect(PotionEffectType.HEAL, 1, 0), true);
+		meta.setDisplayName("§ePotion de soin I");
+		potHeal.setItemMeta(meta);
+		potHeal.setAmount(2);
+		
+		playingPlayers.forEach(p -> p.getInventory().addItem(ItemUtils.item(Material.IRON_SWORD, "§7Epée en fer")));
+		playingPlayers.forEach(p -> p.getInventory().addItem(potHeal.clone()));
+		playingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.HEAD, ItemUtils.item(Material.IRON_HELMET, "§7Casque")));
+		playingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.CHEST, ItemUtils.item(Material.IRON_CHESTPLATE, "§7Plastron")));
+		playingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.LEGS, ItemUtils.item(Material.IRON_LEGGINGS, "§7Jambières")));
+		playingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.FEET, ItemUtils.item(Material.IRON_BOOTS, "§7Bottes")));
+	
+		playingPlayers.addAll(playingPlayers);
+		
+		playingPlayers.get(0).teleport(pos1);
+		playingPlayers.get(1).teleport(pos2);
+	}
+
+	@Override
+	protected void endGame() {
+		
+	}
+	
+	
 	
 	@Override
 	protected void onInterractHandler(PlayerInteractEvent e) {
@@ -132,10 +130,10 @@ public class GameArena extends IGame{
 		e.setCancelled(false);
 	}
 
+	@Override
 	protected void onDamageHandler(EntityDamageEvent e) {
 		if (!playingPlayers.contains(e.getEntity()))
 			return;
-		e.setCancelled(false);
 		
 		Player p = (Player) e.getEntity();
 		
@@ -166,7 +164,6 @@ public class GameArena extends IGame{
 		endGame(AccountProvider.get(p.getUniqueId()), 0, true);
 		
 		playingPlayers.clear();
-		tryToInitGame();
 	}
 	
 	private Player getOtherPlayingPlayer(Player p) {
@@ -181,14 +178,14 @@ public class GameArena extends IGame{
 	/**
 	 * MAJ le compteur des joueurs qui joueront avant le joueur concerné
 	 */
-	private void updateGameStartDelay() {
+	/*private void updateGameStartDelay() {
 		for (int i = 0 ; i < queuedPlayers.size() ; i++) {
 			ItemStack item = queuedPlayers.get(i).getInventory().getItem(queueCountInvIndex);
 			item = ItemUtils.name(item, "§7Place dans la file : " + (i + 1));
 		}	
-	}
+	}*/
 	
-	private void tryToInitGame() {
+	/*private void tryToInitGame() {
 		updateGameStartDelay();
 		
 		if (isGameStarting || playingPlayers.size() > 0 || queuedPlayers.size() < 2)
@@ -199,9 +196,9 @@ public class GameArena extends IGame{
 		list.add(queuedPlayers.remove(0));
 		list.add(queuedPlayers.remove(0));
 		startGame(list, 3);
-	}
+	}*/
 	
-	private void startGame(List<Player> startingPlayers, int countdown) {
+	/*private void startGamee(List<Player> startingPlayers, int countdown) {
 		//cancel si l'un des joueurs n'est plus dans la partie
 		if (startingPlayers.size() != 2 || !getPlayers().contains(startingPlayers.get(0)) || !getPlayers().contains(startingPlayers.get(1))) {
 			startingPlayers.forEach(p -> {
@@ -212,8 +209,6 @@ public class GameArena extends IGame{
 			});
 			
 			isGameStarting = false;
-			tryToInitGame();
-			
 			return;
 		}
 		
@@ -252,7 +247,7 @@ public class GameArena extends IGame{
 			
 			isGameStarting = false;
 		}
-	}
+	}*/
 
 	
 	///////////////////////////////////////////////////////////

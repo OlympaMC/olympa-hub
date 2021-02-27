@@ -41,7 +41,7 @@ import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 
-public class GameElytra extends IGame {
+public class GameElytra extends AGame {
 
 	private static final int startingDelay = 3;
 	
