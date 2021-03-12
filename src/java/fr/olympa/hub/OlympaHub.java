@@ -70,8 +70,6 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 			OlympaCore.getInstance().setOlympaServer(OlympaServer.LOBBY);
 			AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
-			for (GameType game : GameType.values())
-				game.initBddStatement();
 			OlympaPermission.registerPermissions(HubPermissions.class);
 
 			spawn = getConfig().getLocation("spawn");
