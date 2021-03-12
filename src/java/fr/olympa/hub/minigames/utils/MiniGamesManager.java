@@ -84,10 +84,6 @@ public class MiniGamesManager {
 		
 		//register redis
         OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), new GamesRedisListener(), RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name());
-        /*plugin.getTask().runTaskLater(() -> {
-        	OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), new GamesRedisListener(), RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name());
-            plugin.getLogger().log(Level.INFO, "§aLoaded minigames redis chanel " + RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name().toLowerCase());
-        }, 100);*/
 		
 	}
 	

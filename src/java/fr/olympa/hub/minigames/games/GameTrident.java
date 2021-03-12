@@ -19,7 +19,11 @@ import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+
+import net.minecraft.server.v1_16_R3.EntityCow;
+import net.minecraft.server.v1_16_R3.EntityCreeper;
 import net.minecraft.server.v1_16_R3.EntityThrownTrident;
+import net.minecraft.server.v1_16_R3.EntityTypes;
 import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles;
 import net.minecraft.server.v1_16_R3.WorldServer;
@@ -155,6 +159,12 @@ public class GameTrident extends AQueuedGame {
 		for (Player p : playingPlayers) {
 			p.setAllowFlight(true);
 			p.setFlying(true);
+
+			//définit la localisation où le joueur sera tp
+			Location playerTpLoc = null;
+			do {
+				playerTpLoc = interiorRegion.getRandomLocation();
+			}while (playerTpLoc.getBlock().getType() != Material.AIR || playerTpLoc.clone().add(0, 1, 0).getBlock().getType() != Material.AIR);
 			
 			//donne l'item de bataille au joueur
 			ItemStack hoe = ItemUtils.item(Material.DIAMOND_HOE, "§5Excalibur");
@@ -170,7 +180,8 @@ public class GameTrident extends AQueuedGame {
 			//crée le trident à spawn
 			WorldServer worldServer = ((CraftWorld)world).getHandle();
 			
-			EntityThrownTrident trident = new EntityThrownTrident(worldServer, ((CraftPlayer)p).getHandle(), CraftItemStack.asNMSCopy(it));
+			//EntityThrownTrident trident = new EntityThrownTrident(worldServer, ((CraftPlayer)p).getHandle(), CraftItemStack.asNMSCopy(it));
+			EntityCow trident = new EntityCow(EntityTypes.COW, worldServer);
 			playersTridents.put(p, trident.getBukkitEntity());
 			
 			ThreadLocalRandom random = ThreadLocalRandom.current(); 
@@ -186,20 +197,13 @@ public class GameTrident extends AQueuedGame {
 					p.getLocation().getZ() + (random.nextBoolean() ? random.nextDouble(5, 10) : -random.nextDouble(5, 10)));
 			
 			//définit la position du trident puis le fais spawn
-			trident.setLocation(tridentLoc.getX(), tridentLoc.getY(), tridentLoc.getZ(), 0, 0);
 			worldServer.addEntity(trident, CreatureSpawnEvent.SpawnReason.CUSTOM);
+			trident.setLocation(tridentLoc.getX(), tridentLoc.getY(), tridentLoc.getZ(), tridentLoc.getYaw(), tridentLoc.getPitch());
 
 			//teleport the player in the fly area and make him face to his trident
-			Location loc = null;
-			do {
-				loc = interiorRegion.getRandomLocation();
-				
-				Vector dirBetweenLocations = tridentLoc.toVector().subtract(loc.clone().toVector()).multiply(-1);
-				loc.setDirection(dirBetweenLocations);
-				
-			}while (loc.getBlock().getType() != Material.AIR || loc.clone().add(0, 1, 0).getBlock().getType() != Material.AIR);
-			
-			teleport(p, loc);
+			Vector dirBetweenLocations = tridentLoc.toVector().subtract(playerTpLoc.clone().toVector()).multiply(-1);
+			playerTpLoc.setDirection(dirBetweenLocations);
+			teleport(p, playerTpLoc);
 		}
 	}
 

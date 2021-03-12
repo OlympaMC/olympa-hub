@@ -19,7 +19,6 @@ public enum GameType {
 	LABY("score_laby", "§6Labyrinthe", "§6du ", false, true, null),
 	DAC("score_dac", "§6Dé à coudre", "§6du ", false, false, GameDac::new), 
 	TRIDENT("score_trident", "§6Trident Run", "§6du ", false, false, GameTrident::new),
-	
 	;
 	
 	private GameProvider constructor;
@@ -31,7 +30,6 @@ public enum GameType {
 	private boolean isTimerScore;
 	
 	private final SQLColumn<OlympaPlayerHub> scoreColumn;
-	private OlympaStatement bddStatement;
 	
 	GameType(String bddKey, String name, String art, boolean isRestartable, boolean isTimerScore, GameProvider constructor){
 		this.constructor = constructor;
@@ -50,16 +48,6 @@ public enum GameType {
 			return game;
 		
 		return null;
-	}
-	
-	public void initBddStatement() {
-		String sort;
-		if (isTimerScore)
-			sort = "ASC";
-		else
-			sort = "DESC";
-		bddStatement = new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPluginPlayerTable().getName() + 
-				" WHERE " + bddKey + " != 0 ORDER BY " + bddKey + " " + sort + " LIMIT " + AGame.maxTopScoresStored + ";");
 	}
 	
 	public GameProvider getGameProvider(){
@@ -87,7 +75,8 @@ public enum GameType {
 	}
 	
 	public OlympaStatement getStatement() {
-		return bddStatement;
+		return new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPluginPlayerTable().getName() + 
+				" WHERE " + bddKey + " != 0 ORDER BY " + bddKey + (isTimerScore ? " ASC" : " DESC") + " LIMIT " + AGame.maxTopScoresStored + ";");
 	}
 	
 	public String getNameWithArticle() {
