@@ -31,7 +31,6 @@ import fr.olympa.api.server.OlympaServer;
 import fr.olympa.api.server.ServerStatus;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.gui.VanishManager;
-import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import fr.olympa.hub.pads.LaunchPadManager;
@@ -88,6 +87,9 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 			OlympaGroup.PLAYER.setRuntimePermission("jumppads.use");
 			OlympaGroup.PLAYER.setRuntimePermission("music.favorites", false);
+			OlympaGroup.PLAYER.setRuntimePermission("music.save-datas", false);
+			OlympaGroup.VIP.setRuntimePermission("music.favorites", true);
+			OlympaGroup.VIP.setRuntimePermission("music.save-datas", true);
 
 			OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), RedisChannel.BUNGEE_SEND_SERVERSINFOS.name());
 			//RedisAccess.INSTANCE.disconnect();
