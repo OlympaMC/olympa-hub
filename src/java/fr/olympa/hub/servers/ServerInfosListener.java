@@ -8,13 +8,14 @@ import java.util.Map.Entry;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
 import fr.olympa.api.config.CustomConfig;
 import fr.olympa.api.customevents.SpigotConfigReloadEvent;
 import fr.olympa.api.server.MonitorInfo;
 import fr.olympa.core.spigot.redis.receiver.BungeeServerInfoReceiver;
 
-public class ServerInfosListener {
+public class ServerInfosListener implements Listener {
 
 	@EventHandler
 	public void onSpigotConfigReload(SpigotConfigReloadEvent event) {
