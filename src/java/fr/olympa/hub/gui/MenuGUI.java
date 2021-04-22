@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
+import fr.olympa.api.config.CustomConfig;
 import fr.olympa.api.gui.OlympaGUI;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.player.OlympaPlayer;
@@ -101,11 +102,12 @@ public class MenuGUI extends OlympaGUI {
 			for (ServerInfo server : OlympaHub.getInstance().serversInfos.getServers()) {
 				if (server.getServer() == null || !server.getServer().canConnect(player))
 					continue;
-				MonitorInfo mi = serverInfo.stream().filter(m -> !server.isSameServer(m)).findFirst().orElse(null);
-				if (mi != null)
+				MonitorInfo mi = serverInfo.stream().filter(m -> server.isSameServer(m)).findFirst().orElse(null);
+				if (mi != null) {
 					server.updateInfo(mi);
-				setServerItem(server);
-				server.observe("gui_" + hashCode(), () -> setServerItem(server));
+					setServerItem(server);
+					server.observe("gui_" + hashCode(), () -> setServerItem(server));
+				}
 			}
 
 		}, false);
@@ -132,28 +134,31 @@ public class MenuGUI extends OlympaGUI {
 	@Override
 	public boolean onClick(Player p, ItemStack current, int slot, ClickType click) {
 		TextComponent link = getSlotLink(slot);
+		OlympaHub instanceHub = OlympaHub.getInstance();
+		CustomConfig config = instanceHub.getConfig();
 		if (link != null) {
 			p.spigot().sendMessage(link);
 			return true;
 		}
 		try {
-			Optional<Entry<String, ServerInfo>> server = OlympaHub.getInstance().serversInfos.servers.entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().getServer().canConnect(player)).findFirst();
-			if (server.isPresent())
-				if (server.get().getValue().connect(p))
-					p.closeInventory();
-		} catch (IndexOutOfBoundsException ex) {}
+			Optional<Entry<String, ServerInfo>> server = instanceHub.serversInfos.servers.entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().getServer().canConnect(player)).findFirst();
+			if (server.isPresent() && server.get().getValue().connect(p))
+				p.closeInventory();
+		} catch (IndexOutOfBoundsException e) {
+			e.printStackTrace(); // On doit fix ça, c'est pas normal de laisser une exception comme ça
+		}
 
 		if (minigames.keySet().contains(slot))
 			if (minigames.get(slot) == GameType.LABY) {
-				if (!OlympaHub.getInstance().getConfig().getKeys(false).contains("laby_tp_loc")) {
-					OlympaHub.getInstance().getConfig().set("laby_tp_loc", new Location(OlympaHub.getInstance().spawn.getWorld(), 0, 0, 0));
-					OlympaHub.getInstance().saveConfig();
+				if (!config.getKeys(false).contains("laby_tp_loc")) {
+					config.set("laby_tp_loc", new Location(instanceHub.spawn.getWorld(), 0, 0, 0));
+					instanceHub.saveConfig();
 				}
-				p.teleport(OlympaHub.getInstance().getConfig().getLocation("laby_tp_loc"));
-			} else if (OlympaHub.getInstance().games.getGame(minigames.get(slot)) != null)
-				OlympaHub.getInstance().games.getGame(minigames.get(slot)).beginGame(p);
+				p.teleport(config.getLocation("laby_tp_loc"));
+			} else if (instanceHub.games.getGame(minigames.get(slot)) != null)
+				instanceHub.games.getGame(minigames.get(slot)).beginGame(p);
 			else
-				p.sendMessage(OlympaHub.getInstance().getPrefixConsole() + "§cUne erreur est survenue, veuillez contacter un membre du staff.");
+				p.sendMessage(instanceHub.getPrefixConsole() + "§cUne erreur est survenue, veuillez contacter un membre du staff.");
 		return true;
 	}
 
