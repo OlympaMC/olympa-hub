@@ -133,7 +133,7 @@ public class ServerInfo extends AbstractObservable {
 	}
 
 	public String getServerNameCaps() {
-		if (servName != null && server.hasMultiServers())
+		if (servName != null)
 			return server.getNameCaps() + " n°" + servName.replaceFirst("^[A-Za-z]+", "");
 		return server.getNameCaps();
 	}

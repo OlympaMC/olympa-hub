@@ -113,7 +113,6 @@ public class MenuGUI extends OlympaGUI {
 		}, false);
 
 		ConfigurationSection minigamesConfig = OlympaHub.getInstance().getConfig().getConfigurationSection("minigames");
-
 		for (String minigame : minigamesConfig.getKeys(false)) {
 			int slot = minigamesConfig.getInt(minigame + ".slot");
 			GameType game = GameType.valueOf(minigame);
