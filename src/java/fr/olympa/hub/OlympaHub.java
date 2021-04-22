@@ -89,7 +89,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			OlympaGroup.VIP.setRuntimePermission("music.favorites", true);
 			OlympaGroup.VIP.setRuntimePermission("music.save-datas", true);
 
-			serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers"));
+			serversInfos = new ServerInfosListener(config.getConfigurationSection("servers"));
 			//RedisAccess.INSTANCE.disconnect();
 
 			OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag() {

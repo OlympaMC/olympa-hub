@@ -43,9 +43,9 @@ public class ServerInfo extends AbstractObservable {
 	@Nullable
 	private final String servName;
 	private OlympaServer server;
-	public final List<String> description;
-	public final Material item;
-	public final int slot;
+	public List<String> description;
+	public Material item;
+	public int slot;
 
 	@Deprecated
 	private int online;
@@ -61,11 +61,7 @@ public class ServerInfo extends AbstractObservable {
 
 	public ServerInfo(String servName, ConfigurationSection config) {
 		this.servName = servName;
-		description = Arrays.asList(ChatPaginator.wordWrap("§8> §7" + config.getString("description"), 40));
-		item = Material.valueOf(config.getString("item"));
-		slot = config.getInt("slot");
-		if (config.contains("portal"))
-			portal = new Portal(config.getConfigurationSection("portal"));
+		updateConfig(config);
 	}
 
 	@Deprecated
@@ -76,48 +72,28 @@ public class ServerInfo extends AbstractObservable {
 
 	public ServerInfo(MonitorInfo monitorServer, ConfigurationSection config) {
 		this(monitorServer.getName(), config);
-		setInfo(monitorServer);
+		updateInfo(monitorServer);
 	}
 
 	public MonitorInfo getInfo() {
 		return info;
 	}
 
-	public void setInfo(MonitorInfo info) {
+	public void updateConfig(ConfigurationSection config) {
+		description = Arrays.asList(ChatPaginator.wordWrap("§8> §7" + config.getString("description"), 40));
+		item = Material.valueOf(config.getString("item"));
+		slot = config.getInt("slot");
+		if (config.contains("portal"))
+			portal = new Portal(config.getConfigurationSection("portal"));
+	}
+
+	public void updateInfo(MonitorInfo info) {
 		this.info = info;
 		server = info.getOlympaServer();
 		update(info.getOnlinePlayers() != null ? info.getOnlinePlayers() : 0, info.getStatus() != null ? info.getStatus() : ServerStatus.UNKNOWN);
 	}
 
-	public OlympaServer getServer() {
-		return server;
-	}
-
 	@Deprecated
-	public String getServerName() {
-		if (servName != null)
-			return servName;
-		return server.getNameCaps().toLowerCase();
-	}
-
-	public String getServerNameCaps() {
-		if (servName != null)
-			return server.getNameCaps() + " n°" + servName.replaceFirst("^[A-Za-z]+", "");
-		return server.getNameCaps();
-	}
-
-	public int getOnlinePlayers() {
-		return online;
-	}
-
-	public ServerStatus getStatus() {
-		return status;
-	}
-
-	public String getOnlineString() {
-		return (online == -1 ? "§cx" : "§a§l" + online) + " §7joueur" + Utils.withOrWithoutS(online) + " en ligne";
-	}
-
 	public void update(int online, ServerStatus status) {
 		if (this.online == online && this.status == status)
 			return;
@@ -135,6 +111,35 @@ public class ServerInfo extends AbstractObservable {
 		ItemUtils.addEnchant(menuItem, Enchantment.DURABILITY, 0);
 
 		update();
+	}
+
+	public OlympaServer getServer() {
+		return server;
+	}
+
+	@Deprecated
+	public String getServerName() {
+		if (servName != null)
+			return servName;
+		return server.getNameCaps().toLowerCase();
+	}
+
+	public String getServerNameCaps() {
+		if (servName != null && server.hasMultiServers())
+			return server.getNameCaps() + " n°" + servName.replaceFirst("^[A-Za-z]+", "");
+		return server.getNameCaps();
+	}
+
+	public int getOnlinePlayers() {
+		return online;
+	}
+
+	public ServerStatus getStatus() {
+		return status;
+	}
+
+	public String getOnlineString() {
+		return (online == -1 ? "§cx" : "§a§l" + online) + " §7joueur" + Utils.withOrWithoutS(online) + " en ligne";
 	}
 
 	public ItemStack getMenuItem() {

@@ -4,13 +4,25 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.event.EventHandler;
 
+import fr.olympa.api.config.CustomConfig;
+import fr.olympa.api.customevents.SpigotConfigReloadEvent;
 import fr.olympa.api.server.MonitorInfo;
 import fr.olympa.core.spigot.redis.receiver.BungeeServerInfoReceiver;
 
 public class ServerInfosListener {
+
+	@EventHandler
+	public void onSpigotConfigReload(SpigotConfigReloadEvent event) {
+		CustomConfig config = event.getConfig();
+		if (config.getName().equals("config"))
+			for (Entry<String, ServerInfo> entry : servers.entrySet())
+				entry.getValue().updateConfig(config.getConfigurationSection(entry.getKey()));
+	}
 
 	public Map<String, ServerInfo> servers = new HashMap<>();
 
@@ -49,10 +61,10 @@ public class ServerInfosListener {
 		for (MonitorInfo newServ : newServers) {
 			ServerInfo servInfo = servers.get(newServ.getName());
 			if (servInfo != null)
-				servInfo.setInfo(newServ);
+				servInfo.updateInfo(newServ);
 			servInfo = servers.get(newServ.getClearName());
 			if (servInfo != null)
-				servInfo.setInfo(newServ);
+				servInfo.updateInfo(newServ);
 		}
 	}
 
