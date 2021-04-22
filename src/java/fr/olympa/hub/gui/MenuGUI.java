@@ -98,13 +98,16 @@ public class MenuGUI extends OlympaGUI {
 		//				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
 
 		OlympaCore.getInstance().retreiveMonitorInfos(serverInfo -> {
-			for (MonitorInfo mi : serverInfo) {
-				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(mi);
-				if (server == null || !server.getServer().canConnect(player))
+			for (ServerInfo server : OlympaHub.getInstance().serversInfos.getServers()) {
+				if (!server.getServer().canConnect(player))
 					continue;
+				MonitorInfo mi = serverInfo.stream().filter(m -> !server.isSameServer(m)).findFirst().orElse(null);
+				if (mi != null)
+					server.updateInfo(mi);
 				setServerItem(server);
 				server.observe("gui_" + hashCode(), () -> setServerItem(server));
 			}
+
 		}, false);
 
 		ConfigurationSection minigamesConfig = OlympaHub.getInstance().getConfig().getConfigurationSection("minigames");

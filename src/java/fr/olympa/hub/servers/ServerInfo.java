@@ -41,7 +41,7 @@ public class ServerInfo extends AbstractObservable {
 	private static final String SEPARATOR = "§8§m------------------------------------";
 
 	@Nullable
-	private final String servName;
+	private String servName;
 	private OlympaServer server;
 	public List<String> description;
 	public Material item;
@@ -60,7 +60,8 @@ public class ServerInfo extends AbstractObservable {
 	private ConfigurationSection config;
 
 	public ServerInfo(String servName, ConfigurationSection config) {
-		this.servName = servName;
+		if (!servName.equals(servName.toUpperCase()))
+			this.servName = servName;
 		updateConfig(config);
 	}
 
@@ -77,6 +78,11 @@ public class ServerInfo extends AbstractObservable {
 
 	public MonitorInfo getInfo() {
 		return info;
+	}
+
+	public boolean isSameServer(MonitorInfo mi) {
+		String sn = getServerName();
+		return mi.getName().equals(sn) || mi.getClearName().equals(sn);
 	}
 
 	public void updateConfig(ConfigurationSection config) {
