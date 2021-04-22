@@ -23,16 +23,17 @@ public class ServerConfigCommand extends ComplexCommand {
 
 	public ServerConfigCommand(Plugin plugin) {
 		super(plugin, "serverConfig", "Permet de configurer les serveurs", HubPermissions.SERVER_CONFIG_COMMAND);
-		addArgumentParser("SERVER", sender -> OlympaHub.getInstance().serversInfos.servers.stream().map(x -> x.getServer().name()).collect(Collectors.toList()), (x) -> {
+		addArgumentParser("SERVER", (sender, arg) -> OlympaHub.getInstance().serversInfos.getServers().stream().map(x -> x.getServer().name()).collect(Collectors.toList()), (x) -> {
 			try {
 				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(OlympaServer.valueOf(x));
-				if (server != null) return server;
-			}catch (IllegalArgumentException ex) {}
+				if (server != null)
+					return server;
+			} catch (IllegalArgumentException ex) {}
 			return null;
 		}, x -> String.format("Le serveur %s n'existe pas.", x));
 	}
 
-	@Cmd (player = true, min = 1, args = "SERVER", syntax = "<server>")
+	@Cmd(player = true, min = 1, args = "SERVER", syntax = "<server>")
 	public void setPortal(CommandContext cmd) {
 		ServerInfo server = cmd.getArgument(0);
 		Player p = getPlayer();
@@ -47,7 +48,7 @@ public class ServerConfigCommand extends ComplexCommand {
 		}).enterOrLeave();
 	}
 
-	@Cmd (player = true, min = 1, args = "SERVER", syntax = "<server>")
+	@Cmd(player = true, min = 1, args = "SERVER", syntax = "<server>")
 	public void setupNPC(CommandContext cmd) {
 		NPC npc = CitizensAPI.getDefaultNPCSelector().getSelected(sender);
 		if (npc == null) {

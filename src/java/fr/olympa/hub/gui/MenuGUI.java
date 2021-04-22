@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.bukkit.DyeColor;
@@ -21,22 +22,25 @@ import fr.olympa.api.player.OlympaPlayer;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.servers.ServerInfo;
+import fr.olympa.hub.servers.ServerInfosListener;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 public class MenuGUI extends OlympaGUI {
 
 	private static ItemStack[] basicContents = new ItemStack[54];
 	private static TextComponent twitter, discord, website, yt;
 	static {
-		
+
 		ItemStack orangeSeparator = ItemUtils.itemSeparator(DyeColor.ORANGE);
 		ItemStack yellowSeparator = ItemUtils.itemSeparator(DyeColor.YELLOW);
 
-		for (int slot = 9; slot < 18; slot++) basicContents[slot] = yellowSeparator;
-		
+		for (int slot = 9; slot < 18; slot++)
+			basicContents[slot] = yellowSeparator;
+
 		basicContents[0] = ItemUtils.skullCustom("§bTwitter",
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2M3NDVhMDZmNTM3YWVhODA1MDU1NTkxNDllYTE2YmQ0YTg0ZDQ0OTFmMTIyMjY4MThjMzg4MWMwOGU4NjBmYyJ9fX0=");
 		basicContents[1] = ItemUtils.skullCustom("§5Discord",
@@ -68,13 +72,13 @@ public class MenuGUI extends OlympaGUI {
 		component.setColor(color);
 		component.setBold(true);
 		component.setClickEvent(new ClickEvent(net.md_5.bungee.api.chat.ClickEvent.Action.OPEN_URL, url));
-		component.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("§eClique pour ouvrir le lien !")));
+		component.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, new Text(TextComponent.fromLegacyText("§eClique pour ouvrir le lien !"))));
 		return component;
 	}
 
 	private OlympaPlayer player;
-	
-	private Map<Integer, GameType> minigames = new HashMap<Integer, GameType>();
+
+	private Map<Integer, GameType> minigames = new HashMap<>();
 
 	public MenuGUI(OlympaPlayer player) {
 		super("Ω | Menu Olympa", 6);
@@ -91,25 +95,27 @@ public class MenuGUI extends OlympaGUI {
 				"§8> §7Compte Teamspeak " + (player.getTeamspeakId() == 0 ? "lié !" : "non relié"),
 				"§8> §7Version " + (player.getPremiumUniqueId() != null ? "Premium" : "Crack"));
 		//				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
-		
-		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers) {
+
+		for (Entry<String, ServerInfo> entry : ServerInfosListener.servers2.entrySet()) {
+			String serverName = entry.getKey();
+			ServerInfo server = entry.getValue();
 			if (!server.getServer().canConnect(player))
 				continue;
 			setServerItem(server);
 			server.observe("gui_" + hashCode(), () -> setServerItem(server));
 		}
-		
+
 		ConfigurationSection minigamesConfig = OlympaHub.getInstance().getConfig().getConfigurationSection("minigames");
 
 		for (String minigame : minigamesConfig.getKeys(false)) {
 			int slot = minigamesConfig.getInt(minigame + ".slot");
 			GameType game = GameType.valueOf(minigame);
-			
+
 			minigames.put(slot, game);
-			
-			inv.setItem(slot, ItemUtils.item(Material.getMaterial(minigamesConfig.getString(minigame+".item")), 
-					"§aDébut " + game.getNameWithArticle(), minigamesConfig.getString(minigame+".description")));
-			
+
+			inv.setItem(slot, ItemUtils.item(Material.getMaterial(minigamesConfig.getString(minigame + ".item")),
+					"§aDébut " + game.getNameWithArticle(), minigamesConfig.getString(minigame + ".description")));
+
 			//System.out.println(minigame + " - " + minigamesConfig.getString(minigame+".item") + " - " + minigamesConfig.getString(minigame+".description"));
 		}
 	}
@@ -126,22 +132,20 @@ public class MenuGUI extends OlympaGUI {
 			return true;
 		}
 		try {
-			Optional<ServerInfo> server = OlympaHub.getInstance().serversInfos.servers.stream().filter(x -> x.slot == slot && x.getServer().canConnect(player)).findFirst();
+			Optional<Entry<String, ServerInfo>> server = ServerInfosListener.servers2.entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().getServer().canConnect(player)).findFirst();
 			if (server.isPresent())
-				if (server.get().connect(p))
+				if (server.get().getValue().connect(p))
 					p.closeInventory();
-		} catch (IndexOutOfBoundsException ex) {
-		}
-		
+		} catch (IndexOutOfBoundsException ex) {}
+
 		if (minigames.keySet().contains(slot))
 			if (minigames.get(slot) == GameType.LABY) {
-				if(!OlympaHub.getInstance().getConfig().getKeys(false).contains("laby_tp_loc")) {
+				if (!OlympaHub.getInstance().getConfig().getKeys(false).contains("laby_tp_loc")) {
 					OlympaHub.getInstance().getConfig().set("laby_tp_loc", new Location(OlympaHub.getInstance().spawn.getWorld(), 0, 0, 0));
 					OlympaHub.getInstance().saveConfig();
-				}	
+				}
 				p.teleport(OlympaHub.getInstance().getConfig().getLocation("laby_tp_loc"));
-			}
-			else if (OlympaHub.getInstance().games.getGame(minigames.get(slot)) != null)
+			} else if (OlympaHub.getInstance().games.getGame(minigames.get(slot)) != null)
 				OlympaHub.getInstance().games.getGame(minigames.get(slot)).beginGame(p);
 			else
 				p.sendMessage(OlympaHub.getInstance().getPrefixConsole() + "§cUne erreur est survenue, veuillez contacter un membre du staff.");
@@ -150,7 +154,7 @@ public class MenuGUI extends OlympaGUI {
 
 	@Override
 	public boolean onClose(Player p) {
-		for (ServerInfo server : OlympaHub.getInstance().serversInfos.servers)
+		for (ServerInfo server : OlympaHub.getInstance().serversInfos.getServers())
 			server.unobserve("gui_" + hashCode());
 		return super.onClose(p);
 	}
