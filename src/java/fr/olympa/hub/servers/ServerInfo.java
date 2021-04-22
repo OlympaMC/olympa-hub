@@ -86,10 +86,7 @@ public class ServerInfo extends AbstractObservable {
 	public void setInfo(MonitorInfo info) {
 		this.info = info;
 		server = info.getOlympaServer();
-		if (info.getOnlinePlayers() != null)
-			online = info.getOnlinePlayers();
-		if (info.getStatus() != null)
-			status = info.getStatus();
+		update(info.getOnlinePlayers(), info.getStatus());
 	}
 
 	public OlympaServer getServer() {
