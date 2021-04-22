@@ -56,11 +56,11 @@ public class ServerInfosListener {
 		}
 	}
 
-	private int parseInt(String str) {
-		try {
-			return Integer.parseInt(str);
-		} catch (NumberFormatException ex) {
-			return -1;
-		}
-	}
+	//	private int parseInt(String str) {
+	//		try {
+	//			return Integer.parseInt(str);
+	//		} catch (NumberFormatException ex) {
+	//			return -1;
+	//		}
+	//	}
 }

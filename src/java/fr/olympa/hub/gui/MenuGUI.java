@@ -100,7 +100,7 @@ public class MenuGUI extends OlympaGUI {
 		OlympaCore.getInstance().retreiveMonitorInfos(serverInfo -> {
 			for (MonitorInfo mi : serverInfo) {
 				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(mi);
-				if (!server.getServer().canConnect(player))
+				if (server == null || !server.getServer().canConnect(player))
 					continue;
 				setServerItem(server);
 				server.observe("gui_" + hashCode(), () -> setServerItem(server));
