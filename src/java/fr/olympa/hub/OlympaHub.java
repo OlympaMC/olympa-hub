@@ -20,8 +20,6 @@ import fr.olympa.api.permission.OlympaPermission;
 import fr.olympa.api.player.OlympaPlayer;
 import fr.olympa.api.plugin.OlympaAPIPlugin;
 import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.redis.RedisAccess;
-import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
@@ -91,7 +89,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			OlympaGroup.VIP.setRuntimePermission("music.favorites", true);
 			OlympaGroup.VIP.setRuntimePermission("music.save-datas", true);
 
-			OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), RedisChannel.BUNGEE_SEND_SERVERSINFOS.name());
+			serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers"));
 			//RedisAccess.INSTANCE.disconnect();
 
 			OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag() {

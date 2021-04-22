@@ -12,7 +12,6 @@ import fr.olympa.api.command.complex.ComplexCommand;
 import fr.olympa.api.editor.RegionEditor;
 import fr.olympa.api.editor.WaitBlockClick;
 import fr.olympa.api.item.ItemUtils;
-import fr.olympa.api.server.OlympaServer;
 import fr.olympa.api.utils.Prefix;
 import fr.olympa.hub.HubPermissions;
 import fr.olympa.hub.OlympaHub;
@@ -23,9 +22,9 @@ public class ServerConfigCommand extends ComplexCommand {
 
 	public ServerConfigCommand(Plugin plugin) {
 		super(plugin, "serverConfig", "Permet de configurer les serveurs", HubPermissions.SERVER_CONFIG_COMMAND);
-		addArgumentParser("SERVER", (sender, arg) -> OlympaHub.getInstance().serversInfos.getServers().stream().map(x -> x.getServer().name()).collect(Collectors.toList()), (x) -> {
+		addArgumentParser("SERVER", (sender, arg) -> OlympaHub.getInstance().serversInfos.getServers().stream().map(x -> x.getServerName()).collect(Collectors.toList()), (x) -> {
 			try {
-				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(OlympaServer.valueOf(x));
+				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(x);
 				if (server != null)
 					return server;
 			} catch (IllegalArgumentException ex) {}

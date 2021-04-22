@@ -19,10 +19,11 @@ import org.bukkit.inventory.ItemStack;
 import fr.olympa.api.gui.OlympaGUI;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.player.OlympaPlayer;
+import fr.olympa.api.server.MonitorInfo;
+import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.servers.ServerInfo;
-import fr.olympa.hub.servers.ServerInfosListener;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -96,14 +97,15 @@ public class MenuGUI extends OlympaGUI {
 				"§8> §7Version " + (player.getPremiumUniqueId() != null ? "Premium" : "Crack"));
 		//				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
 
-		for (Entry<String, ServerInfo> entry : ServerInfosListener.servers2.entrySet()) {
-			String serverName = entry.getKey();
-			ServerInfo server = entry.getValue();
-			if (!server.getServer().canConnect(player))
-				continue;
-			setServerItem(server);
-			server.observe("gui_" + hashCode(), () -> setServerItem(server));
-		}
+		OlympaCore.getInstance().retreiveMonitorInfos(serverInfo -> {
+			for (MonitorInfo mi : serverInfo) {
+				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(mi);
+				if (!server.getServer().canConnect(player))
+					continue;
+				setServerItem(server);
+				server.observe("gui_" + hashCode(), () -> setServerItem(server));
+			}
+		}, false);
 
 		ConfigurationSection minigamesConfig = OlympaHub.getInstance().getConfig().getConfigurationSection("minigames");
 
@@ -132,7 +134,7 @@ public class MenuGUI extends OlympaGUI {
 			return true;
 		}
 		try {
-			Optional<Entry<String, ServerInfo>> server = ServerInfosListener.servers2.entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().getServer().canConnect(player)).findFirst();
+			Optional<Entry<String, ServerInfo>> server = OlympaHub.getInstance().serversInfos.servers.entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().getServer().canConnect(player)).findFirst();
 			if (server.isPresent())
 				if (server.get().getValue().connect(p))
 					p.closeInventory();
