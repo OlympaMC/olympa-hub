@@ -42,6 +42,7 @@ public class ServerInfo extends AbstractObservable {
 
 	@Nullable
 	private String servName;
+	@Nullable
 	private OlympaServer server;
 	public List<String> description;
 	public Material item;
@@ -119,6 +120,7 @@ public class ServerInfo extends AbstractObservable {
 		update();
 	}
 
+	@Nullable
 	public OlympaServer getServer() {
 		return server;
 	}
