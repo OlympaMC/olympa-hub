@@ -66,7 +66,7 @@ import redis.clients.jedis.Jedis;
 public abstract class AGame extends ComplexCommand implements Listener{
 	
 	private static final int maxDisplayedTopScores = 10;
-	public static final int maxTopScoresStored = 100; 
+	public static final int maxTopScoresStored = 100;
 	
 	protected final boolean isEnabled;
 	
