@@ -28,6 +28,7 @@ import fr.olympa.api.editor.RegionEditor;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.region.shapes.Cuboid;
+import fr.olympa.core.bungee.servers.WaitingConnection;
 import fr.olympa.hub.HubListener;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
@@ -86,7 +87,9 @@ public class GameDac extends AQueuedGame {
 	
 	@Override
 	protected void startGame() {
-		for (int i = 0; i < playingPlayers.size(); i++) {
+		playingPlayers.clear();
+		
+		for (int i = 0; i < waitingPlayers.size(); i++) {
 			Player dacP = playingPlayers.get(i);
 			playingPlayers.add(dacP);
 			woolColor.put(playingPlayers.get(i), wools.get(i % wools.size()));
@@ -100,6 +103,7 @@ public class GameDac extends AQueuedGame {
 			dacP.getInventory().setItem(4, ItemUtils.item(woolColor.get(dacP), "§dDé à coudre", "§8> §7Vous êtes le", "  §7joueur §l" + i));
 		}
 
+		waitingPlayers.clear();
 		bar.setTitle("§5Dé à coudre");
 		currentTurn = 0;
 		plugin.getTask().runTaskLater(() -> playGameTurn(), 2, TimeUnit.SECONDS);
@@ -114,6 +118,7 @@ public class GameDac extends AQueuedGame {
 		
 		//reset playing player
 		playingPlayer = null;
+		playingPlayers.clear();
 
 		//si plus qu'un seul joueur en lice, fin de jeu (ou reset du jeu si 0 joueurs restants)
 		/*if (playingPlayers.size() == 1)

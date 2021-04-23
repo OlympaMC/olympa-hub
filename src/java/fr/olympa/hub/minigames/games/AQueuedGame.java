@@ -18,7 +18,7 @@ import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 
 public abstract class AQueuedGame extends AGame {
 
-	private List<Player> waitingPlayers = new ArrayList<>();
+	protected List<Player> waitingPlayers = new ArrayList<>();
 	protected List<Player> playingPlayers = new ArrayList<>();
 
 	private int minPlayers;
