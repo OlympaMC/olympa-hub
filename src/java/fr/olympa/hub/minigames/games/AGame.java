@@ -597,12 +597,13 @@ public abstract class AGame extends ComplexCommand implements Listener{
 	
 		if (!config.getKeys(false).contains("area")) 
 			config.set("area", new Cuboid(world, 0, 0, 0, 1, 1, 1));
+	
+		if (!config.getKeys(false).contains("portal_region")) 
+			config.set("portal_region", new Cuboid(world, 0, 0, 0, 1, 1, 1));
 		
-
 		if (!config.getKeys(false).contains("holo_loc")) 
 			config.set("holo_loc", new Location(world, 0, 0, 0));	
 		
-
 		if (!config.getKeys(false).contains("start_loc")) 
 			config.set("start_loc", new Location(world, 0, 0, 0));	
 		
