@@ -86,6 +86,9 @@ public abstract class AGame extends ComplexCommand implements Listener{
 	private Region area;
 	protected Location startingLoc;
 	
+	private Region portalRegion;
+	private TrackedRegion portalRegionTracked;
+	
 	private Hologram scoresHolo;
 	private Hologram startHolo;
 	
@@ -114,6 +117,8 @@ public abstract class AGame extends ComplexCommand implements Listener{
 		this.area = (Region) config.get("area");
 		
 		this.startingLoc = config.getLocation("start_loc");
+		
+		setPortal(config.getSerializable("portal_region", Region.class, null));
 		
 		//register listener
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -221,6 +226,8 @@ public abstract class AGame extends ComplexCommand implements Listener{
 	 * @return true if initialisation has been a success, false otherwise
 	 */
 	protected boolean startGame(OlympaPlayerHub p) {
+		if (gameType == GameType.LABY) return true;
+		
 		GameType previousGame = MiniGamesManager.getInstance().isPlaying(p.getPlayer());
 	
 		//cancel previous game if exists
@@ -601,6 +608,20 @@ public abstract class AGame extends ComplexCommand implements Listener{
 		
 		return config;
 	}
+	
+	public void setPortal(Region region) {
+		if (portalRegionTracked != null) portalRegionTracked.unregister();
+		portalRegion = region;
+		if (region == null) return;
+		
+		portalRegionTracked = OlympaCore.getInstance().getRegionManager().registerRegion(portalRegion, gameType.name() + "_portal", EventPriority.NORMAL, new Flag() {
+			@Override
+			public ActionResult enters(Player p, Set<TrackedRegion> to) {
+				beginGame(p);
+				return ActionResult.TELEPORT_ELSEWHERE;
+			}
+		});
+	}
 
 	
 	///////////////////////////////////////////////////////////
@@ -662,6 +683,16 @@ public abstract class AGame extends ComplexCommand implements Listener{
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
 	}
 	
+	@Cmd (player = true)
+	public void portal(CommandContext cmd) {
+		Player p = getPlayer();
+		new RegionEditor(p, region -> {
+			if (region == null) return;
+			config.set("portal_region", region);
+			setPortal(region);
+			sendMessage(p, "§aLe portail de téléportation a été défini.");
+		}).enterOrLeave();
+	}
 	
 	
 }

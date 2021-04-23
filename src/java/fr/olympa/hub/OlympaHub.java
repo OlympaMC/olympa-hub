@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.PluginManager;
 
 import fr.olympa.api.groups.OlympaGroup;
 import fr.olympa.api.lines.CyclingLine;
@@ -72,10 +73,11 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			spawn = getConfig().getLocation("spawn");
 			lightning = getConfig().getLocation("lightning");
 
-			getServer().getPluginManager().registerEvents(new HubListener(), this);
+			PluginManager pm = getServer().getPluginManager();
+			pm.registerEvents(new HubListener(), this);
 
 			try {
-				getServer().getPluginManager().registerEvents(new LaunchPadManager(new File(getDataFolder(), "launchpads.yml")), this);
+				pm.registerEvents(new LaunchPadManager(new File(getDataFolder(), "launchpads.yml")), this);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -90,6 +92,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			OlympaGroup.VIP.setRuntimePermission("music.save-datas", true);
 
 			serversInfos = new ServerInfosListener(config.getConfigurationSection("servers"));
+			pm.registerEvents(serversInfos, this);
 			//RedisAccess.INSTANCE.disconnect();
 
 			OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag() {
