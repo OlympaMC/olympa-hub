@@ -117,10 +117,6 @@ public class GameDac extends AQueuedGame {
 		//reset playing player
 		playingPlayer = null;
 		playingPlayers.clear();
-
-		//si plus qu'un seul joueur en lice, fin de jeu (ou reset du jeu si 0 joueurs restants)
-		/*if (playingPlayers.size() == 1)
-			endGame(AccountProvider.get(playingPlayers.get(0).getUniqueId()), winnerScore, true);*/
 	}
 	
 	private void playGameTurn() {
