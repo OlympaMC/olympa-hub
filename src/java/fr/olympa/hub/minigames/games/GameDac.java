@@ -87,23 +87,21 @@ public class GameDac extends AQueuedGame {
 	
 	@Override
 	protected void startGame() {
-		playingPlayers.clear();
-		
-		for (int i = 0; i < waitingPlayers.size(); i++) {
-			Player dacP = playingPlayers.get(i);
-			playingPlayers.add(dacP);
-			woolColor.put(playingPlayers.get(i), wools.get(i % wools.size()));
+		int i = 0;
+		for (Player p : playingPlayers) {
+			i++;
+			//playingPlayers.add(dacP);
+			woolColor.put(p, wools.get(i % wools.size()));
 			
-			dacP.teleport(tpLoc);
-			sendMessage(dacP, "§eLe match de dé à coudre commence ! Sélection du tour...");
+			p.teleport(tpLoc);
+			sendMessage(p, "§eLe match de dé à coudre commence ! Sélection du tour...");
 			
-			HubListener.bossBar.removePlayer(dacP);
-			bar.addPlayer(dacP);
+			HubListener.bossBar.removePlayer(p);
+			bar.addPlayer(p);
 			
-			dacP.getInventory().setItem(4, ItemUtils.item(woolColor.get(dacP), "§dDé à coudre", "§8> §7Vous êtes le", "  §7joueur §l" + i));
+			p.getInventory().setItem(4, ItemUtils.item(woolColor.get(p), "§dDé à coudre", "§8> §7Vous êtes le", "  §7joueur §l" + i));
 		}
 
-		waitingPlayers.clear();
 		bar.setTitle("§5Dé à coudre");
 		currentTurn = 0;
 		plugin.getTask().runTaskLater(() -> playGameTurn(), 2, TimeUnit.SECONDS);
@@ -127,7 +125,12 @@ public class GameDac extends AQueuedGame {
 	
 	private void playGameTurn() {
 		if (playingPlayers.size() == 0)
-			return;			
+			return;
+		else if (playingPlayers.size() == 1) {
+			endGame(AccountProvider.get(playingPlayers.remove(0).getUniqueId()), 1, true);
+			//startGame();
+			return;
+		}
 		
 		playingPlayer = playingPlayers.get(0);
 		currentTurn++;
@@ -175,7 +178,7 @@ public class GameDac extends AQueuedGame {
 	 */
 	@Override
 	protected void onMoveHandler(Player p, Location from, Location to) {
-		if (playingPlayers.isEmpty()) return; // le jeu n'a pas commencé
+		if (!playingPlayers.contains(p)) return; // le jeu n'a pas commencé
 
 		//Bukkit.broadcastMessage("TO Y : " + to.getBlockY() + " - minJumpY : " + minJumpY);
 		
@@ -244,7 +247,7 @@ public class GameDac extends AQueuedGame {
 				sendMessage(p, "§7§l" + playingPlayer.getName() + " §r§7a été éliminé, " + (playingPlayers.size() - 1) + " joueurs restants.");
 		});
 		
-		playingPlayers.remove(0);
+		//playingPlayers.remove(playingPlayer);
 		playingPlayer = null;
 		
 		endGame(AccountProvider.get(e.getEntity().getUniqueId()), 0, true);

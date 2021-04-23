@@ -18,7 +18,7 @@ import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 
 public abstract class AQueuedGame extends AGame {
 
-	protected List<Player> waitingPlayers = new ArrayList<>();
+	private List<Player> waitingPlayers = new ArrayList<>();
 	protected List<Player> playingPlayers = new ArrayList<>();
 
 	private int minPlayers;
@@ -114,7 +114,7 @@ public abstract class AQueuedGame extends AGame {
 						Collections.shuffle(playingPlayers);
 
 						winnerScore = playingPlayers.size() - 1;
-						
+
 						//lance le jeu
 						startGame();
 					}
