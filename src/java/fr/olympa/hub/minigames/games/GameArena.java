@@ -42,7 +42,7 @@ public class GameArena extends AQueuedGame{
 	private Location pos2;
 	private Region arena;
 	
-	private final int queueCountInvIndex = 7;
+	//private final int queueCountInvIndex = 7;
 	
 	boolean isGameStarting = false;
 	
@@ -52,7 +52,7 @@ public class GameArena extends AQueuedGame{
 		pos1 = config.getLocation("player_1_spawn");
 		pos2 = config.getLocation("player_2_spawn");
 		
-		hotBarContent[queueCountInvIndex] = ItemUtils.item(Material.SUNFLOWER, "");
+		//hotBarContent[queueCountInvIndex] = ItemUtils.item(Material.SUNFLOWER, "");
 
 		allowedTpLocs.add(pos1);
 		allowedTpLocs.add(pos2);
@@ -89,8 +89,8 @@ public class GameArena extends AQueuedGame{
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		super.endGame(p, score, warpToSpawn);
 		
-		p.getPlayer().getInventory().clear();
-		p.getPlayer().getInventory().setArmorContents(new ItemStack[] {null, null, null, null});
+		//p.getPlayer().getInventory().clear();
+		
 		
 		p.getPlayer().setHealth(20d);
 		if (score == -1 && playingPlayers.contains(getOtherPlayingPlayer(p.getPlayer())))

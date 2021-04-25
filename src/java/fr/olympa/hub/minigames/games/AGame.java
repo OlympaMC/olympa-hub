@@ -271,6 +271,7 @@ public abstract class AGame extends ComplexCommand implements Listener{
 			return;
 		
 		p.getPlayer().getInventory().clear();
+		p.getPlayer().getInventory().setArmorContents(new ItemStack[] {null, null, null, null});
 		p.getPlayer().getInventory().setContents(players.remove(p.getPlayer()));
 		
 		if (warpToSpawn)
