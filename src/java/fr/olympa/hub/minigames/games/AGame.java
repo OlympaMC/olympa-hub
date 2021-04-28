@@ -66,7 +66,7 @@ import redis.clients.jedis.Jedis;
 public abstract class AGame extends ComplexCommand implements Listener{
 	
 	private static final int maxDisplayedTopScores = 10;
-	public static final int maxTopScoresStored = 100; 
+	public static final int maxTopScoresStored = 100;
 	
 	protected final boolean isEnabled;
 	
@@ -85,6 +85,9 @@ public abstract class AGame extends ComplexCommand implements Listener{
 	protected final GameType gameType;
 	private Region area;
 	protected Location startingLoc;
+	
+	private Region portalRegion;
+	private TrackedRegion portalRegionTracked;
 	
 	private Hologram scoresHolo;
 	private Hologram startHolo;
@@ -114,6 +117,8 @@ public abstract class AGame extends ComplexCommand implements Listener{
 		this.area = (Region) config.get("area");
 		
 		this.startingLoc = config.getLocation("start_loc");
+		
+		setPortal(config.getSerializable("portal_region", Region.class, null));
 		
 		//register listener
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -221,6 +226,8 @@ public abstract class AGame extends ComplexCommand implements Listener{
 	 * @return true if initialisation has been a success, false otherwise
 	 */
 	protected boolean startGame(OlympaPlayerHub p) {
+		if (gameType == GameType.LABY) return true;
+		
 		GameType previousGame = MiniGamesManager.getInstance().isPlaying(p.getPlayer());
 	
 		//cancel previous game if exists
@@ -264,6 +271,7 @@ public abstract class AGame extends ComplexCommand implements Listener{
 			return;
 		
 		p.getPlayer().getInventory().clear();
+		p.getPlayer().getInventory().setArmorContents(new ItemStack[] {null, null, null, null});
 		p.getPlayer().getInventory().setContents(players.remove(p.getPlayer()));
 		
 		if (warpToSpawn)
@@ -590,16 +598,31 @@ public abstract class AGame extends ComplexCommand implements Listener{
 	
 		if (!config.getKeys(false).contains("area")) 
 			config.set("area", new Cuboid(world, 0, 0, 0, 1, 1, 1));
+	
+		if (!config.getKeys(false).contains("portal_region")) 
+			config.set("portal_region", new Cuboid(world, 0, 0, 0, 1, 1, 1));
 		
-
 		if (!config.getKeys(false).contains("holo_loc")) 
 			config.set("holo_loc", new Location(world, 0, 0, 0));	
 		
-
 		if (!config.getKeys(false).contains("start_loc")) 
 			config.set("start_loc", new Location(world, 0, 0, 0));	
 		
 		return config;
+	}
+	
+	public void setPortal(Region region) {
+		if (portalRegionTracked != null) portalRegionTracked.unregister();
+		portalRegion = region;
+		if (region == null) return;
+		
+		portalRegionTracked = OlympaCore.getInstance().getRegionManager().registerRegion(portalRegion, gameType.name() + "_portal", EventPriority.NORMAL, new Flag() {
+			@Override
+			public ActionResult enters(Player p, Set<TrackedRegion> to) {
+				beginGame(p);
+				return ActionResult.TELEPORT_ELSEWHERE;
+			}
+		});
 	}
 
 	
@@ -662,6 +685,16 @@ public abstract class AGame extends ComplexCommand implements Listener{
 				loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
 	}
 	
+	@Cmd (player = true)
+	public void portal(CommandContext cmd) {
+		Player p = getPlayer();
+		new RegionEditor(p, region -> {
+			if (region == null) return;
+			config.set("portal_region", region);
+			setPortal(region);
+			sendMessage(p, "§aLe portail de téléportation a été défini.");
+		}).enterOrLeave();
+	}
 	
 	
 }

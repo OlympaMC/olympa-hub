@@ -114,7 +114,7 @@ public abstract class AQueuedGame extends AGame {
 						Collections.shuffle(playingPlayers);
 
 						winnerScore = playingPlayers.size() - 1;
-						
+
 						//lance le jeu
 						startGame();
 					}

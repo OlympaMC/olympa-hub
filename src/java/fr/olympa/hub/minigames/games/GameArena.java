@@ -42,7 +42,7 @@ public class GameArena extends AQueuedGame{
 	private Location pos2;
 	private Region arena;
 	
-	private final int queueCountInvIndex = 7;
+	//private final int queueCountInvIndex = 7;
 	
 	boolean isGameStarting = false;
 	
@@ -52,7 +52,7 @@ public class GameArena extends AQueuedGame{
 		pos1 = config.getLocation("player_1_spawn");
 		pos2 = config.getLocation("player_2_spawn");
 		
-		hotBarContent[queueCountInvIndex] = ItemUtils.item(Material.SUNFLOWER, "");
+		//hotBarContent[queueCountInvIndex] = ItemUtils.item(Material.SUNFLOWER, "");
 
 		allowedTpLocs.add(pos1);
 		allowedTpLocs.add(pos2);
@@ -87,11 +87,14 @@ public class GameArena extends AQueuedGame{
 	
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
+		super.endGame(p, score, warpToSpawn);
+		
+		//p.getPlayer().getInventory().clear();
+		
+		
 		p.getPlayer().setHealth(20d);
-		if (score == -1 && playingPlayers.contains(p.getPlayer()))
-			fireLostFor(p.getPlayer());
-		else 
-			super.endGame(p, score, warpToSpawn);
+		if (score == -1 && playingPlayers.contains(getOtherPlayingPlayer(p.getPlayer())))
+			endGame(AccountProvider.get(getOtherPlayingPlayer(p.getPlayer()).getUniqueId()), winnerScore, warpToSpawn);
 	}
 
 	@Override
@@ -125,10 +128,8 @@ public class GameArena extends AQueuedGame{
 	
 	@Override
 	protected void onInterractHandler(PlayerInteractEvent e) {
-		if (!playingPlayers.contains(e.getPlayer()))
-			return;
-
-		e.setCancelled(false);
+		if (playingPlayers.contains(e.getPlayer()))
+			e.setCancelled(false);
 	}
 
 	@Override
@@ -139,7 +140,7 @@ public class GameArena extends AQueuedGame{
 		Player p = (Player) e.getEntity();
 		
 		if (p.getHealth() <= e.getFinalDamage())
-			fireLostFor(p);
+			endGame(AccountProvider.get(p.getUniqueId()), 0, true);
 		else
 			e.setCancelled(false);
 	}
@@ -155,8 +156,9 @@ public class GameArena extends AQueuedGame{
 		e.setCancelled(true);
 	}
 	
+	/*
 	private void fireLostFor(Player p) {
-		if (!playingPlayers.contains(p))
+		if (!playingPlayers.contains(p) || playingPlayers.size() < 2)
 			return;
 		
 		if (getOtherPlayingPlayer(p) != null)
@@ -165,7 +167,7 @@ public class GameArena extends AQueuedGame{
 		endGame(AccountProvider.get(p.getUniqueId()), 0, true);
 		
 		playingPlayers.clear();
-	}
+	}*/
 	
 	private Player getOtherPlayingPlayer(Player p) {
 		if (playingPlayers.contains(p))

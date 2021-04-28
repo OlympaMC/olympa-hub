@@ -1,27 +1,27 @@
 servers:
   zta1:
     description: "Découvrez un monde au bord du chaos, meurtri par des hordes de zombies. Votre mission : survivre coûte que coûte, défendre votre clan et attaquer ceux des autres. Farmez et devenez l'homme le plus puissant de Greenfield !"
-    item: FIREWORK_ROCKET
+    item: ZOMBIE_HEAD
     slot: 28
   pvpfac1:
     description: "Créez votre faction avec vos amis, fabriquez des usines, des équipements, les bases les plus impénétrables possible et attaquez celles des autres. Battez vos ennemis et construisez un véritable empire pour accumuler les richesses, et devenez la plus grande faction de ce monde !"
-    item: GOLDEN_HELMET
+    item: CROSSBOW
     slot: 30
   pvpfac2:
     description: "Créez votre faction avec vos amis, fabriquez des usines, des équipements, les bases les plus impénétrables possible et attaquez celles des autres. Battez vos ennemis et construisez un véritable empire pour accumuler les richesses, et devenez la plus grande faction de ce monde !"
-    item: GOLDEN_HELMET
+    item: CROSSBOW
     slot: 39
   pvpkit1:
     description: "Battez-vous, apprenez à maîtriser vos armes puis terrassez vos adversaires et montez de niveau pour accéder à des kits toujours plus passionnants. Devenez le maître de l'arène et surpassez les autres joueurs."
     item: IRON_SWORD
     slot: 32
   creatif1:
-    description: "Le créatif est un mode de jeux vous permettant d'exprimer au plus profond votre imagination. Créez des constructions toujours plus grandes et plus belles les unes que les autres, jouez avec vos amis en incarnant des personnages et en créant vos propres histoires."
-    item: GRASS_BLOCK
+    description: "Le créatif est un mode de jeux vous permettant d'exprimer au plus profond votre imagination. Créez des constructions toujours plus grandes et plus belles les unes que les autres, jouez avec vos amis en incarnant des personnages et en créant vos propres histoires. §lTaille des plots: 256x256"
+    item: CRAFTING_TABLE
     slot: 34
   creatif2:
-    description: "Le créatif est un mode de jeux vous permettant d'exprimer au plus profond votre imagination. Créez des constructions toujours plus grandes et plus belles les unes que les autres, jouez avec vos amis en incarnant des personnages et en créant vos propres histoires."
-    item: GRASS_BLOCK
+    description: "Le créatif est un mode de jeux vous permettant d'exprimer au plus profond votre imagination. Créez des constructions toujours plus grandes et plus belles les unes que les autres, jouez avec vos amis en incarnant des personnages et en créant vos propres histoires. §lTaille des plots: 128x128"
+    item: CRAFTING_TABLE
     slot: 43
 #   BUILDEUR:
 #     description: "§cServeur staff : §abuildeurs"
@@ -43,7 +43,7 @@ minigames:
     slot: 49
   DAC:
     description: "§cSautez dans le vide... Et visez juste !"
-    item: TNT
+    item: LIGHT_BLUE_WOOL
     slot: 50
   ARENA:
     description: "§cTapez vous dessus !"

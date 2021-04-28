@@ -76,6 +76,7 @@ public class ServerTrait extends Trait {
 	public void load(DataKey key) throws NPCLoadException {
 		super.load(key);
 		server = OlympaHub.getInstance().serversInfos.getServer(key.getString("server"));
+		if (server == null) OlympaHub.getInstance().sendMessage("§cServeur %s introuvable.", key.getString("server"));
 	}
 
 }
