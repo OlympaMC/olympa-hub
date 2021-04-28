@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.Location;
@@ -21,6 +22,7 @@ import fr.olympa.api.holograms.Hologram;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.lines.DynamicLine;
 import fr.olympa.api.lines.FixedLine;
+import fr.olympa.api.match.MatcherPattern;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.ActionResult;
 import fr.olympa.api.region.tracking.TrackedRegion;
@@ -39,7 +41,10 @@ import fr.olympa.hub.OlympaHub;
 public class ServerInfo extends AbstractObservable {
 
 	private static final String SEPARATOR = "§8§m------------------------------------";
+	private static final MatcherPattern<Integer> REGEX_SERV_NB = new MatcherPattern<>("\\d+$", s -> Integer.parseInt(s));
 
+	@Nullable
+	private String cleanName;
 	@Nullable
 	private String servName;
 	@Nullable
@@ -61,8 +66,7 @@ public class ServerInfo extends AbstractObservable {
 	private ConfigurationSection config;
 
 	public ServerInfo(String servName, ConfigurationSection config) {
-		if (!servName.equals(servName.toUpperCase()))
-			this.servName = servName;
+		this.servName = servName;
 		updateConfig(config);
 	}
 
@@ -97,6 +101,11 @@ public class ServerInfo extends AbstractObservable {
 	public void updateInfo(MonitorInfo info) {
 		this.info = info;
 		server = info.getOlympaServer();
+		if (cleanName == null)
+			if (REGEX_SERV_NB.contains(info.getName()))
+				cleanName = server.getNameCaps() + " " + Utils.intToSymbole(REGEX_SERV_NB.extractAndParse(info.getName()));
+			else
+				cleanName = server.getNameCaps();
 		update(info.getOnlinePlayers() != null ? info.getOnlinePlayers() : 0, info.getStatus() != null ? info.getStatus() : ServerStatus.UNKNOWN);
 	}
 
@@ -129,13 +138,18 @@ public class ServerInfo extends AbstractObservable {
 	public String getServerName() {
 		if (servName != null)
 			return servName;
-		return server.getNameCaps().toLowerCase();
+		return server.getNameCaps().toLowerCase().replace(" ", "_");
 	}
 
+	@Nonnull
 	public String getServerNameCaps() {
-		if (servName != null)
-			return server.getNameCaps() + " n°" + servName.replaceFirst("^[A-Za-z]+", "");
-		return server.getNameCaps();
+		if (cleanName != null)
+			return cleanName;
+		else if (server != null)
+			return server.getNameCaps();
+		else if (servName != null)
+			return servName;
+		return "Serveur Inconnu";
 	}
 
 	public int getOnlinePlayers() {
