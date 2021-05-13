@@ -44,19 +44,19 @@ import fr.skytasul.music.CommandMusic;
 public class HubListener implements Listener {
 	//private Map<Integer, Entry<ItemStack, Consumer<Player>>> items = new HashMap<>();
 	public static BossBar bossBar = Bukkit.createBossBar("§e§lBon jeu sur §6§lOlympa§e§l !", BarColor.YELLOW, BarStyle.SOLID);
-	
-	private Map<ItemStack, Entry<Integer, Consumer<Player>>> menuItems = new HashMap<ItemStack, Map.Entry<Integer,Consumer<Player>>>();
-	
+
+	private Map<ItemStack, Entry<Integer, Consumer<Player>>> menuItems = new HashMap<>();
+
 	public HubListener() {
 		bossBar.setProgress(0);
 
-		menuItems.put(ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa", "§7Accès rapide :", "§8● §7Serveurs de jeu Olympa", "§8● §7Mini-jeux d'attente", "§8● §7Profil du joueur"), 
+		menuItems.put(ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa", "§7Accès rapide :", "§8● §7Serveurs de jeu Olympa", "§8● §7Mini-jeux d'attente", "§8● §7Profil du joueur"),
 				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(4, p -> new MenuGUI(AccountProvider.get(p.getUniqueId())).create(p)));
-		
-		menuItems.put(ItemUtils.item(Material.JUKEBOX, "§d♪ | §5§lJukeBox", " §7Profitez de la radio", " §7ou choisissez vos musiques !"), 
+
+		menuItems.put(ItemUtils.item(Material.JUKEBOX, "§d♪ | §5§lJukeBox", " §7Profitez de la radio", " §7ou choisissez vos musiques !"),
 				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(7, p -> CommandMusic.open(p)));
-		
-		menuItems.put(ItemUtils.item(Material.YELLOW_BED, "§8Ω | §7Téléportation au §lspawn"), 
+
+		menuItems.put(ItemUtils.item(Material.YELLOW_BED, "§8Ω | §7Téléportation au §lspawn"),
 				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(8, p -> {
 					Location location = OlympaHub.getInstance().spawn;
 					p.teleport(location);
@@ -67,17 +67,17 @@ public class HubListener implements Listener {
 		final ItemStack vanishYes = ItemUtils.item(Material.ENDER_EYE, "§aΩ | §2Montrer les joueurs");
 		final ItemStack vanishNo = ItemUtils.item(Material.SUNFLOWER, "§aΩ | §2Cacher les joueurs");
 
-		menuItems.put(vanishNo, 
+		menuItems.put(vanishNo,
 				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(6, p -> {
 					if (OlympaHub.getInstance().vanishManager.toogleVanish(p))
 						p.getInventory().setItem(6, vanishYes);
 				}));
-		menuItems.put(vanishYes, 
+		menuItems.put(vanishYes,
 				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(-1, p -> {
 					if (OlympaHub.getInstance().vanishManager.toogleVanish(p))
 						p.getInventory().setItem(6, vanishNo);
 				}));
-		
+
 		/*items.put(6, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.GREEN_DYE, "§dΩ | §5Cacher les joueurs"), p -> {
 			if (VanishManager.getInstance().toogleVanish(p))
 		}));*/
@@ -90,7 +90,7 @@ public class HubListener implements Listener {
 			player.spawnParticle(Particle.SMOKE_LARGE, location, 7, 0.1, 0.1, 0.1, 0.3);
 		}));*/
 	}
-	
+
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
@@ -112,35 +112,31 @@ public class HubListener implements Listener {
 		p.playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1);
 		bossBar.addPlayer(p);
 	}
-	
+
 	@EventHandler
 	public void onOlympaJoin(OlympaPlayerLoadEvent e) {
-		if (e.getOlympaPlayer().getGroup().isHighStaff()) {
+		if (e.getOlympaPlayer().getGroup().isHighStaff())
 			Bukkit.getScheduler().runTask(OlympaHub.getInstance(), () -> OlympaHub.getInstance().lightning.getWorld().strikeLightningEffect(OlympaHub.getInstance().lightning));
-		}else {
+		else {
 			Player p = e.getPlayer();
 			p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.1f, 1f);
 		}
 	}
 
-	
 	@EventHandler
 	public void onWorldLoad(WorldTrackingEvent e) {
 		e.getWorld().setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-		e.getRegion().registerFlags(new PlayerBlocksFlag(true), new PhysicsFlag(true), new FoodFlag(true, true), new GameModeFlag(GameMode.ADVENTURE), new DropFlag(true), new PlayerBlockInteractFlag(false, true, true), new DamageFlag(false));
+		e.getRegion().registerFlags(new PlayerBlocksFlag(true), new PhysicsFlag(true), new FoodFlag(true), new GameModeFlag(GameMode.ADVENTURE), new DropFlag(true), new PlayerBlockInteractFlag(false, true, true), new DamageFlag(false));
 	}
-	
-	
+
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
-		if (e.getHand() == EquipmentSlot.HAND) {
-			if (MiniGamesManager.getInstance().isPlaying(e.getPlayer()) == null && menuItems.containsKey(player.getInventory().getItemInMainHand())) {
+		if (e.getHand() == EquipmentSlot.HAND)
+			if (MiniGamesManager.getInstance().isPlaying(e.getPlayer()) == null && menuItems.containsKey(player.getInventory().getItemInMainHand()))
 				menuItems.get(player.getInventory().getItemInMainHand()).getValue().accept(player);
-			}
-		}
 	}
-	
+
 	@EventHandler
 	public void onSwapHands(PlayerSwapHandItemsEvent e) {
 		e.setCancelled(true);
@@ -149,7 +145,7 @@ public class HubListener implements Listener {
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		Player player = (Player) e.getWhoClicked();
-		
+
 		if (e.getClickedInventory() == player.getInventory() && MiniGamesManager.getInstance().isPlaying(player) == null) {
 			Entry<Integer, Consumer<Player>> entry = menuItems.get(player.getInventory().getItemInMainHand());
 			if (entry != null) {
