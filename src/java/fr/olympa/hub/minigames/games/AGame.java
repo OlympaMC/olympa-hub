@@ -100,7 +100,7 @@ public abstract class AGame extends ComplexCommand implements Listener{
 	
 	@SuppressWarnings("unchecked")
 	public AGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile) throws ActivateFailedException {
-		super(plugin, game.toString().toLowerCase(), "Accès à la config " + game.getNameWithArticle(), HubPermissions.EDIT_MINIGAMES);
+		super(plugin, game.toString().toLowerCase(), "Accès à la config " + game.getNameWithArticle() + ".", HubPermissions.EDIT_MINIGAMES);
 		
 		this.plugin = plugin;
 		this.instance = this;

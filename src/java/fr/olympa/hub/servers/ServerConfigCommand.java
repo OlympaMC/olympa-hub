@@ -21,7 +21,7 @@ import net.citizensnpcs.api.npc.NPC;
 public class ServerConfigCommand extends ComplexCommand {
 
 	public ServerConfigCommand(Plugin plugin) {
-		super(plugin, "serverConfig", "Permet de configurer les serveurs", HubPermissions.SERVER_CONFIG_COMMAND);
+		super(plugin, "serverConfig", "Permet de configurer les serveurs.", HubPermissions.SERVER_CONFIG_COMMAND);
 		addArgumentParser("SERVER", (sender, arg) -> OlympaHub.getInstance().serversInfos.getServers().stream().map(x -> x.getServerName()).collect(Collectors.toList()), (x) -> {
 			try {
 				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(x);
