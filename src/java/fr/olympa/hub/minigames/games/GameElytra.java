@@ -7,20 +7,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -32,7 +26,7 @@ import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.api.region.tracking.ActionResult;
-import fr.olympa.api.region.tracking.TrackedRegion;
+import fr.olympa.api.region.tracking.RegionEvent.EntryEvent;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
@@ -74,13 +68,12 @@ public class GameElytra extends AGame {
 		
 		//register des régions
 		listReg.forEach(reg -> {
-			OlympaCore.getInstance().getRegionManager().registerRegion(reg, "elytra_anneau_" + reg.hashCode(),
-					EventPriority.HIGH, new Flag() {
+			OlympaCore.getInstance().getRegionManager().registerRegion(reg, "elytra_anneau_" + reg.hashCode(), EventPriority.HIGH, new Flag() {
 				@Override
-				public ActionResult enters(Player p, Set<TrackedRegion> to) {
-					super.enters(p, to);
-					if (getPlayers().contains(p))
-						enterPortal(p, reg);
+				public ActionResult enters(EntryEvent event) {
+					super.enters(event);
+					if (getPlayers().contains(event.getPlayer()))
+						enterPortal(event.getPlayer(), reg);
 					
 					return ActionResult.ALLOW;
 				}

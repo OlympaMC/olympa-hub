@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.Location;
@@ -16,18 +15,7 @@ import org.bukkit.Particle;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.craftbukkit.v1_16_R3.CraftParticle;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
-
-import net.minecraft.server.v1_16_R3.EntityCow;
-import net.minecraft.server.v1_16_R3.EntityCreeper;
-import net.minecraft.server.v1_16_R3.EntityThrownTrident;
-import net.minecraft.server.v1_16_R3.EntityTypes;
-import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity;
-import net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles;
-import net.minecraft.server.v1_16_R3.WorldServer;
-
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -55,13 +43,18 @@ import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.api.region.tracking.ActionResult;
-import fr.olympa.api.region.tracking.TrackedRegion;
+import fr.olympa.api.region.tracking.RegionEvent.ExitEvent;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
+import net.minecraft.server.v1_16_R3.EntityCow;
+import net.minecraft.server.v1_16_R3.EntityTypes;
+import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity;
+import net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles;
+import net.minecraft.server.v1_16_R3.WorldServer;
 
 public class GameTrident extends AQueuedGame {
 
@@ -81,10 +74,10 @@ public class GameTrident extends AQueuedGame {
 		//cancel going out of game area
 		OlympaCore.getInstance().getRegionManager().registerRegion(exteriorRegion, "trident_exterior", EventPriority.NORMAL, new Flag() {
 			@Override
-			public ActionResult leaves(Player p, Set<TrackedRegion> to) {
-				super.leaves(p, to);
+			public ActionResult leaves(ExitEvent event) {
+				super.leaves(event);
 				
-				if (playingPlayers.contains(p))
+				if (playingPlayers.contains(event.getPlayer()))
 					return ActionResult.DENY;
 				else
 					return ActionResult.ALLOW;
@@ -94,11 +87,11 @@ public class GameTrident extends AQueuedGame {
 		//show border barrier particles
 		OlympaCore.getInstance().getRegionManager().registerRegion(interiorRegion, "trident_interior", EventPriority.NORMAL, new Flag() {
 			@Override
-			public ActionResult leaves(Player p, Set<TrackedRegion> to) {
-				if (playingPlayers.contains(p))
+			public ActionResult leaves(ExitEvent event) {
+				if (playingPlayers.contains(event.getPlayer()))
 					//showBarrier(p);
-					sendMessage(p, "§7Attention, vous vous approchez de la bordure de la carte !");
-				return super.leaves(p, to);
+					sendMessage(event.getPlayer(), "§7Attention, vous vous approchez de la bordure de la carte !");
+				return super.leaves(event);
 			}
 		});
 		

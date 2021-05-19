@@ -2,11 +2,9 @@ package fr.olympa.hub;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
@@ -23,7 +21,7 @@ import fr.olympa.api.plugin.OlympaAPIPlugin;
 import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.ActionResult;
-import fr.olympa.api.region.tracking.TrackedRegion;
+import fr.olympa.api.region.tracking.RegionEvent.ExitEvent;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.scoreboard.sign.ScoreboardManager;
 import fr.olympa.api.server.OlympaServer;
@@ -97,9 +95,9 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 			OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag() {
 				@Override
-				public ActionResult leaves(Player p, Set<TrackedRegion> to) {
-					super.leaves(p, to);
-					p.teleport(spawn);
+				public ActionResult leaves(ExitEvent event) {
+					super.leaves(event);
+					event.getPlayer().teleport(spawn);
 					return ActionResult.TELEPORT_ELSEWHERE;
 				}
 			}.setMessages(null, "§cNe vous égarez pas !", ChatMessageType.ACTION_BAR));

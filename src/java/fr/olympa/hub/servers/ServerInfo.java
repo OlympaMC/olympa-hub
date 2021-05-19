@@ -3,7 +3,6 @@ package fr.olympa.hub.servers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,6 +24,7 @@ import fr.olympa.api.lines.FixedLine;
 import fr.olympa.api.match.MatcherPattern;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.tracking.ActionResult;
+import fr.olympa.api.region.tracking.RegionEvent.EntryEvent;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.server.MonitorInfo;
@@ -203,9 +203,9 @@ public class ServerInfo extends AbstractObservable {
 		public Portal(Region region, Location holoLocation) {
 			this.region = OlympaCore.getInstance().getRegionManager().registerRegion(region, "portal_" + getServer().name(), EventPriority.HIGH, new Flag() {
 				@Override
-				public ActionResult enters(Player p, Set<TrackedRegion> to) {
-					connect(p);
-					return super.enters(p, to);
+				public ActionResult enters(EntryEvent event) {
+					connect(event.getPlayer());
+					return super.enters(event);
 				}
 			});
 			hologram = OlympaCore.getInstance().getHologramsManager().createHologram(holoLocation.clone().add(0, 1, 0), false, true, new FixedLine<>("§e§l"

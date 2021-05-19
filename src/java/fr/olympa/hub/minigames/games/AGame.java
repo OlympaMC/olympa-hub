@@ -51,6 +51,8 @@ import fr.olympa.api.redis.RedisChannel;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.api.region.tracking.ActionResult;
+import fr.olympa.api.region.tracking.RegionEvent.EntryEvent;
+import fr.olympa.api.region.tracking.RegionEvent.ExitEvent;
 import fr.olympa.api.region.tracking.TrackedRegion;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.api.utils.observable.SimpleObservable;
@@ -165,22 +167,21 @@ public abstract class AGame extends ComplexCommand implements Listener{
 				new FixedLine<HologramLine>("§7Commencez ici"));
 		
 		//gestion sortie de zone de jeu
-		OlympaCore.getInstance().getRegionManager().registerRegion(area, "zone_" + gameType.toString().toLowerCase(), EventPriority.HIGHEST,
-			new Flag() {
-				@Override
-				public ActionResult leaves(Player p, Set<TrackedRegion> to) {
-					super.leaves(p, to);
-					
-					if (!players.keySet().contains(p))
-						return ActionResult.ALLOW;
-					
-					if (exitGameArea(p)) {
-						endGame(AccountProvider.get(p.getUniqueId()), -1, false);
-						return ActionResult.ALLOW;	
-					}else
-						return ActionResult.TELEPORT_ELSEWHERE;
-				}
-			});
+		OlympaCore.getInstance().getRegionManager().registerRegion(area, "zone_" + gameType.toString().toLowerCase(), EventPriority.HIGHEST, new Flag() {
+			@Override
+			public ActionResult leaves(ExitEvent event) {
+				super.leaves(event);
+				
+				if (!players.keySet().contains(event.getPlayer()))
+					return ActionResult.ALLOW;
+				
+				if (exitGameArea(event.getPlayer())) {
+					endGame(AccountProvider.get(event.getPlayer().getUniqueId()), -1, false);
+					return ActionResult.ALLOW;
+				}else
+					return ActionResult.TELEPORT_ELSEWHERE;
+			}
+		});
 		
 		//définition de la hotbar du jeu
 		if (gameType.isRestartable())
@@ -618,8 +619,8 @@ public abstract class AGame extends ComplexCommand implements Listener{
 		
 		portalRegionTracked = OlympaCore.getInstance().getRegionManager().registerRegion(portalRegion, gameType.name() + "_portal", EventPriority.NORMAL, new Flag() {
 			@Override
-			public ActionResult enters(Player p, Set<TrackedRegion> to) {
-				beginGame(p);
+			public ActionResult enters(EntryEvent event) {
+				beginGame(event.getPlayer());
 				return ActionResult.TELEPORT_ELSEWHERE;
 			}
 		});

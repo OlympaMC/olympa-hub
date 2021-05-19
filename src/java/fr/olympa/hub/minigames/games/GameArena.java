@@ -1,7 +1,6 @@
 package fr.olympa.hub.minigames.games;
 
 import java.rmi.activation.ActivateFailedException;
-import java.util.Set;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,7 +26,8 @@ import fr.olympa.api.provider.AccountProvider;
 import fr.olympa.api.region.Region;
 import fr.olympa.api.region.shapes.Cuboid;
 import fr.olympa.api.region.tracking.ActionResult;
-import fr.olympa.api.region.tracking.TrackedRegion;
+import fr.olympa.api.region.tracking.RegionEvent.EntryEvent;
+import fr.olympa.api.region.tracking.RegionEvent.ExitEvent;
 import fr.olympa.api.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
@@ -58,26 +58,26 @@ public class GameArena extends AQueuedGame{
 		allowedTpLocs.add(pos2);
 		
 		arena = (Region) config.get("arena");
-
-		OlympaCore.getInstance().getRegionManager().registerRegion(arena, "fightzone_" + gameType.toString().toLowerCase(), EventPriority.HIGHEST,
-			new Flag() {
-				@Override
-				public ActionResult leaves(Player p, Set<TrackedRegion> to) {
-					super.leaves(p, to);
-					if (!playingPlayers.contains(p))
-						return ActionResult.ALLOW;
-					else
-						return ActionResult.DENY;
-				}
-				@Override
-				public ActionResult enters(Player p, Set<TrackedRegion> to) {
-					super.leaves(p, to);
-					if (playingPlayers.contains(p))
-						return ActionResult.ALLOW;
-					else
-						return ActionResult.DENY;
-				}
-			});
+		
+		OlympaCore.getInstance().getRegionManager().registerRegion(arena, "fightzone_" + gameType.toString().toLowerCase(), EventPriority.HIGHEST, new Flag() {
+			@Override
+			public ActionResult leaves(ExitEvent event) {
+				super.leaves(event);
+				if (!playingPlayers.contains(event.getPlayer()))
+					return ActionResult.ALLOW;
+				else
+					return ActionResult.DENY;
+			}
+			
+			@Override
+			public ActionResult enters(EntryEvent event) {
+				super.enters(event);
+				if (playingPlayers.contains(event.getPlayer()))
+					return ActionResult.ALLOW;
+				else
+					return ActionResult.DENY;
+			}
+		});
 	}
 	
 	@Override
