@@ -20,11 +20,11 @@ import fr.olympa.api.config.CustomConfig;
 import fr.olympa.api.gui.OlympaGUI;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.player.OlympaPlayer;
-import fr.olympa.api.server.MonitorInfo;
 import fr.olympa.core.spigot.OlympaCore;
+import fr.olympa.core.spigot.redis.receiver.BungeeServerInfoReceiver;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
-import fr.olympa.hub.servers.ServerInfo;
+import fr.olympa.hub.servers.ServerInfoItem;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -98,16 +98,19 @@ public class MenuGUI extends OlympaGUI {
 				"§8> §7Version " + (player.getPremiumUniqueId() != null ? "Premium" : "Crack"));
 		//				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
 
+		BungeeServerInfoReceiver.registerCallback(serverInfos -> {
+
+		});
 		OlympaCore.getInstance().retreiveMonitorInfos(serverInfo -> {
-			for (ServerInfo server : OlympaHub.getInstance().serversInfos.getServers()) {
-				if (server.getServer() == null || !server.getServer().canConnect(player))
+			for (ServerInfoItem server : OlympaHub.getInstance().serversInfos.getServers()) {
+				if (!server.containsMinimumOneServer(serverInfo))
 					continue;
-				MonitorInfo mi = serverInfo.stream().filter(m -> server.isSameServer(m)).findFirst().orElse(null);
-				if (mi != null) {
-					server.updateInfo(mi);
-					setServerItem(server);
-					server.observe("gui_" + hashCode(), () -> setServerItem(server));
-				}
+				//				MonitorInfo mi = serverInfo.stream().filter(m -> server.containsServer(m)).collect(Collectors.toList());
+				//				if (mi != null) {
+				//					server.updateInfo(mi);
+				//					setServerItem(server);
+				//				}
+				server.observe("gui_" + hashCode(), () -> setServerItem(server));
 			}
 
 		}, false);
@@ -126,7 +129,7 @@ public class MenuGUI extends OlympaGUI {
 		}
 	}
 
-	private void setServerItem(ServerInfo server) {
+	private void setServerItem(ServerInfoItem server) {
 		inv.setItem(server.slot, server.getMenuItem());
 	}
 
@@ -140,8 +143,8 @@ public class MenuGUI extends OlympaGUI {
 			return true;
 		}
 		try {
-			Optional<Entry<String, ServerInfo>> server = instanceHub.serversInfos.servers.entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().getServer().canConnect(player)).findFirst();
-			if (server.isPresent() && server.get().getValue().connect(p))
+			Optional<Entry<String, ServerInfoItem>> server = instanceHub.serversInfos.servers.entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().connect(p)).findFirst();
+			if (server.isPresent())
 				p.closeInventory();
 		} catch (IndexOutOfBoundsException e) {
 			e.printStackTrace(); // On doit fix ça, c'est pas normal de laisser une exception comme ça
@@ -163,7 +166,7 @@ public class MenuGUI extends OlympaGUI {
 
 	@Override
 	public boolean onClose(Player p) {
-		for (ServerInfo server : OlympaHub.getInstance().serversInfos.getServers())
+		for (ServerInfoItem server : OlympaHub.getInstance().serversInfos.getServers())
 			server.unobserve("gui_" + hashCode());
 		return super.onClose(p);
 	}

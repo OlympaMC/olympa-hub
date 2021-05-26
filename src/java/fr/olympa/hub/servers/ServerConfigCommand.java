@@ -22,9 +22,9 @@ public class ServerConfigCommand extends ComplexCommand {
 
 	public ServerConfigCommand(Plugin plugin) {
 		super(plugin, "serverConfig", "Permet de configurer les serveurs.", HubPermissions.SERVER_CONFIG_COMMAND);
-		addArgumentParser("SERVER", (sender, arg) -> OlympaHub.getInstance().serversInfos.getServers().stream().map(x -> x.getServerName()).collect(Collectors.toList()), (x) -> {
+		addArgumentParser("SERVER", (sender, arg) -> OlympaHub.getInstance().serversInfos.getServers().stream().map(x -> x.getItemServerNameKey()).collect(Collectors.toList()), (x) -> {
 			try {
-				ServerInfo server = OlympaHub.getInstance().serversInfos.getServer(x);
+				ServerInfoItem server = OlympaHub.getInstance().serversInfos.getServer(x);
 				if (server != null)
 					return server;
 			} catch (IllegalArgumentException ex) {}
@@ -34,7 +34,7 @@ public class ServerConfigCommand extends ComplexCommand {
 
 	@Cmd(player = true, min = 1, args = "SERVER", syntax = "<server>")
 	public void setPortal(CommandContext cmd) {
-		ServerInfo server = cmd.getArgument(0);
+		ServerInfoItem server = cmd.getArgument(0);
 		Player p = getPlayer();
 
 		sendMessage(Prefix.DEFAULT, "Sélectionnez la zone du portail.");
@@ -42,7 +42,7 @@ public class ServerConfigCommand extends ComplexCommand {
 			sendMessage(Prefix.DEFAULT, "Sélectionnez l'endroit où apparaîtra l'hologramme.");
 			new WaitBlockClick(p, block -> {
 				server.setPortal(region, block.getLocation().add(0.5, 1, 0.5));
-				sendSuccess("Vous avez créé le portail pour le serveur %s !", server.getServer().getNameCaps());
+				sendSuccess("Vous avez créé le portail pour le serveur %s !", server.getItemServerNameKey());
 			}, ItemUtils.item(Material.STICK, "§aCliquez sur le bloc")).enterOrLeave();
 		}).enterOrLeave();
 	}
@@ -56,9 +56,9 @@ public class ServerConfigCommand extends ComplexCommand {
 		}
 		ServerTrait trait = npc.getOrAddTrait(ServerTrait.class);
 		npc.data().setPersistent(NPC.NAMEPLATE_VISIBLE_METADATA, false);
-		ServerInfo server = cmd.getArgument(0);
+		ServerInfoItem server = cmd.getArgument(0);
 		trait.setServer(server);
-		sendSuccess("Le NPC %d est maintenant associé aux serveurs %s.", npc.getId(), server.getServer().getNameCaps());
+		sendSuccess("Le NPC %d est maintenant associé aux serveurs %s.", npc.getId(), server.getItemServerNameKey());
 	}
 
 }

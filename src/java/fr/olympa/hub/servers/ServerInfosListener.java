@@ -1,5 +1,6 @@
 package fr.olympa.hub.servers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -21,27 +22,27 @@ public class ServerInfosListener implements Listener {
 	public void onSpigotConfigReload(SpigotConfigReloadEvent event) {
 		CustomConfig config = event.getConfig();
 		if (config.getName().equals("config"))
-			for (Entry<String, ServerInfo> entry : servers.entrySet())
+			for (Entry<String, ServerInfoItem> entry : servers.entrySet())
 				entry.getValue().updateConfig(config.getConfigurationSection(entry.getKey()));
 	}
 
-	public Map<String, ServerInfo> servers = new HashMap<>();
+	public Map<String, ServerInfoItem> servers = new HashMap<>();
 
 	public ServerInfosListener(ConfigurationSection serversConfig) {
-		for (String serverName : serversConfig.getKeys(false)) {
-			ConfigurationSection configSection = serversConfig.getConfigurationSection(serverName);
-			servers.put(serverName, new ServerInfo(serverName, configSection));
+		for (String itemServerConfigKeyName : serversConfig.getKeys(false)) {
+			ConfigurationSection configSection = serversConfig.getConfigurationSection(itemServerConfigKeyName);
+			servers.put(itemServerConfigKeyName, new ServerInfoItem(itemServerConfigKeyName, configSection));
 		}
 		BungeeServerInfoReceiver.registerCallback(mis -> updateData(mis));
 	}
 
-	public ServerInfo getServer(String serverName) {
-		return servers.get(serverName);
+	public ServerInfoItem getServer(String itemServerConfigKeyName) {
+		return servers.get(itemServerConfigKeyName);
 	}
 
-	public ServerInfo getServer(MonitorInfo mi) {
-		return servers.get(mi.getName());
-	}
+	//	public ServerInfoItem getServer(MonitorInfo mi) {
+	//		return servers.get(mi.getName());
+	//	}
 
 	//	public ServerInfo getServer(OlympaServer olympaServer) {
 	//		Entry<String, ServerInfo> entry = servers.entrySet().stream().filter(x -> x.getValue().getServer() == olympaServer).findAny().orElse(null);
@@ -50,23 +51,36 @@ public class ServerInfosListener implements Listener {
 	//		return null;
 	//	}
 
-	public Collection<ServerInfo> getServers() {
+	public Collection<ServerInfoItem> getServers() {
 		return servers.values();
 	}
 
-	public Map<String, ServerInfo> getServersInfo() {
+	public Map<String, ServerInfoItem> getServersInfo() {
 		return servers;
 	}
 
 	public void updateData(List<MonitorInfo> newServers) {
-		for (MonitorInfo newServ : newServers) {
-			ServerInfo servInfo = servers.get(newServ.getName());
-			if (servInfo != null)
-				servInfo.updateInfo(newServ);
-			servInfo = servers.get(newServ.getClearName());
-			if (servInfo != null)
-				servInfo.updateInfo(newServ);
-		}
+		Map<String, List<MonitorInfo>> newInfos = new HashMap<>();
+		for (MonitorInfo newServ : newServers)
+			for (Entry<String, ServerInfoItem> entry : servers.entrySet())
+				if (entry.getValue().containsServer(newServ)) {
+					List<MonitorInfo> list = newInfos.get(entry.getKey());
+					if (list == null) {
+						list = new ArrayList<>();
+						newInfos.put(entry.getKey(), list);
+					}
+					list.add(newServ);
+				}
+		//			ServerInfoItem servInfo = servers.get(newServ.getName());
+		//			if (servInfo != null)
+		//				servInfo.updateInfo(newServ);
+		//			servInfo = servers.get(newServ.getClearName());
+		//			if (servInfo != null)
+		//				servInfo.updateInfo(newServ);
+		newInfos.forEach((itemServerConfigKeyName, newServs) -> {
+			ServerInfoItem serverInfoItem = servers.get(itemServerConfigKeyName);
+			serverInfoItem.tryUpdate(newServs);
+		});
 	}
 
 	//	private int parseInt(String str) {
