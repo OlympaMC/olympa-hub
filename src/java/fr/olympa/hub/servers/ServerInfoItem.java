@@ -1,6 +1,7 @@
 package fr.olympa.hub.servers;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +57,7 @@ public class ServerInfoItem extends AbstractObservable {
 	@Nonnull
 	private ConfigurationSection config;
 	@Nullable
-	private Map<String, MonitorInfo> serversInfo;
+	private Map<String, MonitorInfo> serversInfo = new HashMap<>();
 	private boolean isUniqueMultipleServers;
 
 	public ServerInfoItem(String itemServerKey, ConfigurationSection config) {
@@ -65,14 +66,14 @@ public class ServerInfoItem extends AbstractObservable {
 	}
 
 	public boolean containsServer(MonitorInfo monitorInfo) {
-		return serversInfo.keySet().stream().anyMatch(serverName -> serverName.equals(monitorInfo.getName()));
+		return serversInfo.values().stream().anyMatch(mi -> mi != null && mi.getName().equals(monitorInfo.getName()));
 	}
 
 	public boolean containsMinimumOneServer(List<MonitorInfo> monitorInfos) {
 		return monitorInfos.stream().anyMatch(monitorInfo -> serversInfo.keySet().stream().anyMatch(serverName -> serverName.equals(monitorInfo.getName())));
 	}
 
-	public void updateConfig(ConfigurationSection config) {
+	private void updateConfig(ConfigurationSection config) {
 		description = Arrays.asList(ChatPaginator.wordWrap("§8> §7" + config.getString("description"), 40));
 		item = Material.valueOf(config.getString("item"));
 		slot = config.getInt("slot");

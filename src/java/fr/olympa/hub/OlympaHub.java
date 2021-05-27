@@ -68,8 +68,10 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
 			OlympaPermission.registerPermissions(HubPermissions.class);
 
-			spawn = getConfig().getLocation("spawn");
-			lightning = getConfig().getLocation("lightning");
+			getConfig().addTask("olympaHubMain", config -> {
+				lightning = config.getLocation("lightning");
+				spawn = config.getLocation("spawn");
+			});
 
 			PluginManager pm = getServer().getPluginManager();
 			pm.registerEvents(new HubListener(), this);
@@ -89,7 +91,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			OlympaGroup.VIP.setRuntimePermission("music.favorites", true);
 			OlympaGroup.VIP.setRuntimePermission("music.save-datas", true);
 
-			serversInfos = new ServerInfosListener(config.getConfigurationSection("servers"));
+			serversInfos = new ServerInfosListener(config);
 			pm.registerEvents(serversInfos, this);
 			//RedisAccess.INSTANCE.disconnect();
 

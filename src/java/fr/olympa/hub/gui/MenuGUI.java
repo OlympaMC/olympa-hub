@@ -21,7 +21,6 @@ import fr.olympa.api.gui.OlympaGUI;
 import fr.olympa.api.item.ItemUtils;
 import fr.olympa.api.player.OlympaPlayer;
 import fr.olympa.core.spigot.OlympaCore;
-import fr.olympa.core.spigot.redis.receiver.BungeeServerInfoReceiver;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.servers.ServerInfoItem;
@@ -37,7 +36,7 @@ public class MenuGUI extends OlympaGUI {
 	private static TextComponent twitter, discord, website, yt;
 	static {
 
-		ItemStack orangeSeparator = ItemUtils.itemSeparator(DyeColor.ORANGE);
+		//		ItemStack orangeSeparator = ItemUtils.itemSeparator(DyeColor.ORANGE);
 		ItemStack yellowSeparator = ItemUtils.itemSeparator(DyeColor.YELLOW);
 
 		for (int slot = 9; slot < 18; slot++)
@@ -78,13 +77,13 @@ public class MenuGUI extends OlympaGUI {
 		return component;
 	}
 
-	private OlympaPlayer player;
+	//	OlympaPlayer player
 
 	private Map<Integer, GameType> minigames = new HashMap<>();
 
 	public MenuGUI(OlympaPlayer player) {
 		super("Ω | Menu Olympa", 6);
-		this.player = player;
+		//		this.player = player;
 		inv.setContents(basicContents);
 
 		ItemUtils.skull(x -> inv.setItem(4, x), "§eMon profil", player.getName(),
@@ -98,9 +97,6 @@ public class MenuGUI extends OlympaGUI {
 				"§8> §7Version " + (player.getPremiumUniqueId() != null ? "Premium" : "Crack"));
 		//				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
 
-		BungeeServerInfoReceiver.registerCallback(serverInfos -> {
-
-		});
 		OlympaCore.getInstance().retreiveMonitorInfos(serverInfo -> {
 			for (ServerInfoItem server : OlympaHub.getInstance().serversInfos.getServers()) {
 				if (!server.containsMinimumOneServer(serverInfo))

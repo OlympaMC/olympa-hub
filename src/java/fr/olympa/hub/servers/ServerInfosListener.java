@@ -8,31 +8,33 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import fr.olympa.api.config.CustomConfig;
-import fr.olympa.api.customevents.SpigotConfigReloadEvent;
 import fr.olympa.api.server.MonitorInfo;
 import fr.olympa.core.spigot.redis.receiver.BungeeServerInfoReceiver;
 
 public class ServerInfosListener implements Listener {
 
-	@EventHandler
+	/*@EventHandler
 	public void onSpigotConfigReload(SpigotConfigReloadEvent event) {
 		CustomConfig config = event.getConfig();
 		if (config.getName().equals("config"))
 			for (Entry<String, ServerInfoItem> entry : servers.entrySet())
 				entry.getValue().updateConfig(config.getConfigurationSection(entry.getKey()));
-	}
+	}*/
 
 	public Map<String, ServerInfoItem> servers = new HashMap<>();
 
-	public ServerInfosListener(ConfigurationSection serversConfig) {
-		for (String itemServerConfigKeyName : serversConfig.getKeys(false)) {
-			ConfigurationSection configSection = serversConfig.getConfigurationSection(itemServerConfigKeyName);
-			servers.put(itemServerConfigKeyName, new ServerInfoItem(itemServerConfigKeyName, configSection));
-		}
+	public ServerInfosListener(CustomConfig config) {
+		config.addTask(this.getClass().getName(), configTask -> {
+			ConfigurationSection serversConfig = configTask.getConfigurationSection("servers");
+			servers.clear();
+			for (String itemServerConfigKeyName : serversConfig.getKeys(false)) {
+				ConfigurationSection configSection = serversConfig.getConfigurationSection(itemServerConfigKeyName);
+				servers.put(itemServerConfigKeyName, new ServerInfoItem(itemServerConfigKeyName, configSection));
+			}
+		});
 		BungeeServerInfoReceiver.registerCallback(mis -> updateData(mis));
 	}
 
