@@ -97,19 +97,11 @@ public class MenuGUI extends OlympaGUI {
 				"§8> §7Version " + (player.getPremiumUniqueId() != null ? "Premium" : "Crack"));
 		//				"§8> §7Compte Discord " + (player.getDiscordId() == 0 ? "lié !" : "non relié"));
 
-		OlympaCore.getInstance().retreiveMonitorInfos(serverInfo -> {
-			for (ServerInfoItem server : OlympaHub.getInstance().serversInfos.getServers()) {
-				if (!server.containsMinimumOneServer(serverInfo))
-					continue;
-				//				MonitorInfo mi = serverInfo.stream().filter(m -> server.containsServer(m)).collect(Collectors.toList());
-				//				if (mi != null) {
-				//					server.updateInfo(mi);
-				//					setServerItem(server);
-				//				}
-				server.observe("gui_" + hashCode(), () -> setServerItem(server));
-			}
+		OlympaCore.getInstance().retreiveMonitorInfos((mi, isInstantData) -> {
+			for (ServerInfoItem server : OlympaHub.getInstance().serversInfos.getServers())
+				server.printItem(player, inv, isInstantData);
 
-		}, false);
+		}, true);
 
 		ConfigurationSection minigamesConfig = OlympaHub.getInstance().getConfig().getConfigurationSection("minigames");
 		for (String minigame : minigamesConfig.getKeys(false)) {
@@ -123,10 +115,6 @@ public class MenuGUI extends OlympaGUI {
 
 			//System.out.println(minigame + " - " + minigamesConfig.getString(minigame+".item") + " - " + minigamesConfig.getString(minigame+".description"));
 		}
-	}
-
-	private void setServerItem(ServerInfoItem server) {
-		inv.setItem(server.slot, server.getMenuItem());
 	}
 
 	@Override

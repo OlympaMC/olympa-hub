@@ -69,7 +69,10 @@ public class ServerTrait extends Trait {
 	@Override
 	public void save(DataKey key) {
 		super.save(key);
-		key.setString("server", server.getItemServerNameKey());
+		if (server == null)
+			OlympaHub.getInstance().sendMessage(this.getClass().getName() + " §cServeur %s introuvable.", key.getString("server"));
+		else
+			key.setString("server", server.getItemServerNameKey());
 	}
 
 	@Override
@@ -77,7 +80,7 @@ public class ServerTrait extends Trait {
 		super.load(key);
 		server = OlympaHub.getInstance().serversInfos.getServer(key.getString("server"));
 		if (server == null)
-			OlympaHub.getInstance().sendMessage("§cServeur %s introuvable.", key.getString("server"));
+			OlympaHub.getInstance().sendMessage(this.getClass().getName() + "§cServeur %s introuvable.", key.getString("server"));
 	}
 
 }
