@@ -14,8 +14,8 @@ import fr.olympa.api.lines.CyclingLine;
 import fr.olympa.api.lines.DynamicLine;
 import fr.olympa.api.lines.FixedLine;
 import fr.olympa.api.lines.TimerLine;
-import fr.olympa.api.permission.OlympaAPIPermissions;
 import fr.olympa.api.permission.OlympaPermission;
+import fr.olympa.api.permission.list.OlympaAPIPermissionsSpigot;
 import fr.olympa.api.player.OlympaPlayer;
 import fr.olympa.api.plugin.OlympaAPIPlugin;
 import fr.olympa.api.provider.AccountProvider;
@@ -107,8 +107,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(ServerTrait.class).withName("server"));
 			CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(VoteTrait.class).withName("vote"));
 
-			OlympaAPIPermissions.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
-			OlympaAPIPermissions.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+			OlympaAPIPermissionsSpigot.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+			OlympaAPIPermissionsSpigot.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
 
 			games = new MiniGamesManager(this);
 			vanishManager = new VanishManager();

@@ -275,27 +275,26 @@ public class ServerInfoItem extends AbstractObservable {
 		Boolean out = null;
 		MonitorInfo monitorInfo = null;
 		for (Iterator<MonitorInfo> it = serversInfo.values().iterator(); it.hasNext(); monitorInfo = it.next()) {
-			Boolean b = hasPermissionToJoin(player, monitorInfo);
-			if (b != null)
-				if (b == true)
-					return true;
-				else if (out == null)
-					out = false;
+			if (monitorInfo == null)
+				continue;
+			boolean b = hasPermissionToJoin(player, monitorInfo);
+			if (b)
+				return true;
+			else if (out == null && !b)
+				out = false;
 		}
 		return out;
 	}
 
-	public Boolean hasPermissionToJoin(OlympaPlayer player, MonitorInfo minitorServer) {
-		if (minitorServer == null)
-			return null;
+	public boolean hasPermissionToJoin(OlympaPlayer player, MonitorInfo minitorServer) {
 		return minitorServer.getOlympaServer().canConnect(player);
 	}
 
 	private void setServerItem(OlympaPlayer player, Inventory inv) {
-		ItemStack menuItem = getMenuItem();
-		ItemStack currentItem = inv.getItem(slot);
-		if (currentItem != null && currentItem.isSimilar(menuItem))
-			return;
+		//		ItemStack menuItem = getMenuItem();
+		//		ItemStack currentItem = inv.getItem(slot);
+		//		if (currentItem != null)
+		//			return;
 		Boolean hasPerm = hasPermissionToJoin(player);
 		if (hasPerm == null)
 			inv.setItem(slot, ItemUtils.item(item, "§6§l" + getServerNameCaps(), "§eChargement ..."));
@@ -311,9 +310,10 @@ public class ServerInfoItem extends AbstractObservable {
 	}
 
 	public void printItem(OlympaPlayer player, Inventory inv, boolean isInstantData) {
+		//		if (!isInstantData)
+		//		return;
 		Boolean canJoin = this.hasPermissionToJoin(player);
-		if (isInstantData)
-			printItem(player, inv, canJoin);
+		printItem(player, inv, canJoin);
 	}
 
 }
