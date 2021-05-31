@@ -154,10 +154,10 @@ public class ServerInfoItem extends AbstractObservable {
 				if (!symbole.isBlank())
 					sb.append(" " + symbole);
 				if (mi.getStatus() != ServerStatus.OPEN)
-					sb.append(" " + mi.getStatus().getNameColored());
+					sb.append(" (" + mi.getStatus().getNameColored() + "§7)");
 				if (mi.getOnlinePlayers() != null) {
 					int online = mi.getOnlinePlayers();
-					sb.append(String.format(" - %s§7 joueur%s ", online, Utils.withOrWithoutS(online)));
+					sb.append(String.format(" - %s joueur%s ", online, Utils.withOrWithoutS(online)));
 				}
 				lore.add(sb.toString());
 			}
@@ -271,8 +271,8 @@ public class ServerInfoItem extends AbstractObservable {
 
 	}
 
-	public Boolean hasPermissionToJoin(OlympaPlayer player) {
-		Boolean out = null;
+	public boolean hasPermissionToJoin(OlympaPlayer player) {
+		boolean out = true;
 		MonitorInfo monitorInfo = null;
 		for (Iterator<MonitorInfo> it = serversInfo.values().iterator(); it.hasNext(); monitorInfo = it.next()) {
 			if (monitorInfo == null)
@@ -280,7 +280,7 @@ public class ServerInfoItem extends AbstractObservable {
 			boolean b = hasPermissionToJoin(player, monitorInfo);
 			if (b)
 				return true;
-			else if (out == null && !b)
+			else
 				out = false;
 		}
 		return out;
@@ -295,16 +295,17 @@ public class ServerInfoItem extends AbstractObservable {
 		//		ItemStack currentItem = inv.getItem(slot);
 		//		if (currentItem != null)
 		//			return;
-		Boolean hasPerm = hasPermissionToJoin(player);
-		if (hasPerm == null)
+		boolean hasPerm = hasPermissionToJoin(player);
+		/*if (hasPerm == null)
 			inv.setItem(slot, ItemUtils.item(item, "§6§l" + getServerNameCaps(), "§eChargement ..."));
-		else if (hasPerm == true)
+		else */
+		if (hasPerm)
 			inv.setItem(slot, getMenuItem());
 		else
 			inv.setItem(slot, new ItemStack(Material.AIR));
 	}
 
-	private void printItem(OlympaPlayer player, Inventory inv, Boolean canJoin) {
+	private void printItem(OlympaPlayer player, Inventory inv) {
 		setServerItem(player, inv);
 		observe("gui_" + slot + itemServerKey + player.getUniqueId(), () -> setServerItem(player, inv));
 	}
@@ -312,8 +313,8 @@ public class ServerInfoItem extends AbstractObservable {
 	public void printItem(OlympaPlayer player, Inventory inv, boolean isInstantData) {
 		//		if (!isInstantData)
 		//		return;
-		Boolean canJoin = this.hasPermissionToJoin(player);
-		printItem(player, inv, canJoin);
+		//		Boolean canJoin = this.hasPermissionToJoin(player);
+		printItem(player, inv);
 	}
 
 }

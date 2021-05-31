@@ -165,8 +165,9 @@ public class MenuGUI extends OlympaGUI {
 			return website;
 		case 8:
 			return yt;
+		default:
+			return null;
 		}
-		return null;
 	}
 
 }
