@@ -6,12 +6,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import fr.olympa.api.command.complex.Cmd;
-import fr.olympa.api.command.complex.CommandContext;
-import fr.olympa.api.command.complex.ComplexCommand;
-import fr.olympa.api.editor.RegionEditor;
-import fr.olympa.api.editor.WaitBlockClick;
-import fr.olympa.api.item.ItemUtils;
+import fr.olympa.api.common.command.complex.Cmd;
+import fr.olympa.api.common.command.complex.CommandContext;
+import fr.olympa.api.spigot.command.ComplexCommand;
+import fr.olympa.api.spigot.editor.RegionEditor;
+import fr.olympa.api.spigot.editor.WaitBlockClick;
+import fr.olympa.api.spigot.item.ItemUtils;
 import fr.olympa.api.utils.Prefix;
 import fr.olympa.hub.HubPermissions;
 import fr.olympa.hub.OlympaHub;

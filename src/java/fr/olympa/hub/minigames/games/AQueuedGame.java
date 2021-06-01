@@ -11,7 +11,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import fr.olympa.api.provider.AccountProvider;
+import fr.olympa.api.common.provider.AccountProvider;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;

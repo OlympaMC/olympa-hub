@@ -1,11 +1,12 @@
 version: 1.0
 servers:
-  buildeur_item:
+  lobby_item:
     defaultServersName: "Lobbys"
     description: "Lobbys"
-    item: DIAMOND_PICKAXE
+    item: BLACK_TERRACOTTA
     isUniqueMultipleServers: true
-    slot: 17
+    slot: 45
+    bungeeServersNames:
       - lobby1
       - lobby2
   zta_item:
@@ -39,17 +40,18 @@ servers:
     item: CRAFTING_TABLE
     isUniqueMultipleServers: true
     slot: 34
+    bungeeServersNames:
       - creatif1
-      - creatif1
+      - creatif2
   buildeur_item:
     defaultServersName: "Buildeurs"
     description: "§cServeur staff : §abuildeurs"
     item: DIAMOND_PICKAXE
     isUniqueMultipleServers: true
-    slot: 43
+    slot: 53
+    bungeeServersNames:
       - buildeur
       - buildeur2
-
 minigames:
   JUMP:
     description: "§cSautez partout !"

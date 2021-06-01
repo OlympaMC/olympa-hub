@@ -9,8 +9,8 @@ import java.util.Map.Entry;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.Listener;
 
-import fr.olympa.api.config.CustomConfig;
-import fr.olympa.api.server.MonitorInfo;
+import fr.olympa.api.common.server.ServerInfoBasic;
+import fr.olympa.api.spigot.config.CustomConfig;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.core.spigot.redis.receiver.BungeeServerInfoReceiver;
 
@@ -48,7 +48,7 @@ public class ServerInfosListener implements Listener {
 		return servers;
 	}
 
-	public void updateData(List<MonitorInfo> newServers) {
+	public void updateData(List<ServerInfoBasic> newServers) {
 		for (Entry<String, ServerInfoItem> entry : servers.entrySet())
 			entry.getValue().update(newServers);
 	}

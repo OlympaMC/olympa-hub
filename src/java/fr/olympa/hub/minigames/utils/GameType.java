@@ -2,9 +2,9 @@ package fr.olympa.hub.minigames.utils;
 
 import java.sql.Types;
 
-import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.sql.SQLColumn;
-import fr.olympa.api.sql.statement.OlympaStatement;
+import fr.olympa.api.common.provider.AccountProvider;
+import fr.olympa.api.common.sql.SQLColumn;
+import fr.olympa.api.common.sql.statement.OlympaStatement;
 import fr.olympa.hub.minigames.games.GameArena;
 import fr.olympa.hub.minigames.games.GameDac;
 import fr.olympa.hub.minigames.games.GameElytra;

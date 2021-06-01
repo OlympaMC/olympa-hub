@@ -35,16 +35,16 @@ import org.bukkit.util.Vector;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 
-import fr.olympa.api.command.complex.Cmd;
-import fr.olympa.api.command.complex.CommandContext;
-import fr.olympa.api.editor.RegionEditor;
-import fr.olympa.api.item.ItemUtils;
-import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.region.Region;
-import fr.olympa.api.region.shapes.Cuboid;
-import fr.olympa.api.region.tracking.ActionResult;
-import fr.olympa.api.region.tracking.RegionEvent.ExitEvent;
-import fr.olympa.api.region.tracking.flags.Flag;
+import fr.olympa.api.common.command.complex.Cmd;
+import fr.olympa.api.common.command.complex.CommandContext;
+import fr.olympa.api.spigot.editor.RegionEditor;
+import fr.olympa.api.spigot.item.ItemUtils;
+import fr.olympa.api.common.provider.AccountProvider;
+import fr.olympa.api.spigot.region.Region;
+import fr.olympa.api.spigot.region.shapes.Cuboid;
+import fr.olympa.api.spigot.region.tracking.ActionResult;
+import fr.olympa.api.spigot.region.tracking.RegionEvent.ExitEvent;
+import fr.olympa.api.spigot.region.tracking.flags.Flag;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;

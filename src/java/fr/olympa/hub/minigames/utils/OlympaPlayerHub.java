@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import fr.olympa.api.provider.OlympaPlayerObject;
-import fr.olympa.api.sql.SQLColumn;
+import fr.olympa.api.common.provider.OlympaPlayerObject;
+import fr.olympa.api.common.sql.SQLColumn;
 
 public class OlympaPlayerHub extends OlympaPlayerObject {
 	

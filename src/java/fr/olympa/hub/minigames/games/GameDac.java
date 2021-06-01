@@ -22,12 +22,12 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.scheduler.BukkitTask;
 
-import fr.olympa.api.command.complex.Cmd;
-import fr.olympa.api.command.complex.CommandContext;
-import fr.olympa.api.editor.RegionEditor;
-import fr.olympa.api.item.ItemUtils;
-import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.region.shapes.Cuboid;
+import fr.olympa.api.common.command.complex.Cmd;
+import fr.olympa.api.common.command.complex.CommandContext;
+import fr.olympa.api.spigot.editor.RegionEditor;
+import fr.olympa.api.spigot.item.ItemUtils;
+import fr.olympa.api.common.provider.AccountProvider;
+import fr.olympa.api.spigot.region.shapes.Cuboid;
 import fr.olympa.core.bungee.servers.WaitingConnection;
 import fr.olympa.hub.HubListener;
 import fr.olympa.hub.OlympaHub;

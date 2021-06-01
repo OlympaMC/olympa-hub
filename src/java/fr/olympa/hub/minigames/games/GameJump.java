@@ -14,10 +14,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import fr.olympa.api.command.complex.Cmd;
-import fr.olympa.api.command.complex.CommandContext;
-import fr.olympa.api.item.ItemUtils;
-import fr.olympa.api.provider.AccountProvider;
+import fr.olympa.api.common.command.complex.Cmd;
+import fr.olympa.api.common.command.complex.CommandContext;
+import fr.olympa.api.spigot.item.ItemUtils;
+import fr.olympa.api.common.provider.AccountProvider;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;

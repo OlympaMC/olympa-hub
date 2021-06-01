@@ -1,7 +1,7 @@
 package fr.olympa.hub;
 
-import fr.olympa.api.groups.OlympaGroup;
-import fr.olympa.api.permission.OlympaSpigotPermission;
+import fr.olympa.api.common.groups.OlympaGroup;
+import fr.olympa.api.common.permission.OlympaSpigotPermission;
 
 public class HubPermissions {
 

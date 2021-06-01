@@ -25,25 +25,25 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.ChatPaginator;
 
-import fr.olympa.api.holograms.Hologram;
-import fr.olympa.api.item.ItemUtils;
-import fr.olympa.api.lines.DynamicLine;
-import fr.olympa.api.lines.FixedLine;
-import fr.olympa.api.match.MatcherPattern;
-import fr.olympa.api.permission.OlympaPermission;
-import fr.olympa.api.player.OlympaPlayer;
-import fr.olympa.api.region.Region;
-import fr.olympa.api.region.tracking.ActionResult;
-import fr.olympa.api.region.tracking.RegionEvent.EntryEvent;
-import fr.olympa.api.region.tracking.TrackedRegion;
-import fr.olympa.api.region.tracking.flags.Flag;
-import fr.olympa.api.server.MonitorInfo;
-import fr.olympa.api.server.ServerStatus;
-import fr.olympa.api.sort.Sorting;
+import fr.olympa.api.common.match.MatcherPattern;
+import fr.olympa.api.common.observable.AbstractObservable;
+import fr.olympa.api.common.permission.OlympaPermission;
+import fr.olympa.api.common.player.OlympaPlayer;
+import fr.olympa.api.common.server.ServerInfoBasic;
+import fr.olympa.api.common.server.ServerStatus;
+import fr.olympa.api.common.sort.Sorting;
+import fr.olympa.api.spigot.holograms.Hologram;
+import fr.olympa.api.spigot.item.ItemUtils;
+import fr.olympa.api.spigot.lines.DynamicLine;
+import fr.olympa.api.spigot.lines.FixedLine;
+import fr.olympa.api.spigot.region.Region;
+import fr.olympa.api.spigot.region.tracking.ActionResult;
+import fr.olympa.api.spigot.region.tracking.RegionEvent.EntryEvent;
+import fr.olympa.api.spigot.region.tracking.TrackedRegion;
+import fr.olympa.api.spigot.region.tracking.flags.Flag;
+import fr.olympa.api.spigot.utils.SpigotUtils;
 import fr.olympa.api.utils.Prefix;
 import fr.olympa.api.utils.Utils;
-import fr.olympa.api.utils.observable.AbstractObservable;
-import fr.olympa.api.utils.spigot.SpigotUtils;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.core.spigot.redis.RedisSpigotSend;
 import fr.olympa.hub.OlympaHub;
@@ -64,7 +64,7 @@ public class ServerInfoItem extends AbstractObservable {
 	private Portal portal;
 	@Nonnull
 	private ConfigurationSection config;
-	private Map<String, MonitorInfo> serversInfo = new TreeMap<>();
+	private Map<String, ServerInfoBasic> serversInfo = new TreeMap<>();
 	private boolean isUniqueMultipleServers;
 
 	public ServerInfoItem(String itemServerKey, ConfigurationSection config) {
@@ -81,11 +81,11 @@ public class ServerInfoItem extends AbstractObservable {
 		return serversInfo.entrySet().stream().anyMatch(e -> e.getValue() != null && e.getKey().equals(servName));
 	}
 
-	public Optional<Entry<String, MonitorInfo>> getServer(String servName) {
+	public Optional<Entry<String, ServerInfoBasic>> getServer(String servName) {
 		return serversInfo.entrySet().stream().filter(e -> e.getKey().equals(servName)).findFirst();
 	}
 
-	public boolean containsMinimumOneServer(List<MonitorInfo> monitorInfos) {
+	public boolean containsMinimumOneServer(List<ServerInfoBasic> monitorInfos) {
 		return monitorInfos.stream().anyMatch(monitorInfo -> serversInfo.keySet().stream().anyMatch(bungeeServerName -> monitorInfo.getName().equals(bungeeServerName)));
 	}
 
@@ -104,17 +104,17 @@ public class ServerInfoItem extends AbstractObservable {
 			portal = new Portal(config.getConfigurationSection("portal"));
 	}
 
-	public MonitorInfo getInfo(String bungeeServerName) {
+	public ServerInfoBasic getInfo(String bungeeServerName) {
 		return serversInfo.get(bungeeServerName);
 	}
 
-	private boolean tryUpdate(List<MonitorInfo> mis) {
+	private boolean tryUpdate(List<ServerInfoBasic> mis) {
 		boolean b = false;
-		for (MonitorInfo mi : mis) {
-			Optional<Entry<String, MonitorInfo>> oldServ = getServer(mi.getName());
+		for (ServerInfoBasic mi : mis) {
+			Optional<Entry<String, ServerInfoBasic>> oldServ = getServer(mi.getName());
 			if (oldServ.isEmpty())
 				continue;
-			Entry<String, MonitorInfo> get = oldServ.get();
+			Entry<String, ServerInfoBasic> get = oldServ.get();
 			if (get.getValue() == null || !mi.equals(get.getValue())) {
 				serversInfo.put(mi.getName(), mi);
 				b = true;
@@ -123,7 +123,7 @@ public class ServerInfoItem extends AbstractObservable {
 		return b;
 	}
 
-	public String getCleanName(MonitorInfo info) {
+	public String getCleanName(ServerInfoBasic info) {
 		String cleanName;
 		if (REGEX_SERV_NB.contains(info.getName()))
 			cleanName = info.getOlympaServer().getNameCaps() + " " + Utils.intToSymbole(REGEX_SERV_NB.extractAndParse(info.getName()));
@@ -132,17 +132,17 @@ public class ServerInfoItem extends AbstractObservable {
 		return cleanName;
 	}
 
-	public void update(List<MonitorInfo> newMonitorInfo) {
+	public void update(List<ServerInfoBasic> newMonitorInfo) {
 		tryUpdate(newMonitorInfo);
 		//		if (!tryUpdate(newMonitorInfo))
 		//			return;
-		Collection<MonitorInfo> monitorInfo = serversInfo.values();
+		Collection<ServerInfoBasic> monitorInfo = serversInfo.values();
 		List<String> lore = new ArrayList<>();
 		lore.add(SEPARATOR);
 		lore.addAll(description);
 		lore.add(SEPARATOR);
 		lore.add(getOnlineString());
-		ServerStatus status = monitorInfo.stream().filter(mi -> mi != null).sorted(new Sorting<>(mi -> mi.getStatus().getId(), true)).map(MonitorInfo::getStatus).findFirst().orElse(ServerStatus.UNKNOWN);
+		ServerStatus status = monitorInfo.stream().filter(mi -> mi != null).sorted(new Sorting<>(mi -> mi.getStatus().getId(), true)).map(ServerInfoBasic::getStatus).findFirst().orElse(ServerStatus.UNKNOWN);
 		if (status != ServerStatus.OPEN)
 			lore.add("§7Statut : " + status.getNameColored());
 		lore.add("");
@@ -182,7 +182,7 @@ public class ServerInfoItem extends AbstractObservable {
 	@Nonnull
 	public String getServerNameCaps() {
 		if (!serversInfo.isEmpty()) {
-			MonitorInfo oneServerInfo = serversInfo.values().stream().filter(mi -> mi != null).findFirst().orElse(null);
+			ServerInfoBasic oneServerInfo = serversInfo.values().stream().filter(mi -> mi != null).findFirst().orElse(null);
 			if (oneServerInfo != null && serversInfo.values().stream().allMatch(mi -> mi != null && mi.getOlympaServer().isSame(oneServerInfo.getOlympaServer())))
 				return oneServerInfo.getOlympaServer().getNameCaps();
 		}
@@ -193,7 +193,7 @@ public class ServerInfoItem extends AbstractObservable {
 
 	public Integer getTotalOnlinePlayer() {
 		Integer online = null;
-		for (MonitorInfo mi : serversInfo.values())
+		for (ServerInfoBasic mi : serversInfo.values())
 			if (mi != null && mi.getOnlinePlayers() != null) {
 				if (online == null)
 					online = 0;
@@ -212,21 +212,21 @@ public class ServerInfoItem extends AbstractObservable {
 	}
 
 	public boolean connect(Player p) {
-		Set<MonitorInfo> serversNotOff = serversInfo.values().stream().filter(mi -> mi != null && !mi.getStatus().equals(ServerStatus.CLOSE)).collect(Collectors.toSet());
+		Set<ServerInfoBasic> serversNotOff = serversInfo.values().stream().filter(mi -> mi != null && !mi.getStatus().equals(ServerStatus.CLOSE)).collect(Collectors.toSet());
 		if (serversNotOff.isEmpty()) {
 			Prefix.DEFAULT_BAD.sendMessage(p, "Ce serveur est fermé. Réessaye plus tard !");
 			return false;
 		}
-		List<MonitorInfo> serverCanConnect = serversNotOff.stream().filter(mi -> {
+		List<ServerInfoBasic> serverCanConnect = serversNotOff.stream().filter(mi -> {
 			OlympaPermission permission = mi.getStatus().getPermission();
 			return permission == null || permission.hasPermission(p.getUniqueId());
-		}).sorted(new Sorting<>(true, mi -> mi.getStatus().getId(), MonitorInfo::getId)).collect(Collectors.toList());
+		}).sorted(new Sorting<>(true, mi -> mi.getStatus().getId(), ServerInfoBasic::getId)).collect(Collectors.toList());
 		if (serverCanConnect.isEmpty()) {
 			Prefix.DEFAULT_BAD.sendMessage(p, "Tu n'as pas la permission de te connecter à ce serveur.");
 			return false;
 		}
 		// TODO choose between multiple serveurs with isUniqueMultipleServers & onlines count of player
-		MonitorInfo serverInfo = serverCanConnect.get(0);
+		ServerInfoBasic serverInfo = serverCanConnect.get(0);
 		Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", Utils.capitalize(serverInfo.getName()));
 		RedisSpigotSend.sendServerSwitch(p, serverInfo.getName());
 		return true;
@@ -273,8 +273,8 @@ public class ServerInfoItem extends AbstractObservable {
 
 	public boolean hasPermissionToJoin(OlympaPlayer player) {
 		boolean out = true;
-		MonitorInfo monitorInfo = null;
-		for (Iterator<MonitorInfo> it = serversInfo.values().iterator(); it.hasNext(); monitorInfo = it.next()) {
+		ServerInfoBasic monitorInfo = null;
+		for (Iterator<ServerInfoBasic> it = serversInfo.values().iterator(); it.hasNext(); monitorInfo = it.next()) {
 			if (monitorInfo == null)
 				continue;
 			boolean b = hasPermissionToJoin(player, monitorInfo);
@@ -286,7 +286,7 @@ public class ServerInfoItem extends AbstractObservable {
 		return out;
 	}
 
-	public boolean hasPermissionToJoin(OlympaPlayer player, MonitorInfo minitorServer) {
+	public boolean hasPermissionToJoin(OlympaPlayer player, ServerInfoBasic minitorServer) {
 		return minitorServer.getOlympaServer().canConnect(player);
 	}
 

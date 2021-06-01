@@ -2,9 +2,9 @@ package fr.olympa.hub.servers;
 
 import org.bukkit.event.EventHandler;
 
-import fr.olympa.api.holograms.Hologram;
-import fr.olympa.api.lines.DynamicLine;
-import fr.olympa.api.lines.FixedLine;
+import fr.olympa.api.spigot.holograms.Hologram;
+import fr.olympa.api.spigot.lines.DynamicLine;
+import fr.olympa.api.spigot.lines.FixedLine;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
 import net.citizensnpcs.api.event.NPCRightClickEvent;

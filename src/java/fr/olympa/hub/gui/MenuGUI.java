@@ -16,10 +16,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
-import fr.olympa.api.config.CustomConfig;
-import fr.olympa.api.gui.OlympaGUI;
-import fr.olympa.api.item.ItemUtils;
-import fr.olympa.api.player.OlympaPlayer;
+import fr.olympa.api.spigot.config.CustomConfig;
+import fr.olympa.api.spigot.gui.OlympaGUI;
+import fr.olympa.api.spigot.item.ItemUtils;
+import fr.olympa.api.common.player.OlympaPlayer;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;

@@ -2,7 +2,7 @@ package fr.olympa.hub.minigames.utils;
 
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.EnumUtils;
 
-import fr.olympa.api.provider.AccountProvider;
+import fr.olympa.api.common.provider.AccountProvider;
 import fr.olympa.hub.minigames.games.AGame;
 import redis.clients.jedis.JedisPubSub;
 

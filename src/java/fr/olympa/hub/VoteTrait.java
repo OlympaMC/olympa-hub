@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import org.bukkit.event.EventHandler;
 
-import fr.olympa.api.holograms.Hologram;
-import fr.olympa.api.lines.CyclingLine;
-import fr.olympa.api.lines.FixedLine;
+import fr.olympa.api.spigot.holograms.Hologram;
+import fr.olympa.api.spigot.lines.CyclingLine;
+import fr.olympa.api.spigot.lines.FixedLine;
 import fr.olympa.api.utils.Prefix;
 import fr.olympa.core.spigot.OlympaCore;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
