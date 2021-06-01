@@ -1,4 +1,4 @@
-version: 1.0
+version: 1.1
 servers:
   lobby_item:
     defaultServersName: "Lobbys"
@@ -75,7 +75,7 @@ minigames:
     slot: 51
 
 zone:
-  ==: fr.olympa.api.region.shapes.Cuboid
+  ==: fr.olympa.api.spigot.region.shapes.Cuboid
   world: "world"
   xMin: -10000
   yMin: 0

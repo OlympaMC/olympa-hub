@@ -1,8 +1,5 @@
 package fr.olympa.hub;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Location;
 import org.bukkit.event.EventPriority;
@@ -10,22 +7,22 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 
 import fr.olympa.api.common.groups.OlympaGroup;
-import fr.olympa.api.spigot.lines.CyclingLine;
-import fr.olympa.api.spigot.lines.DynamicLine;
-import fr.olympa.api.spigot.lines.FixedLine;
-import fr.olympa.api.spigot.lines.TimerLine;
 import fr.olympa.api.common.permission.OlympaPermission;
 import fr.olympa.api.common.permission.list.OlympaAPIPermissionsSpigot;
 import fr.olympa.api.common.player.OlympaPlayer;
 import fr.olympa.api.common.plugin.OlympaAPIPlugin;
 import fr.olympa.api.common.provider.AccountProvider;
+import fr.olympa.api.common.server.OlympaServer;
+import fr.olympa.api.common.server.ServerStatus;
+import fr.olympa.api.spigot.lines.CyclingLine;
+import fr.olympa.api.spigot.lines.DynamicLine;
+import fr.olympa.api.spigot.lines.FixedLine;
+import fr.olympa.api.spigot.lines.TimerLine;
 import fr.olympa.api.spigot.region.Region;
 import fr.olympa.api.spigot.region.tracking.ActionResult;
 import fr.olympa.api.spigot.region.tracking.RegionEvent.ExitEvent;
 import fr.olympa.api.spigot.region.tracking.flags.Flag;
 import fr.olympa.api.spigot.scoreboard.sign.ScoreboardManager;
-import fr.olympa.api.common.server.OlympaServer;
-import fr.olympa.api.common.server.ServerStatus;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.gui.VanishManager;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
@@ -76,11 +73,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			PluginManager pm = getServer().getPluginManager();
 			pm.registerEvents(new HubListener(), this);
 
-			try {
-				pm.registerEvents(new LaunchPadManager(new File(getDataFolder(), "launchpads.yml")), this);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			pm.registerEvents(new LaunchPadManager(this, "launchpads.yml"), this);
 
 			new SpawnCommand(this).register();
 			new ServerConfigCommand(this).register();
@@ -145,7 +138,9 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 	@Override
 	public void onDisable() {
-		MiniGamesManager.getInstance().saveConfig(MiniGamesManager.getInstance().getConfig());
+		MiniGamesManager miniGameManager = MiniGamesManager.getInstance();
+		if (miniGameManager != null)
+			miniGameManager.saveConfig();
 	}
 
 }
