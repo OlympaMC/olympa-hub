@@ -68,6 +68,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			getConfig().addTask("olympaHubMain", config -> {
 				lightning = config.getLocation("lightning");
 				spawn = config.getLocation("spawn");
+				OlympaCore.getInstance().setSpawn(spawn);
 			});
 
 			PluginManager pm = getServer().getPluginManager();
