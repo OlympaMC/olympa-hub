@@ -61,7 +61,7 @@ public abstract class AQueuedGame extends AGame {
 		
 		if (playingPlayers.remove(p.getPlayer()) && playingPlayers.size() <= 1) {
 			if (playingPlayers.size() == 1)
-				endGame(AccountProvider.get(playingPlayers.get(0).getUniqueId()), winnerScore, true);
+				endGame(AccountProvider.getter().get(playingPlayers.get(0).getUniqueId()), winnerScore, true);
 			endGame();
 			tryToInitGame();
 		}

@@ -2,7 +2,7 @@ package fr.olympa.hub.minigames.utils;
 
 import java.sql.Types;
 
-import fr.olympa.api.common.provider.AccountProvider;
+import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.api.common.sql.SQLColumn;
 import fr.olympa.api.common.sql.statement.OlympaStatement;
 import fr.olympa.hub.minigames.games.AGame;
@@ -76,7 +76,7 @@ public enum GameType {
 	}
 
 	public OlympaStatement getStatement() {
-		return new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProvider.getPluginPlayerTable().getName() +
+		return new OlympaStatement("SELECT player_id, " + bddKey + " FROM " + AccountProviderAPI.getter().getPluginPlayerTable().getName() +
 				" WHERE " + bddKey + " != 0 ORDER BY " + bddKey + (isTimerScore ? " ASC" : " DESC") + " LIMIT " + AGame.maxTopScoresStored + ";");
 	}
 

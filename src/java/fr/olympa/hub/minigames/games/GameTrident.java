@@ -241,7 +241,7 @@ public class GameTrident extends AQueuedGame {
 				if (entry.getValue().equals(e.getEntity())) {
 					if (playingPlayers.size() > 1) {
 						sendMessage(entry.getKey(), "§7Dommage, vous avez été rattrapé par votre trident !");
-						endGame(AccountProvider.get(entry.getKey().getUniqueId()), 0, false);	
+						endGame(AccountProvider.getter().get(entry.getKey().getUniqueId()), 0, false);	
 					}
 					return;
 				}
@@ -254,7 +254,7 @@ public class GameTrident extends AQueuedGame {
 		
 		if (playingPlayers.contains(e.getEntity()))
 				if (((Player)e.getEntity()).getHealth() <= e.getFinalDamage())
-						endGame(AccountProvider.get(e.getEntity().getUniqueId()), 0, true);
+						endGame(AccountProvider.getter().get(e.getEntity().getUniqueId()), 0, true);
 					else
 						e.setCancelled(false);
 	}

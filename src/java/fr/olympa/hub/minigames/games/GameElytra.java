@@ -105,7 +105,7 @@ public class GameElytra extends AGame {
 				getPlayers().forEach(p -> {
 					if (p.getLocation().distance(lastKnownLoc.get(p)) <= 0.5 && getPlayerTimeMillis(p) > 1500) {
 						p.sendMessage(gameType.getChatPrefix() + "§7Ne vous arrêtez pas de voler !");
-						restartGame(AccountProvider.get(p.getUniqueId()));
+						restartGame(AccountProvider.getter().get(p.getUniqueId()));
 					}
 					
 					lastKnownLoc.put(p, p.getLocation().clone());
@@ -208,7 +208,7 @@ public class GameElytra extends AGame {
 	@Override //relance le jeu pour le joueur s'il sort de la zone de jeu alors qu'il était en vol
 	protected boolean exitGameArea(Player p) {
 		if (getPlayerTimeMillis(p) > 0) {
-			restartGame(AccountProvider.get(p.getUniqueId()));
+			restartGame(AccountProvider.getter().get(p.getUniqueId()));
 			return false;	
 		}else {
 			return super.exitGameArea(p);
@@ -233,7 +233,7 @@ public class GameElytra extends AGame {
 				fireEndGameWithSuccess((Player) e.getEntity());
 			else {
 				e.getEntity().sendMessage(gameType.getChatPrefix() + "§7Ne vous arrêtez pas de voler !");
-				restartGame(AccountProvider.get(e.getEntity().getUniqueId()));	
+				restartGame(AccountProvider.getter().get(e.getEntity().getUniqueId()));	
 			}
 	}*/
 	
@@ -245,7 +245,7 @@ public class GameElytra extends AGame {
 	}
 	
 	private void fireEndGameWithSuccess(Player p) {
-		endGame(AccountProvider.get(p.getUniqueId()), 
+		endGame(AccountProvider.getter().get(p.getUniqueId()), 
 				((double)(getPlayerTimeMillis(p)))/1000d, false);
 	}
 

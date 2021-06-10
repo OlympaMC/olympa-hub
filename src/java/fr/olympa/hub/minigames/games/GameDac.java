@@ -123,7 +123,7 @@ public class GameDac extends AQueuedGame {
 		if (playingPlayers.size() == 0)
 			return;
 		else if (playingPlayers.size() == 1) {
-			endGame(AccountProvider.get(playingPlayers.remove(0).getUniqueId()), 1, true);
+			endGame(AccountProvider.getter().get(playingPlayers.remove(0).getUniqueId()), 1, true);
 			//startGame();
 			return;
 		}
@@ -155,7 +155,7 @@ public class GameDac extends AQueuedGame {
 				if (currentTurn == currentTurnBis)
 					if (playingPlayer != null && playingPlayer.isOnline()) {
 						sendMessage(playingPlayer, "§cVous avez attendu trop longtemps avant de sauter !");
-						endGame(AccountProvider.get(playingPlayer.getUniqueId()), 0, true);
+						endGame(AccountProvider.getter().get(playingPlayer.getUniqueId()), 0, true);
 					}
 				timeTask.cancel();
 			}else {
@@ -246,7 +246,7 @@ public class GameDac extends AQueuedGame {
 		//playingPlayers.remove(playingPlayer);
 		playingPlayer = null;
 		
-		endGame(AccountProvider.get(e.getEntity().getUniqueId()), 0, true);
+		endGame(AccountProvider.getter().get(e.getEntity().getUniqueId()), 0, true);
 		plugin.getTask().runTaskLater(() -> playGameTurn(), 500, TimeUnit.MILLISECONDS);
 	}
 

@@ -11,7 +11,7 @@ import fr.olympa.api.common.permission.OlympaPermission;
 import fr.olympa.api.common.permission.list.OlympaAPIPermissionsSpigot;
 import fr.olympa.api.common.player.OlympaPlayer;
 import fr.olympa.api.common.plugin.OlympaAPIPlugin;
-import fr.olympa.api.common.provider.AccountProvider;
+import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.api.common.server.OlympaServer;
 import fr.olympa.api.common.server.ServerStatus;
 import fr.olympa.api.spigot.lines.CyclingLine;
@@ -62,7 +62,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			super.onEnable();
 
 			OlympaCore.getInstance().setOlympaServer(OlympaServer.LOBBY);
-			AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
+			AccountProviderAPI.getter().setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
 			OlympaPermission.registerPermissions(HubPermissions.class);
 
 			getConfig().addTask("olympaHubMain", config -> {

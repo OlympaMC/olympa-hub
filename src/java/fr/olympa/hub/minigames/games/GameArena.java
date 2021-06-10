@@ -94,7 +94,7 @@ public class GameArena extends AQueuedGame{
 		
 		p.getPlayer().setHealth(20d);
 		if (score == -1 && playingPlayers.contains(getOtherPlayingPlayer(p.getPlayer())))
-			endGame(AccountProvider.get(getOtherPlayingPlayer(p.getPlayer()).getUniqueId()), winnerScore, warpToSpawn);
+			endGame(AccountProvider.getter().get(getOtherPlayingPlayer(p.getPlayer()).getUniqueId()), winnerScore, warpToSpawn);
 	}
 
 	@Override
@@ -140,7 +140,7 @@ public class GameArena extends AQueuedGame{
 		Player p = (Player) e.getEntity();
 		
 		if (p.getHealth() <= e.getFinalDamage())
-			endGame(AccountProvider.get(p.getUniqueId()), 0, true);
+			endGame(AccountProvider.getter().get(p.getUniqueId()), 0, true);
 		else
 			e.setCancelled(false);
 	}
@@ -162,9 +162,9 @@ public class GameArena extends AQueuedGame{
 			return;
 		
 		if (getOtherPlayingPlayer(p) != null)
-			endGame(AccountProvider.get(getOtherPlayingPlayer(p).getUniqueId()), 1, true);
+			endGame(AccountProvider.getter().get(getOtherPlayingPlayer(p).getUniqueId()), 1, true);
 		
-		endGame(AccountProvider.get(p.getUniqueId()), 0, true);
+		endGame(AccountProvider.getter().get(p.getUniqueId()), 0, true);
 		
 		playingPlayers.clear();
 	}*/
