@@ -60,7 +60,6 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		try {
 			instance = this;
 			super.onEnable();
-
 			OlympaCore.getInstance().setOlympaServer(OlympaServer.LOBBY);
 			AccountProviderAPI.getter().setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
 			OlympaPermission.registerPermissions(HubPermissions.class);
@@ -87,7 +86,6 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 			serversInfos = new ServerInfosListener(config);
 			pm.registerEvents(serversInfos, this);
-			//RedisAccess.INSTANCE.disconnect();
 
 			OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag() {
 				@Override
@@ -131,7 +129,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 					new FixedLine<>("§a§lServeur:"),
 					new DynamicLine<>(x -> "§7● " + OlympaCore.getInstance().getServerName()));
 			scoreboards.addFooters(FixedLine.EMPTY_LINE, CyclingLine.olympaAnimation());
-		} catch (Exception e) {
+		} catch (Error | Exception e) {
 			OlympaCore.getInstance().setStatus(ServerStatus.MAINTENANCE);
 			e.printStackTrace();
 		}
