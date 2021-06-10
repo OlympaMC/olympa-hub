@@ -9,10 +9,10 @@ import java.util.Map.Entry;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.Listener;
 
+import fr.olympa.api.common.redis.spigotsub.BungeeServerInfoReceiver;
 import fr.olympa.api.common.server.ServerInfoBasic;
 import fr.olympa.api.spigot.config.CustomConfig;
 import fr.olympa.core.spigot.OlympaCore;
-import fr.olympa.core.spigot.redis.receiver.BungeeServerInfoReceiver;
 
 public class ServerInfosListener implements Listener {
 

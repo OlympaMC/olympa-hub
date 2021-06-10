@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import fr.olympa.api.common.redis.RedisAccess;
 import fr.olympa.api.common.redis.RedisChannel;
 import fr.olympa.api.spigot.config.CustomConfig;
 import fr.olympa.core.spigot.OlympaCore;
@@ -37,21 +36,21 @@ public class MiniGamesManager {
 		config = new CustomConfig(plugin, "games.yml");
 		config.load();
 		/*configFile = new File(plugin.getDataFolder(), "games.yml");
-
-
+		
+		
 		if (!configFile.exists())
 			try {
 				if (configFile.getParentFile().mkdirs() || configFile.createNewFile())
 					plugin.getLogger().log(Level.WARNING, "Games config games.yml wasn't found, creating empty file.");
-
+		
 			} catch (IOException e) {
 				plugin.getLogger().log(Level.SEVERE, "§cUnable to create minigames config, please check the files permissions.");
 				e.printStackTrace();
 			}
 		//plugin.saveResource("games.yml", false);
-
+		
 		config = new YamlConfiguration();
-
+		
 		try {
 			config.load(configFile);
 			plugin.getLogger().log(Level.INFO, "§aSuccessfully loaded games.yml.");
@@ -79,7 +78,7 @@ public class MiniGamesManager {
 		saveConfig();
 
 		//register redis
-		OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), new GamesRedisListener(), RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name());
+		OlympaCore.getInstance().registerRedisSub(new GamesRedisListener(), RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name());
 
 	}
 

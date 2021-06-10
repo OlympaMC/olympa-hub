@@ -17,7 +17,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import fr.olympa.api.common.command.complex.Cmd;
 import fr.olympa.api.common.command.complex.CommandContext;
 import fr.olympa.api.spigot.item.ItemUtils;
-import fr.olympa.api.common.provider.AccountProvider;
+import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
@@ -97,7 +97,7 @@ public class GameJump extends AGame{
 		if (playerLastCheckPoint.get(p) + 1 == check) 
 			if (check == checkpoints.size() - 1) {
 				
-				endGame(AccountProvider.getter().get(p.getUniqueId()), (playerLastCPTime.get(p) + getCurrentCPTime(p))/1000d, false);
+				endGame(AccountProviderAPI.getter().get(p.getUniqueId()), (playerLastCPTime.get(p) + getCurrentCPTime(p))/1000d, false);
 				
 			}else {
 				playerLastCPTime.put(p, playerLastCPTime.get(p) + getCurrentCPTime(p));

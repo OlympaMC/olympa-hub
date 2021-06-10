@@ -37,10 +37,10 @@ import fr.olympa.api.common.command.complex.Cmd;
 import fr.olympa.api.common.command.complex.CommandContext;
 import fr.olympa.api.common.observable.SimpleObservable;
 import fr.olympa.api.common.player.OlympaPlayerInformations;
-import fr.olympa.api.common.provider.AccountProvider;
 import fr.olympa.api.common.provider.AccountProviderAPI;
-import fr.olympa.api.common.redis.RedisAccess;
+import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.api.common.redis.RedisChannel;
+import fr.olympa.api.common.redis.RedisConnection;
 import fr.olympa.api.spigot.command.ComplexCommand;
 import fr.olympa.api.spigot.editor.RegionEditor;
 import fr.olympa.api.spigot.holograms.Hologram;
@@ -175,7 +175,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 					return ActionResult.ALLOW;
 
 				if (exitGameArea(event.getPlayer())) {
-					endGame(AccountProvider.getter().get(event.getPlayer().getUniqueId()), -1, false);
+					endGame(AccountProviderAPI.getter().get(event.getPlayer().getUniqueId()), -1, false);
 					return ActionResult.ALLOW;
 				} else
 					return ActionResult.TELEPORT_ELSEWHERE;
@@ -311,13 +311,13 @@ public abstract class AGame extends ComplexCommand implements Listener {
 		if (gameType.isTimerScore()) {
 			if (p.getScore(gameType) == 0 && score > 0 || p.getScore(gameType) > score) {
 				p.setScore(gameType, score);
-				//new AccountProvider(p.getUniqueId()).saveToDb(p);
+				//new AccountProviderAPI(p.getUniqueId()).saveToDb(p);
 
 				hasScoreBeenImproved = true;
 			}
 		} else if (score > 0) {
 			p.setScore(gameType, p.getScore(gameType) + score);
-			//new AccountProvider(p.getUniqueId()).saveToDb(p);
+			//new AccountProviderAPI(p.getUniqueId()).saveToDb(p);
 
 			hasScoreBeenImproved = true;
 		}
@@ -382,10 +382,11 @@ public abstract class AGame extends ComplexCommand implements Listener {
 			observable.update();
 
 			if (shareInfoOnRedis) {
-				try (Jedis jedis = RedisAccess.INSTANCE.connect()) {
+				RedisConnection redisAcces = OlympaCore.getInstance().getRedisAccess();
+				try (Jedis jedis = redisAcces.connect()) {
 					jedis.publish(RedisChannel.SPIGOT_LOBBY_MINIGAME_SCORE.name(), gameType.toString() + ":" + p.getId() + ":" + score);
 				}
-				RedisAccess.INSTANCE.disconnect();
+				redisAcces.disconnect();
 			}
 
 			return true;
@@ -424,7 +425,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 	public void beginGame(Player p) {
 		p.teleport(startingLoc);
-		startGame((OlympaPlayerHub) AccountProvider.getter().get(p.getUniqueId()));
+		startGame((OlympaPlayerHub) AccountProviderAPI.getter().get(p.getUniqueId()));
 	}
 
 	///////////////////////////////////////////////////////////
@@ -440,14 +441,14 @@ public abstract class AGame extends ComplexCommand implements Listener {
 			switch (e.getPlayer().getInventory().getHeldItemSlot()) {
 			case 7:
 				if (gameType.isRestartable() && !e.getPlayer().getLocation().getBlock().equals(startingLoc.getBlock())) {
-					restartGame(AccountProvider.getter().get(e.getPlayer().getUniqueId()));
+					restartGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()));
 
 					e.setCancelled(true);
 					return;
 				}
 				break;
 			case 8:
-				plugin.getTask().runTaskLater(() -> endGame(AccountProvider.getter().get(e.getPlayer().getUniqueId()), -1, true), 1);
+				plugin.getTask().runTaskLater(() -> endGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()), -1, true), 1);
 
 				e.setCancelled(true);
 				return;
@@ -492,7 +493,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 			if (!allowTp) {
 				e.getPlayer().sendMessage(gameType.getChatPrefix() + "§cVous téléporter pendant le jeu est interdit !");
-				endGame(AccountProvider.getter().get(e.getPlayer().getUniqueId()), -1, false);
+				endGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()), -1, false);
 			}
 		}
 	}
@@ -506,11 +507,11 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 		if (!players.containsKey(p)) {
 			if (e.getTo().getBlock().equals(startingLoc.getBlock()))
-				startGame((OlympaPlayerHub) AccountProvider.getter().get(p.getUniqueId()));
+				startGame((OlympaPlayerHub) AccountProviderAPI.getter().get(p.getUniqueId()));
 
 		} else if (!allowFly && p.isFlying() || p.getGameMode() != GameMode.ADVENTURE) {
 			p.sendMessage(gameType.getChatPrefix() + "§cNe profitez pas de vos permissions pour vous mettre en fly !");
-			endGame(AccountProvider.getter().get(e.getPlayer().getUniqueId()), -1, false);
+			endGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()), -1, false);
 
 		} else
 			onMoveHandler(p, e.getFrom(), e.getTo());
@@ -542,7 +543,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
-		endGame(AccountProvider.getter().get(e.getPlayer().getUniqueId()), -1, false);
+		endGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()), -1, false);
 	}
 
 	/**
@@ -559,7 +560,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 	public void onChangeGamemode(PlayerGameModeChangeEvent e) {
 		if (players.containsKey(e.getPlayer())) {
 			e.getPlayer().sendMessage(gameType.getChatPrefix() + "§cNe profitez pas de vos permissions pour changer de gamemode !");
-			endGame(AccountProvider.getter().get(e.getPlayer().getUniqueId()), 0, true);
+			endGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()), 0, true);
 		}
 	}*/
 

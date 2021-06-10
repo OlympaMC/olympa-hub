@@ -39,7 +39,7 @@ import fr.olympa.api.common.command.complex.Cmd;
 import fr.olympa.api.common.command.complex.CommandContext;
 import fr.olympa.api.spigot.editor.RegionEditor;
 import fr.olympa.api.spigot.item.ItemUtils;
-import fr.olympa.api.common.provider.AccountProvider;
+import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.api.spigot.region.Region;
 import fr.olympa.api.spigot.region.shapes.Cuboid;
 import fr.olympa.api.spigot.region.tracking.ActionResult;
@@ -241,7 +241,7 @@ public class GameTrident extends AQueuedGame {
 				if (entry.getValue().equals(e.getEntity())) {
 					if (playingPlayers.size() > 1) {
 						sendMessage(entry.getKey(), "§7Dommage, vous avez été rattrapé par votre trident !");
-						endGame(AccountProvider.getter().get(entry.getKey().getUniqueId()), 0, false);	
+						endGame(AccountProviderAPI.getter().get(entry.getKey().getUniqueId()), 0, false);	
 					}
 					return;
 				}
@@ -254,7 +254,7 @@ public class GameTrident extends AQueuedGame {
 		
 		if (playingPlayers.contains(e.getEntity()))
 				if (((Player)e.getEntity()).getHealth() <= e.getFinalDamage())
-						endGame(AccountProvider.getter().get(e.getEntity().getUniqueId()), 0, true);
+						endGame(AccountProviderAPI.getter().get(e.getEntity().getUniqueId()), 0, true);
 					else
 						e.setCancelled(false);
 	}

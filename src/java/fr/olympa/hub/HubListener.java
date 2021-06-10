@@ -29,7 +29,7 @@ import org.bukkit.inventory.ItemStack;
 import fr.olympa.api.spigot.customevents.OlympaPlayerLoadEvent;
 import fr.olympa.api.spigot.customevents.WorldTrackingEvent;
 import fr.olympa.api.spigot.item.ItemUtils;
-import fr.olympa.api.common.provider.AccountProvider;
+import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.api.spigot.region.tracking.flags.DamageFlag;
 import fr.olympa.api.spigot.region.tracking.flags.DropFlag;
 import fr.olympa.api.spigot.region.tracking.flags.FoodFlag;
@@ -51,7 +51,7 @@ public class HubListener implements Listener {
 		bossBar.setProgress(0);
 
 		menuItems.put(ItemUtils.item(Material.CHEST, "§eΩ | Menu §6§lOlympa", "§7Accès rapide :", "§8● §7Serveurs de jeu Olympa", "§8● §7Mini-jeux d'attente", "§8● §7Profil du joueur"),
-				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(4, p -> new MenuGUI(AccountProvider.getter().get(p.getUniqueId())).create(p)));
+				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(4, p -> new MenuGUI(AccountProviderAPI.getter().get(p.getUniqueId())).create(p)));
 
 		menuItems.put(ItemUtils.item(Material.JUKEBOX, "§d♪ | §5§lJukeBox", " §7Profitez de la radio", " §7ou choisissez vos musiques !"),
 				new AbstractMap.SimpleEntry<Integer, Consumer<Player>>(7, p -> CommandMusic.open(p)));

@@ -11,7 +11,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import fr.olympa.api.common.provider.AccountProvider;
+import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
@@ -61,7 +61,7 @@ public abstract class AQueuedGame extends AGame {
 		
 		if (playingPlayers.remove(p.getPlayer()) && playingPlayers.size() <= 1) {
 			if (playingPlayers.size() == 1)
-				endGame(AccountProvider.getter().get(playingPlayers.get(0).getUniqueId()), winnerScore, true);
+				endGame(AccountProviderAPI.getter().get(playingPlayers.get(0).getUniqueId()), winnerScore, true);
 			endGame();
 			tryToInitGame();
 		}
