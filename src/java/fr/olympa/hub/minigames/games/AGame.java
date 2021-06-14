@@ -38,7 +38,6 @@ import fr.olympa.api.common.command.complex.CommandContext;
 import fr.olympa.api.common.observable.SimpleObservable;
 import fr.olympa.api.common.player.OlympaPlayerInformations;
 import fr.olympa.api.common.provider.AccountProviderAPI;
-import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.api.common.redis.RedisChannel;
 import fr.olympa.api.common.redis.RedisConnection;
 import fr.olympa.api.spigot.command.ComplexCommand;
