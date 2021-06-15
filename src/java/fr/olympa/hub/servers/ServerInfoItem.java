@@ -25,6 +25,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.ChatPaginator;
 
+import fr.olympa.api.LinkSpigotBungee;
 import fr.olympa.api.common.match.MatcherPattern;
 import fr.olympa.api.common.observable.AbstractObservable;
 import fr.olympa.api.common.permission.OlympaPermission;
@@ -72,13 +73,9 @@ public class ServerInfoItem extends AbstractObservable {
 		try {
 			updateConfig(config);
 		} catch (Exception e) {
-			e.addSuppressed(new Throwable("Can't load server item " + itemServerKey));
+			e.addSuppressed(new Throwable("Can't load server item " + itemServerKey + " from config"));
 			e.printStackTrace();
 		}
-	}
-
-	public boolean containsServer(String servName) {
-		return serversInfo.entrySet().stream().anyMatch(e -> e.getValue() != null && e.getKey().equals(servName));
 	}
 
 	public Optional<Entry<String, ServerInfoBasic>> getServer(String servName) {
@@ -89,12 +86,16 @@ public class ServerInfoItem extends AbstractObservable {
 		return monitorInfos.stream().anyMatch(monitorInfo -> serversInfo.keySet().stream().anyMatch(bungeeServerName -> monitorInfo.getName().equals(bungeeServerName)));
 	}
 
-	private void updateConfig(ConfigurationSection config) throws Exception {
+	private void updateConfig(ConfigurationSection config) {
 		description = Arrays.asList(ChatPaginator.wordWrap("§8> §7" + config.getString("description"), 40));
 		item = Material.valueOf(config.getString("item"));
 		slot = config.getInt("slot");
 		List<String> bungeeServersNames = config.getStringList("bungeeServersNames");
+		if (bungeeServersNames.isEmpty())
+			LinkSpigotBungee.Provider.link.sendMessage("&7[DEBUG TO BE REMOVED] updateConfig bungeeServersNames is NULL");
 		bungeeServersNames.forEach(bungeeServerName -> {
+			LinkSpigotBungee.Provider.link.sendMessage("&7[DEBUG TO BE REMOVED] updateConfig serverInfoItem contains key %s ? %s",
+					bungeeServerName, serversInfo.containsKey(bungeeServerName) ? "true" : "false");
 			if (!serversInfo.containsKey(bungeeServerName))
 				serversInfo.put(bungeeServerName, null);
 		});

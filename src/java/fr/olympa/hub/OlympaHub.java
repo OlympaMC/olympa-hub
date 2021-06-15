@@ -131,6 +131,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			scoreboards.addFooters(FixedLine.EMPTY_LINE, CyclingLine.olympaAnimation());
 		} catch (Error | Exception e) {
 			OlympaCore.getInstance().setStatus(ServerStatus.MAINTENANCE);
+			getLogger().severe(String.format("Une erreur est survenu lors du chargement de %s. Le serveur est désormais en maintenance.", this.getClass().getSimpleName()));
 			e.printStackTrace();
 		}
 	}

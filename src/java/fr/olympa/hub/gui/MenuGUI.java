@@ -16,10 +16,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
+import fr.olympa.api.common.player.OlympaPlayer;
 import fr.olympa.api.spigot.config.CustomConfig;
 import fr.olympa.api.spigot.gui.OlympaGUI;
 import fr.olympa.api.spigot.item.ItemUtils;
-import fr.olympa.api.common.player.OlympaPlayer;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.GameType;
@@ -126,13 +126,9 @@ public class MenuGUI extends OlympaGUI {
 			p.spigot().sendMessage(link);
 			return true;
 		}
-		try {
-			Optional<Entry<String, ServerInfoItem>> server = instanceHub.serversInfos.servers.entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().connect(p)).findFirst();
-			if (server.isPresent())
-				p.closeInventory();
-		} catch (IndexOutOfBoundsException e) {
-			e.printStackTrace(); // On doit fix ça, c'est pas normal de laisser une exception comme ça
-		}
+		Optional<Entry<String, ServerInfoItem>> server = instanceHub.serversInfos.getServersInfo().entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().connect(p)).findFirst();
+		if (server.isPresent())
+			p.closeInventory();
 
 		if (minigames.keySet().contains(slot))
 			if (minigames.get(slot) == GameType.LABY) {
