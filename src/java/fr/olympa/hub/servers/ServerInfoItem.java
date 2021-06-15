@@ -25,11 +25,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.ChatPaginator;
 
-import fr.olympa.api.LinkSpigotBungee;
 import fr.olympa.api.common.match.MatcherPattern;
 import fr.olympa.api.common.observable.AbstractObservable;
 import fr.olympa.api.common.permission.OlympaPermission;
 import fr.olympa.api.common.player.OlympaPlayer;
+import fr.olympa.api.common.redis.RedisClass;
 import fr.olympa.api.common.server.ServerInfoBasic;
 import fr.olympa.api.common.server.ServerStatus;
 import fr.olympa.api.common.sort.Sorting;
@@ -46,7 +46,6 @@ import fr.olympa.api.spigot.utils.SpigotUtils;
 import fr.olympa.api.utils.Prefix;
 import fr.olympa.api.utils.Utils;
 import fr.olympa.core.spigot.OlympaCore;
-import fr.olympa.core.spigot.redis.RedisSpigotSend;
 import fr.olympa.hub.OlympaHub;
 
 public class ServerInfoItem extends AbstractObservable {
@@ -91,11 +90,7 @@ public class ServerInfoItem extends AbstractObservable {
 		item = Material.valueOf(config.getString("item"));
 		slot = config.getInt("slot");
 		List<String> bungeeServersNames = config.getStringList("bungeeServersNames");
-		if (bungeeServersNames.isEmpty())
-			LinkSpigotBungee.Provider.link.sendMessage("&7[DEBUG TO BE REMOVED] updateConfig bungeeServersNames is NULL");
 		bungeeServersNames.forEach(bungeeServerName -> {
-			LinkSpigotBungee.Provider.link.sendMessage("&7[DEBUG TO BE REMOVED] updateConfig serverInfoItem contains key %s ? %s",
-					bungeeServerName, serversInfo.containsKey(bungeeServerName) ? "true" : "false");
 			if (!serversInfo.containsKey(bungeeServerName))
 				serversInfo.put(bungeeServerName, null);
 		});
@@ -229,7 +224,8 @@ public class ServerInfoItem extends AbstractObservable {
 		// TODO choose between multiple serveurs with isUniqueMultipleServers & onlines count of player
 		ServerInfoBasic serverInfo = serverCanConnect.get(0);
 		Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", Utils.capitalize(serverInfo.getName()));
-		RedisSpigotSend.sendServerSwitch(p, serverInfo.getName());
+		RedisClass.SERVER_SWITCH.sendServerSwitch(p, serverInfo.getName());
+		//		RedisSpigotSend.sendServerSwitch(p, serverInfo.getName());
 		return true;
 	}
 
