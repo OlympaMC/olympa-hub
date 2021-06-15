@@ -1,0 +1,4 @@
+rootProject.name = 'olympa-hub'
+
+include 'olympa-api'
+project(':olympa-api').projectDir = new File(settingsDir, "../olympa-api")
