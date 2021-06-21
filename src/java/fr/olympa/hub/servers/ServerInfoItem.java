@@ -216,7 +216,7 @@ public class ServerInfoItem extends AbstractObservable {
 		List<ServerInfoBasic> serverCanConnect = serversNotOff.stream().filter(mi -> {
 			OlympaPermission permission = mi.getStatus().getPermission();
 			return permission == null || permission.hasPermission(p.getUniqueId());
-		}).sorted(new Sorting<>(true, mi -> mi.getStatus().getId(), ServerInfoBasic::getId)).collect(Collectors.toList());
+		}).sorted(new Sorting<>(true, mi -> mi.getStatus().getId(), ServerInfoBasic::getServerID)).collect(Collectors.toList());
 		if (serverCanConnect.isEmpty()) {
 			Prefix.DEFAULT_BAD.sendMessage(p, "Tu n'as pas la permission de te connecter à ce serveur.");
 			return false;
