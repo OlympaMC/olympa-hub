@@ -1,7 +1,7 @@
 // Olympa Hub
 
 plugins {
-    id 'java-library'
+    id 'java'
 }
 
 repositories {
@@ -11,8 +11,8 @@ repositories {
     maven {
         url = uri('https://repo.citizensnpcs.co/')
         content{
-       		includeGroup "net.citizensnpc"
-        	includeGroup "org.mcmonkey"
+				includeGroup "net.citizensnpcs"
+				includeGroup "org.mcmonkey"
         }
     }
 
