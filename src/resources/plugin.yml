@@ -1,7 +1,7 @@
 name: OlympaHub
 main: fr.olympa.hub.OlympaHub
-version: 0.1
-api-version: 1.15
+version: @plugin_version@
+api-version: 1.16
 authors: [SkytAsul, Bullobily, Tristiisch]
 depend: [OlympaCore]
 softdepend: [Citizens, JukeBox]
