@@ -29,8 +29,7 @@ configurations.all {
 
 dependencies {
     compileOnly 'fr.olympa:olympa-api:0.0.1-SNAPSHOT'
-    compileOnly 'net.citizensnpcs:citizens-main:2.0.27-SNAPSHOT'
-    compileOnly 'net.citizensnpcs:citizens-v1_16_R3:2.0.27-SNAPSHOT'
+    compileOnly 'net.citizensnpcs:citizens-main:2.0.28-SNAPSHOT'
     compileOnly 'fr.skytasul:jukebox:1.19.6'
 }
 
