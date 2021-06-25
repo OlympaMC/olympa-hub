@@ -1,5 +1,6 @@
 name: OlympaHub
 main: fr.olympa.hub.OlympaHub
+website: https://gitlab.com/olympa/olympahub
 version: @plugin_version@
 api-version: 1.16
 authors: [SkytAsul, Bullobily, Tristiisch]
