@@ -78,9 +78,9 @@ public class GameDac extends AQueuedGame {
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		super.endGame(p, score, warpToSpawn);
-
-		bar.removePlayer(p.getPlayer());
-		HubListener.bossBar.addPlayer(p.getPlayer());
+		Player player = (Player) p.getPlayer();
+		bar.removePlayer(player);
+		HubListener.bossBar.addPlayer(player);
 		if (p.getPlayer() == playingPlayer)
 			playGameTurn();
 	}

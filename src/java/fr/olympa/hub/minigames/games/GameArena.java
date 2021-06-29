@@ -88,18 +88,16 @@ public class GameArena extends AQueuedGame {
 	@Override
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		super.endGame(p, score, warpToSpawn);
-
-		//p.getPlayer().getInventory().clear();
-
-		p.getPlayer().setHealth(20d);
-		if (score == -1 && playingPlayers.contains(getOtherPlayingPlayer(p.getPlayer()))) {
+		Player player = (Player) p.getPlayer();
+		//player.getInventory().clear();
+		player.setHealth(20d);
+		if (score == -1 && playingPlayers.contains(getOtherPlayingPlayer(player)))
 			try {
-				endGame(AccountProviderAPI.getter().get(getOtherPlayingPlayer(p.getPlayer()).getUniqueId()), winnerScore, warpToSpawn);
+				endGame(AccountProviderAPI.getter().get(getOtherPlayingPlayer(player).getUniqueId()), winnerScore, warpToSpawn);
 			} catch (NullPointerException e) {
 				e.printStackTrace();
-				// getOtherPlayingPlayer(p.getPlayer()) can be null, we need to fix it and remove this try catch.
+				// getOtherPlayingPlayer(player) can be null, we need to fix it and remove this try catch.
 			}
-		}
 	}
 
 	@Override

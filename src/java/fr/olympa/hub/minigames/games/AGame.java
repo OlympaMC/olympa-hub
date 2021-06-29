@@ -227,24 +227,20 @@ public abstract class AGame extends ComplexCommand implements Listener {
 	protected boolean startGame(OlympaPlayerHub p) {
 		if (gameType == GameType.LABY)
 			return true;
-
-		GameType previousGame = MiniGamesManager.getInstance().isPlaying(p.getPlayer());
-
+		Player player = (Player) p.getPlayer();
+		GameType previousGame = MiniGamesManager.getInstance().isPlaying(player);
 		//cancel previous game if exists
 		if (MiniGamesManager.getInstance().getGame(previousGame) != null)
 			MiniGamesManager.getInstance().getGame(previousGame).endGame(p, -1, false);
 
-		if (!allowFly && p.getPlayer().isFlying() || p.getPlayer().getGameMode() != GameMode.ADVENTURE) {
-			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§cVous devez être en gamemode aventure et sans fly pour pouvoir jouer !");
+		if (!allowFly && player.isFlying() || player.getGameMode() != GameMode.ADVENTURE) {
+			player.sendMessage(gameType.getChatPrefix() + "§cVous devez être en gamemode aventure et sans fly pour pouvoir jouer !");
 			return false;
 		}
-
-		players.put(p.getPlayer(), p.getPlayer().getInventory().getContents());
-		p.getPlayer().getInventory().clear();
-		p.getPlayer().getInventory().setContents(hotBarContent);
-
-		p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aVous venez de rejoindre le jeu ! Faites de votre mieux !");
-
+		players.put(player, player.getInventory().getContents());
+		player.getInventory().clear();
+		player.getInventory().setContents(hotBarContent);
+		player.sendMessage(gameType.getChatPrefix() + "§aVous venez de rejoindre le jeu ! Faites de votre mieux !");
 		return true;
 	}
 
@@ -255,7 +251,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 	 */
 	protected void restartGame(OlympaPlayerHub p) {
 		if (gameType.isRestartable())
-			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Remise à 0 des scores...");
+			((Player) p.getPlayer()).sendMessage(gameType.getChatPrefix() + "§7Remise à 0 des scores...");
 	}
 
 	/**
@@ -269,40 +265,37 @@ public abstract class AGame extends ComplexCommand implements Listener {
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		if (!players.keySet().contains(p.getPlayer()))
 			return;
-
-		p.getPlayer().getInventory().clear();
-		p.getPlayer().getInventory().setArmorContents(new ItemStack[] { null, null, null, null });
-		p.getPlayer().getInventory().setContents(players.remove(p.getPlayer()));
-
+		Player player = (Player) p.getPlayer();
+		player.getInventory().clear();
+		player.getInventory().setArmorContents(new ItemStack[] { null, null, null, null });
+		player.getInventory().setContents(players.remove(player));
 		if (warpToSpawn)
-			p.getPlayer().teleport(startingLoc);
-
+			player.teleport(startingLoc);
 		if (score == -1) {
-			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Partie annulée.");
+			player.sendMessage(gameType.getChatPrefix() + "§7Partie annulée.");
 			return;
 		}
-
 		//Messages de victoire/défaite
 		if (gameType.isTimerScore()) {
 			if (p.getScore(gameType) == 0)
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aPremière partie terminée ! Votre temps est de " +
+				player.sendMessage(gameType.getChatPrefix() + "§aPremière partie terminée ! Votre temps est de " +
 						new DecimalFormat("#.##").format(score) + "s.");
 
 			else if (p.getScore(gameType) <= score)
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§7Vous n'avez pas battu votre précédent record de " +
+				player.sendMessage(gameType.getChatPrefix() + "§7Vous n'avez pas battu votre précédent record de " +
 						new DecimalFormat("#.##").format(p.getScore(gameType)) + "s ! Temps obtenu : " + new DecimalFormat("#.##").format(score) + "s.");
 
 			else
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Record personnel battu ! Passage de " +
+				player.sendMessage(gameType.getChatPrefix() + "§2Record personnel battu ! Passage de " +
 						new DecimalFormat("#.##").format(p.getScore(gameType)) + "s à " + new DecimalFormat("#.##").format(score) + "s. Félicitations !");
 
 		} else if (score >= 1)
 			if (p.getScore(gameType) == 0)
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aFélicitations pour votre première victoire ! Vous remportez " + score + " points.");
+				player.sendMessage(gameType.getChatPrefix() + "§aFélicitations pour votre première victoire ! Vous remportez " + score + " points.");
 			else
-				p.getPlayer().sendMessage(gameType.getChatPrefix() + "§2Et une victoire de plus ! Nouveau compte de points : " + new DecimalFormat("#").format(p.getScore(gameType) + score));
+				player.sendMessage(gameType.getChatPrefix() + "§2Et une victoire de plus ! Nouveau compte de points : " + new DecimalFormat("#").format(p.getScore(gameType) + score));
 		else
-			p.getPlayer().sendMessage(gameType.getChatPrefix() + "§aC'est perdu, mais vous ferez mieux la prochaine fois !");
+			player.sendMessage(gameType.getChatPrefix() + "§aC'est perdu, mais vous ferez mieux la prochaine fois !");
 
 		boolean hasScoreBeenImproved = false;
 
@@ -335,7 +328,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 			if (updateScores(p.getInformation(), p.getScore(gameType), true))
 				if (getPlayerRank(p) < oldPlayerRank || oldPlayerRank == 0)
-					p.getPlayer().sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place §c" +
+					player.sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place §c" +
 							oldPlayerRankString + " §eà la place §c" + getPlayerRank(p) + "§e, félicitations !!");
 		}
 	}
