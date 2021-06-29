@@ -10,7 +10,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.Listener;
 
 import fr.olympa.api.common.redis.RedisClass;
-import fr.olympa.api.common.server.ServerInfoBasic;
+import fr.olympa.api.common.server.ServerInfoAdvanced;
 import fr.olympa.api.spigot.config.CustomConfig;
 import fr.olympa.core.spigot.OlympaCore;
 
@@ -31,7 +31,7 @@ public class ServerInfosListener implements Listener {
 				}
 			}, false);
 		});
-		RedisClass.SERVER_INFO.registerCallback(mis -> updateData(mis));
+		RedisClass.SERVER_INFO_ADVANCED.registerCallback(mis -> updateData(mis));
 	}
 
 	ServerInfoItem getServer(String itemServerConfigKeyName) {
@@ -46,7 +46,7 @@ public class ServerInfosListener implements Listener {
 		return servers;
 	}
 
-	private void updateData(List<ServerInfoBasic> newServers) {
+	private void updateData(List<ServerInfoAdvanced> newServers) {
 		for (Entry<String, ServerInfoItem> entry : servers.entrySet())
 			entry.getValue().update(newServers);
 	}
