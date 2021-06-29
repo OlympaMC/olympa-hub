@@ -143,11 +143,11 @@ public class ServerInfoItem extends AbstractObservable {
 			lore.add("§7Statut : " + status.getNameColored());
 		lore.add("");
 		monitorInfo.forEach(mi -> {
-			if (mi != null) {
+			if (mi != null && mi.hasMinimalInfo()) {
 				StringBuilder sb = new StringBuilder();
 				sb.append("§7" + mi.getOlympaServer().getNameCaps());
 				String symbole = mi.getIdSymbole();
-				if (!symbole.isBlank())
+				if (symbole != null && !symbole.isBlank())
 					sb.append(" " + symbole);
 				if (mi.getStatus() != ServerStatus.OPEN)
 					sb.append(" (" + mi.getStatus().getNameColored() + "§7)");
