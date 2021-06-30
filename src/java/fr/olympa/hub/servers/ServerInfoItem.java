@@ -142,7 +142,7 @@ public class ServerInfoItem extends AbstractObservable {
 					sj.add("(" + mi.getStatus().getNameColored() + "§7)");
 				if (mi.getOnlinePlayers() != null) {
 					int online = mi.getOnlinePlayers();
-					sj.add(String.format("- %s joueur%s ", online, Utils.withOrWithoutS(online)));
+					sj.add(String.format("- %s joueur%s", online, Utils.withOrWithoutS(online)));
 				}
 				if (mi.hasInfoVersions())
 					sj.add(mi.getRangeVersionMinecraft());
