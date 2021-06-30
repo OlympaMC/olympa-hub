@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -119,15 +120,6 @@ public class ServerInfoItem extends AbstractObservable {
 		return b;
 	}
 
-	public String getCleanName(ServerInfoAdvanced info) {
-		String cleanName;
-		if (REGEX_SERV_NB.contains(info.getName()))
-			cleanName = info.getOlympaServer().getNameCaps() + " " + Utils.intToSymbole(REGEX_SERV_NB.extractAndParse(info.getName()));
-		else
-			cleanName = info.getOlympaServer().getNameCaps();
-		return cleanName;
-	}
-
 	public void update(List<ServerInfoAdvanced> newMonitorInfo) {
 		tryUpdate(newMonitorInfo);
 		//		if (!tryUpdate(newMonitorInfo))
@@ -144,19 +136,17 @@ public class ServerInfoItem extends AbstractObservable {
 		lore.add("");
 		monitorInfo.forEach(mi -> {
 			if (mi != null && mi.hasMinimalInfo()) {
-				StringBuilder sb = new StringBuilder();
-				sb.append("§7" + mi.getOlympaServer().getNameCaps());
-				String symbole = mi.getIdSymbole();
-				if (symbole != null && !symbole.isBlank())
-					sb.append(" " + symbole);
+				StringJoiner sj = new StringJoiner(" ");
+				sj.add("§7" + mi.getHumanName());
 				if (mi.getStatus() != ServerStatus.OPEN)
-					sb.append(" (" + mi.getStatus().getNameColored() + "§7)");
+					sj.add("(" + mi.getStatus().getNameColored() + "§7)");
 				if (mi.getOnlinePlayers() != null) {
 					int online = mi.getOnlinePlayers();
-					sb.append(String.format(" - %s joueur%s ", online, Utils.withOrWithoutS(online)));
+					sj.add(String.format("- %s joueur%s ", online, Utils.withOrWithoutS(online)));
 				}
-				sb.append(mi.getRangeVersionMinecraft());
-				lore.add(sb.toString());
+				if (mi.hasInfoVersions())
+					sj.add(mi.getRangeVersionMinecraft());
+				lore.add(sj.toString());
 			}
 		});
 		menuItem = ItemUtils.item(item, "§6§l" + getServerNameCaps(), lore.toArray(new String[0]));
@@ -180,8 +170,11 @@ public class ServerInfoItem extends AbstractObservable {
 	public String getServerNameCaps() {
 		if (!serversInfo.isEmpty()) {
 			ServerInfoAdvanced oneServerInfo = serversInfo.values().stream().filter(mi -> mi != null).findFirst().orElse(null);
-			if (oneServerInfo != null && serversInfo.values().stream().allMatch(mi -> mi != null && mi.getOlympaServer().isSame(oneServerInfo.getOlympaServer())))
-				return oneServerInfo.getOlympaServer().getNameCaps();
+			if (oneServerInfo != null)
+				//				if (serversInfo.size() == 1)
+				//					return oneServerInfo.getHumanName();
+				if (serversInfo.values().stream().allMatch(mi -> mi != null && mi.getOlympaServer().isSame(oneServerInfo.getOlympaServer())))
+					return oneServerInfo.getOlympaServer().getNameCaps();
 		}
 		if (defaultServersName != null)
 			return defaultServersName;
