@@ -159,7 +159,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 		}
 
 		//création de l'holo du début de partie
-		startHolo = OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, true,
+		startHolo = OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, true,true,
 				new FixedLine<HologramLine>("§6Début " + gameType.getNameWithArticle()),
 				new FixedLine<HologramLine>("§7Commencez ici"));
 
@@ -262,7 +262,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 	 * @return true if player finished the game, false otherwise
 	 */
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
-		if (!players.keySet().contains(p.getPlayer()))
+		if (p == null || !players.keySet().contains(p.getPlayer()))
 			return;
 		Player player = (Player) p.getPlayer();
 		player.getInventory().clear();

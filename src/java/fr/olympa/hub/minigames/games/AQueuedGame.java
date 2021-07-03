@@ -43,6 +43,7 @@ public abstract class AQueuedGame extends AGame {
 		Player player = (Player) p.getPlayer();
 		waitingPlayers.forEach(wp -> sendMessage(wp, "§a§l" + p.getName() + " §aa rejoint la file d'attente !"));
 		waitingPlayers.add(player);
+
 		if (playingPlayers.size() > 0)
 			sendMessage(player, "§7Une partie est déjà en cours...");
 		else
@@ -54,21 +55,25 @@ public abstract class AQueuedGame extends AGame {
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		super.endGame(p, score, warpToSpawn);
 		waitingPlayers.remove(p.getPlayer());
+
+		//System.out.println(gameType + "end game : " + p.getName() + "(joueurs restants : " + playingPlayers + ") condition : " + (playingPlayers.contains(p.getPlayer()) && playingPlayers.size() <= 1));
+
 		if (playingPlayers.remove(p.getPlayer()) && playingPlayers.size() <= 1) {
-			if (playingPlayers.size() == 1)
+
+			if (playingPlayers.size() == 1) {
 				endGame(AccountProviderAPI.getter().get(playingPlayers.get(0).getUniqueId()), winnerScore, true);
-			endGame();
-			tryToInitGame();
+			} else {
+				endGame();
+				tryToInitGame();
+			}
 		}
 	}
 
 	private void tryToInitGame() {
 		if (playingPlayers.size() > 0)
-			return;
-		if (playingPlayers.size() > 0)
 			waitingPlayers.forEach(p -> sendMessage(p, "§aUne partie est déjà en cours. Nombres de joueurs prêts pour la prochaine partie : " + waitingPlayers.size() + "/" + minPlayers));
-		else //démarre le compte à rebours avant lancement de la partie
-		if (waitingPlayers.size() >= minPlayers && countdownTask == null) {
+		//démarre le compte à rebours avant lancement de la partie
+		else if (waitingPlayers.size() >= minPlayers && countdownTask == null) {
 			countdown = countdownDelay;
 			countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
 				//arrête le timer si plus assez de joueurs ne sont en ligne

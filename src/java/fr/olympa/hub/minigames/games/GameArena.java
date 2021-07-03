@@ -45,12 +45,12 @@ public class GameArena extends AQueuedGame {
 	boolean isGameStarting = false;
 
 	public GameArena(OlympaHub plugin, ConfigurationSection fileConfig) throws UnsupportedOperationException {
-		super(plugin, GameType.ARENA, fileConfig, 2, 10);
+		super(plugin, GameType.ARENA, fileConfig, 2, 2);
+
+		//winnerScore = 1;
 
 		pos1 = config.getLocation("player_1_spawn");
 		pos2 = config.getLocation("player_2_spawn");
-
-		//hotBarContent[queueCountInvIndex] = ItemUtils.item(Material.SUNFLOWER, "");
 
 		allowedTpLocs.add(pos1);
 		allowedTpLocs.add(pos2);
@@ -87,15 +87,15 @@ public class GameArena extends AQueuedGame {
 	protected void endGame(OlympaPlayerHub p, double score, boolean warpToSpawn) {
 		super.endGame(p, score, warpToSpawn);
 		Player player = (Player) p.getPlayer();
-		//player.getInventory().clear();
+
 		player.setHealth(20d);
-		if (score == -1 && playingPlayers.contains(getOtherPlayingPlayer(player)))
+		/*if (score == -1 && playingPlayers.contains(getOtherPlayingPlayer(player)))
 			try {
 				endGame(AccountProviderAPI.getter().get(getOtherPlayingPlayer(player).getUniqueId()), winnerScore, warpToSpawn);
 			} catch (NullPointerException e) {
 				e.printStackTrace();
 				// getOtherPlayingPlayer(player) can be null, we need to fix it and remove this try catch.
-			}
+			}*/
 	}
 
 	@Override
@@ -114,7 +114,7 @@ public class GameArena extends AQueuedGame {
 		playingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.LEGS, ItemUtils.item(Material.IRON_LEGGINGS, "§7Jambières")));
 		playingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.FEET, ItemUtils.item(Material.IRON_BOOTS, "§7Bottes")));
 
-		playingPlayers.addAll(playingPlayers);
+		//playingPlayers.addAll(playingPlayers);
 
 		playingPlayers.get(0).teleport(pos1);
 		playingPlayers.get(1).teleport(pos2);
@@ -155,19 +155,6 @@ public class GameArena extends AQueuedGame {
 		e.setCancelled(true);
 	}
 
-	/*
-	private void fireLostFor(Player p) {
-		if (!playingPlayers.contains(p) || playingPlayers.size() < 2)
-			return;
-	
-		if (getOtherPlayingPlayer(p) != null)
-			endGame(AccountProviderAPI.getter().get(getOtherPlayingPlayer(p).getUniqueId()), 1, true);
-	
-		endGame(AccountProviderAPI.getter().get(p.getUniqueId()), 0, true);
-	
-		playingPlayers.clear();
-	}*/
-
 	private Player getOtherPlayingPlayer(Player p) {
 		if (playingPlayers.contains(p))
 			for (Player pp : playingPlayers)
@@ -176,80 +163,6 @@ public class GameArena extends AQueuedGame {
 
 		return null;
 	}
-
-	/**
-	 * MAJ le compteur des joueurs qui joueront avant le joueur concerné
-	 */
-	/*private void updateGameStartDelay() {
-		for (int i = 0 ; i < queuedPlayers.size() ; i++) {
-			ItemStack item = queuedPlayers.get(i).getInventory().getItem(queueCountInvIndex);
-			item = ItemUtils.name(item, "§7Place dans la file : " + (i + 1));
-		}
-	}*/
-
-	/*private void tryToInitGame() {
-		updateGameStartDelay();
-	
-		if (isGameStarting || playingPlayers.size() > 0 || queuedPlayers.size() < 2)
-			return;
-	
-		List<Player> list = new ArrayList<Player>();
-	
-		list.add(queuedPlayers.remove(0));
-		list.add(queuedPlayers.remove(0));
-		startGame(list, 3);
-	}*/
-
-	/*private void startGamee(List<Player> startingPlayers, int countdown) {
-		//cancel si l'un des joueurs n'est plus dans la partie
-		if (startingPlayers.size() != 2 || !getPlayers().contains(startingPlayers.get(0)) || !getPlayers().contains(startingPlayers.get(1))) {
-			startingPlayers.forEach(p -> {
-				if (getPlayers().contains(p)) {
-					p.sendMessage(gameType.getChatPrefix() + "§cVotre adversaire a annulé la partie ! §7En attente d'un nouvau joueur...");
-					queuedPlayers.add(0, p);
-				}
-			});
-	
-			isGameStarting = false;
-			return;
-		}
-	
-		//gestion timer avant début partie
-		if (countdown > 0) {
-			startingPlayers.forEach(p -> p.sendTitle("§c" + countdown, "§7Début du match dans...", 0, 22, 0));
-			startingPlayers.forEach(p -> p.sendMessage(gameType.getChatPrefix() + "§aDébut du match dans " + countdown));
-	
-			isGameStarting = true;
-	
-			plugin.getTask().runTaskLater(() -> startGame(startingPlayers, countdown - 1), 20);
-	
-		//lancement de la partie
-		}else {
-	
-			startingPlayers.forEach(p -> p.getInventory().setItem(queueCountInvIndex, null));
-	
-			ItemStack potHeal = new ItemStack(Material.SPLASH_POTION);
-			PotionMeta meta = (PotionMeta) potHeal.getItemMeta();
-			meta.addCustomEffect(new PotionEffect(PotionEffectType.HEAL, 1, 0), true);
-			meta.setDisplayName("§ePotion de soin I");
-			potHeal.setItemMeta(meta);
-			potHeal.setAmount(2);
-	
-			startingPlayers.forEach(p -> p.getInventory().addItem(ItemUtils.item(Material.IRON_SWORD, "§7Epée en fer")));
-			startingPlayers.forEach(p -> p.getInventory().addItem(potHeal.clone()));
-			startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.HEAD, ItemUtils.item(Material.IRON_HELMET, "§7Casque")));
-			startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.CHEST, ItemUtils.item(Material.IRON_CHESTPLATE, "§7Plastron")));
-			startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.LEGS, ItemUtils.item(Material.IRON_LEGGINGS, "§7Jambières")));
-			startingPlayers.forEach(p -> p.getInventory().setItem(EquipmentSlot.FEET, ItemUtils.item(Material.IRON_BOOTS, "§7Bottes")));
-
-			playingPlayers.addAll(startingPlayers);
-	
-			startingPlayers.get(0).teleport(pos1);
-			startingPlayers.get(1).teleport(pos2);
-	
-			isGameStarting = false;
-		}
-	}*/
 
 	///////////////////////////////////////////////////////////
 	//                      CONFIG INIT                      //
