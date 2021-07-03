@@ -1,6 +1,5 @@
 package fr.olympa.hub.minigames.games;
 
-import java.rmi.activation.ActivateFailedException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +57,7 @@ public class GameDac extends AQueuedGame {
 
 	private Map<Player, Material> woolColor = new HashMap<>();
 
-	public GameDac(OlympaHub plugin, ConfigurationSection configFromFile) throws ActivateFailedException {
+	public GameDac(OlympaHub plugin, ConfigurationSection configFromFile) throws UnsupportedOperationException {
 		super(plugin, GameType.DAC, configFromFile, 2, 10);
 
 		jumpRegion = (Cuboid) config.get("jump_region");

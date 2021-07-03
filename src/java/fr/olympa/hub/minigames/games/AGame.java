@@ -1,6 +1,5 @@
 package fr.olympa.hub.minigames.games;
 
-import java.rmi.activation.ActivateFailedException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -99,7 +98,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 	protected boolean allowFly = false; //if set to true, players will be allowed to use fly mode during the game
 
 	@SuppressWarnings("unchecked")
-	public AGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile) throws ActivateFailedException {
+	public AGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile) throws UnsupportedOperationException {
 		super(plugin, game.toString().toLowerCase(), "Accès à la config " + game.getNameWithArticle() + ".", HubPermissions.EDIT_MINIGAMES);
 
 		this.plugin = plugin;
@@ -112,7 +111,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 		isEnabled = config.getBoolean("isEnabled");
 		if (!isEnabled)
-			throw new ActivateFailedException("");
+			throw new UnsupportedOperationException("");
 
 		area = (Region) config.get("area");
 

@@ -1,6 +1,5 @@
 package fr.olympa.hub.minigames.games;
 
-import java.rmi.activation.ActivateFailedException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +31,7 @@ public class GameJump extends AGame {
 
 	private Map<Player, Integer> playerLastCheckPoint = new HashMap<>();
 
-	public GameJump(OlympaHub plugin, ConfigurationSection fileConfig) throws ActivateFailedException {
+	public GameJump(OlympaHub plugin, ConfigurationSection fileConfig) throws UnsupportedOperationException {
 		super(plugin, GameType.JUMP, fileConfig);
 
 		config.getList("checkpoints").forEach(loc -> checkpoints.add((Location) loc));

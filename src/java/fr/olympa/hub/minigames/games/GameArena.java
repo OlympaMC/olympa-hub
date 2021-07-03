@@ -1,7 +1,5 @@
 package fr.olympa.hub.minigames.games;
 
-import java.rmi.activation.ActivateFailedException;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -46,7 +44,7 @@ public class GameArena extends AQueuedGame {
 
 	boolean isGameStarting = false;
 
-	public GameArena(OlympaHub plugin, ConfigurationSection fileConfig) throws ActivateFailedException {
+	public GameArena(OlympaHub plugin, ConfigurationSection fileConfig) throws UnsupportedOperationException {
 		super(plugin, GameType.ARENA, fileConfig, 2, 10);
 
 		pos1 = config.getLocation("player_1_spawn");

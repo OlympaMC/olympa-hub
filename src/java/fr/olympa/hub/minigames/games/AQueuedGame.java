@@ -1,6 +1,5 @@
 package fr.olympa.hub.minigames.games;
 
-import java.rmi.activation.ActivateFailedException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -31,7 +30,7 @@ public abstract class AQueuedGame extends AGame {
 
 	protected int winnerScore = 0;
 
-	public AQueuedGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile, int minPlayers, int maxPlayers) throws ActivateFailedException {
+	public AQueuedGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile, int minPlayers, int maxPlayers) throws UnsupportedOperationException {
 		super(plugin, game, configFromFile);
 		this.minPlayers = minPlayers;
 		this.maxPlayers = maxPlayers;

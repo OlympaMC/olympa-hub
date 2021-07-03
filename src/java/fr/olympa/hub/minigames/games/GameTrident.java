@@ -1,7 +1,6 @@
 package fr.olympa.hub.minigames.games;
 
 import java.lang.reflect.Field;
-import java.rmi.activation.ActivateFailedException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,7 +62,7 @@ public class GameTrident extends AQueuedGame {
 
 	private Map<Player, Entity> playersTridents = new HashMap<>();
 
-	public GameTrident(OlympaHub plugin, ConfigurationSection gameConfig) throws ActivateFailedException {
+	public GameTrident(OlympaHub plugin, ConfigurationSection gameConfig) throws UnsupportedOperationException {
 		super(plugin, GameType.TRIDENT, gameConfig, 2, 15);
 
 		allowFly = true;

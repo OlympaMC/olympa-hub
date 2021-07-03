@@ -1,6 +1,5 @@
 package fr.olympa.hub.minigames.utils;
 
-import java.rmi.activation.ActivateFailedException;
 
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -10,5 +9,5 @@ import fr.olympa.hub.minigames.games.AGame;
 @FunctionalInterface
 public interface GameProvider {
 
-	AGame getGame(OlympaHub plugin, ConfigurationSection config) throws ActivateFailedException;
+	AGame getGame(OlympaHub plugin, ConfigurationSection config) throws UnsupportedOperationException;
 }

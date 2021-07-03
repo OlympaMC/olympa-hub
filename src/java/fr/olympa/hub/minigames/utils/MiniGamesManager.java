@@ -1,6 +1,5 @@
 package fr.olympa.hub.minigames.utils;
 
-import java.rmi.activation.ActivateFailedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -20,8 +19,6 @@ public class MiniGamesManager {
 	private static MiniGamesManager instance;
 
 	private Map<GameType, AGame> games = new HashMap<>();
-
-	//	private File configFile;
 
 	//	private YamlConfiguration config;
 	private CustomConfig config;
@@ -69,7 +66,7 @@ public class MiniGamesManager {
 					games.put(game, iGame);
 
 					plugin.getLogger().log(Level.INFO, "§aGame " + game + " successfully loaded.");
-				} catch (ActivateFailedException e) {
+				} catch (UnsupportedOperationException e) {
 					plugin.getLogger().log(Level.WARNING, "§eGame " + game + "§e wasn't loaded because isEnabled property in games.yml was set to false.");
 				}
 			else
