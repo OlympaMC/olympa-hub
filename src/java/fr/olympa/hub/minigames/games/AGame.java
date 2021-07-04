@@ -159,7 +159,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 		}
 
 		//création de l'holo du début de partie
-		startHolo = OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, true,true,
+		startHolo = OlympaCore.getInstance().getHologramsManager().createHologram(startingLoc.clone().add(0, 2, 0), false, true,
 				new FixedLine<HologramLine>("§6Début " + gameType.getNameWithArticle()),
 				new FixedLine<HologramLine>("§7Commencez ici"));
 
