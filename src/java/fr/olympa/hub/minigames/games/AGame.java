@@ -325,10 +325,12 @@ public abstract class AGame extends ComplexCommand implements Listener {
 			else
 				oldPlayerRankString = Integer.toString(oldPlayerRank);
 
-			if (updateScores(p.getInformation(), p.getScore(gameType), true))
-				if (getPlayerRank(p) < oldPlayerRank || oldPlayerRank == 0)
+			if (updateScores(p.getInformation(), p.getScore(gameType), true)) {
+				int playerRank = getPlayerRank(p);
+				if (playerRank < oldPlayerRank || oldPlayerRank == 0)
 					player.sendMessage(gameType.getChatPrefix() + "§eVous progressez dans le tableau des scores de la place §c" +
-							oldPlayerRankString + " §eà la place §c" + getPlayerRank(p) + "§e, félicitations !!");
+							oldPlayerRankString + " §eà la place §c" + playerRank + "§e, félicitations !!");
+			}
 		}
 	}
 
@@ -348,7 +350,8 @@ public abstract class AGame extends ComplexCommand implements Listener {
 	public int getPlayerRank(OlympaPlayerInformations p) {
 		//return new ArrayList<OlympaPlayerInformations>(topScores.keySet()).indexOf(p.getInformation()) + 1;
 		List<OlympaPlayerInformations> list = new ArrayList<>(topScores.keySet());
-		for (int i = 0; i < topScores.keySet().size(); i++)
+		for (int i =
+				0; i < list.size(); i++)
 			if (list.get(i).getId() == p.getId())
 				return i + 1;
 
