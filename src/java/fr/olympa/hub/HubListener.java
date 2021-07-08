@@ -77,18 +77,6 @@ public class HubListener implements Listener {
 					if (OlympaHub.getInstance().vanishManager.toogleVanish(p))
 						p.getInventory().setItem(6, vanishNo);
 				}));
-
-		/*items.put(6, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.GREEN_DYE, "§dΩ | §5Cacher les joueurs"), p -> {
-			if (VanishManager.getInstance().toogleVanish(p))
-		}));*/
-		/*
-		items.put(7, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.JUKEBOX, "§d♪ | §5§lJukeBox", " §7Profitez de la radio", " §7ou choisissez vos musiques !"), player -> CommandMusic.open(player)));
-		items.put(8, new AbstractMap.SimpleEntry<>(ItemUtils.item(Material.YELLOW_BED, "§8Ω | §7Téléportation au §lspawn"), player -> {
-			Location location = OlympaHub.getInstance().spawn;
-			player.teleport(location);
-			player.playSound(location, Sound.ENTITY_ENDER_DRAGON_SHOOT, 0.2f, 1);
-			player.spawnParticle(Particle.SMOKE_LARGE, location, 7, 0.1, 0.1, 0.1, 0.3);
-		}));*/
 	}
 
 	@EventHandler

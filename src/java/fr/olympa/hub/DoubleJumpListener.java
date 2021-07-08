@@ -16,6 +16,7 @@ import fr.olympa.api.common.player.OlympaPlayer;
 import fr.olympa.api.spigot.customevents.AsyncOlympaPlayerChangeGroupEvent;
 import fr.olympa.api.spigot.customevents.OlympaPlayerLoadEvent;
 import fr.olympa.api.spigot.utils.SpigotUtils;
+import fr.olympa.hub.minigames.utils.MiniGamesManager;
 
 public class DoubleJumpListener implements Listener {
 	
@@ -38,12 +39,14 @@ public class DoubleJumpListener implements Listener {
 		Player p = e.getPlayer();
 		if (p.getGameMode() != GameMode.CREATIVE) {
 			e.setCancelled(true);
-			players.add(p);
-			Location location = p.getLocation();
-			location.setPitch(Math.min(location.getPitch(), 85));
-			p.setVelocity(location.getDirection().multiply(1.5).setY(1));
-			p.playSound(p.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 0.25f, 0.74f);
-			p.setAllowFlight(false);
+			if (MiniGamesManager.getInstance().isPlaying(e.getPlayer()) == null) {
+				players.add(p);
+				Location location = p.getLocation();
+				location.setPitch(Math.min(location.getPitch(), 85));
+				p.setAllowFlight(false);
+				p.setVelocity(location.getDirection().multiply(1.5).setY(1));
+				p.getWorld().playSound(location, Sound.ENTITY_BAT_TAKEOFF, 0.25f, 0.74f);
+			}
 		}
 	}
 	

@@ -1,13 +1,14 @@
 package fr.olympa.hub.gui;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -18,6 +19,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import fr.olympa.api.utils.Prefix;
 import fr.olympa.hub.OlympaHub;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import net.minecraft.server.v1_16_R3.EntityHuman;
 import net.minecraft.server.v1_16_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_16_R3.PacketPlayOutNamedEntitySpawn;
@@ -46,68 +50,51 @@ public class VanishManager implements Listener {
 			return false;
 		}
 
-		if (!playersUsingVanish.remove(p))
+		boolean vanish = false;
+		if (!playersUsingVanish.remove(p)) {
 			playersUsingVanish.add(p);
+			vanish = true;
+		}
 
-		if (isUsingVanish(p))
+		Material material;
+		if (vanish) {
 			Prefix.DEFAULT_GOOD.sendMessage(p, "Les joueurs ont été cachés !");
-		else
+			material = Material.ENDER_EYE;
+			
+			((CraftPlayer) p).getHandle().playerConnection.networkManager.channel.pipeline().addBefore("packet_handler", "hub_vanish", new ChannelDuplexHandler() {
+				@Override
+				public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+					if (msg instanceof PacketPlayOutNamedEntitySpawn packet) return;
+					super.write(ctx, msg, promise);
+				}
+			});
+		}else {
 			Prefix.DEFAULT_GOOD.sendMessage(p, "Les joueurs sont réapparus !");
-
-		Bukkit.getOnlinePlayers().forEach(pp -> sendPacket(p, pp));
-
+			material = Material.SUNFLOWER;
+			((CraftPlayer) p).getHandle().playerConnection.networkManager.channel.pipeline().remove("hub_vanish");
+		}
+		
+		sendPackets(p, Bukkit.getOnlinePlayers().stream().filter(x -> x != p).collect(Collectors.toList()), vanish);
+		p.setCooldown(material, 5 * 20);
+		
 		lastToogle.put(p, System.currentTimeMillis());
 		return true;
 	}
 
-	private void sendPacket(Player p, Player target) {
-		List<Player> list = new ArrayList<>();
-		list.add(target);
-		sendPacket(p, list);
-	}
-
-	private void sendPacket(Player p, List<Player> targets) {
-		targets.remove(p);
-		//EntityPlayer targ = ((CraftPlayer)target).getHandle(); //Target entity
-
-		/*DataWatcher w = targ.getDataWatcher(); //Target entity datawatcher
-		
-		if (isUsingVanish(p))
-			w.set(new DataWatcherObject<>(0, DataWatcherRegistry.a), (byte) 0x20); //0x20 makes player invisible but still rendered
-		else
-			w.set(new DataWatcherObject<>(0, DataWatcherRegistry.a), (byte) 0x0); //0x0 makes player visible
-		
-		((CraftPlayer)p).getHandle().playerConnection.sendPacket(new PacketPlayOutEntityMetadata(targ.getId(), w, true));*/
-		//((CraftPlayer)p).getHandle().playerConnection.sendPacket(new packetplayout
-
-		if (isUsingVanish(p)) {
-			int[] ps = new int[targets.size()];
-
-			for (int i = 0; i < targets.size(); i++)
-				ps[i] = ((CraftPlayer) targets.get(i)).getHandle().getId();
-			//	        Reflection.
-			//delete entities packet
+	private void sendPackets(Player p, Collection<Player> players, boolean hide) {
+		if (hide) {
+			int[] ps = players.stream().mapToInt(target -> ((CraftPlayer) target).getHandle().getId()).toArray();
+			
 			((CraftPlayer) p).getHandle().playerConnection.sendPacket(new PacketPlayOutEntityDestroy(ps));
 		} else
-			targets.forEach(pp -> ((CraftPlayer) p).getHandle().playerConnection
+			players.forEach(pp -> ((CraftPlayer) p).getHandle().playerConnection
 					.sendPacket(new PacketPlayOutNamedEntitySpawn((EntityHuman) ((CraftEntity) pp).getHandle())));
 
 	}
 
-	/*private void sendVisiblePacket(Player p, Player target) {
-		if (p.equals(target))
-			return;
-		//new PacketPlayOutEntityMetadata
-		PacketPlayOutRemoveEntityEffect packet = new PacketPlayOutRemoveEntityEffect(((CraftPlayer)target).getHandle().getId(),
-				MobEffects.INVISIBILITY);
-		((CraftPlayer)p).getHandle().playerConnection.sendPacket(packet);
-	}*/
-
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		lastToogle.put(e.getPlayer(), System.currentTimeMillis() - 10000);
-
-		OlympaHub.getInstance().getTask().runTaskLater(() -> playersUsingVanish.forEach(p -> sendPacket(p, e.getPlayer())), 5);
 	}
 
 	@EventHandler
