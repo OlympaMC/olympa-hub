@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
-import org.bukkit.util.Vector;
 
 import fr.olympa.api.common.player.OlympaPlayer;
 import fr.olympa.api.spigot.customevents.AsyncOlympaPlayerChangeGroupEvent;
@@ -39,9 +39,10 @@ public class DoubleJumpListener implements Listener {
 		if (p.getGameMode() != GameMode.CREATIVE) {
 			e.setCancelled(true);
 			players.add(p);
-			Vector direction = p.getLocation().getDirection();
-			p.setVelocity(direction.multiply(1.5).setY(1));
-			p.playSound(p.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 1.0f, -5.0f);
+			Location location = p.getLocation();
+			location.setPitch(Math.min(location.getPitch(), 85));
+			p.setVelocity(location.getDirection().multiply(1.5).setY(1));
+			p.playSound(p.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 0.25f, 0.74f);
 			p.setAllowFlight(false);
 		}
 	}
