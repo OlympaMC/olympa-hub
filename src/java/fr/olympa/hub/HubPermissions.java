@@ -12,4 +12,6 @@ public class HubPermissions {
  
 	public static final OlympaSpigotPermission EDIT_MINIGAMES = new OlympaSpigotPermission(OlympaGroup.DEV);
 
+	public static final OlympaSpigotPermission DOUBLE_JUMP = new OlympaSpigotPermission(OlympaGroup.VIP);
+	
 }

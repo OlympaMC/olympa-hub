@@ -26,10 +26,10 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.api.spigot.customevents.OlympaPlayerLoadEvent;
 import fr.olympa.api.spigot.customevents.WorldTrackingEvent;
 import fr.olympa.api.spigot.item.ItemUtils;
-import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.api.spigot.region.tracking.flags.DamageFlag;
 import fr.olympa.api.spigot.region.tracking.flags.DropFlag;
 import fr.olympa.api.spigot.region.tracking.flags.FoodFlag;

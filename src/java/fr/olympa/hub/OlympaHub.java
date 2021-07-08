@@ -72,7 +72,8 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 
 			PluginManager pm = getServer().getPluginManager();
 			pm.registerEvents(new HubListener(), this);
-
+			pm.registerEvents(new DoubleJumpListener(), this);
+			
 			pm.registerEvents(new LaunchPadManager(this, "launchpads.yml"), this);
 
 			new SpawnCommand(this).register();
