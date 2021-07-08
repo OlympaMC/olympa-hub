@@ -75,6 +75,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 	protected ItemStack[] hotBarContent = new ItemStack[9];
 	private Map<Player, ItemStack[]> players = new HashMap<>();
+	private List<Player> wasFlightAllowed = new ArrayList<>();
 
 	//scores map, must be sorted from the best to the worst
 	//la taille ne doit pas dépasser maxTopScoresStored
@@ -240,6 +241,10 @@ public abstract class AGame extends ComplexCommand implements Listener {
 		player.getInventory().clear();
 		player.getInventory().setContents(hotBarContent);
 		player.sendMessage(gameType.getChatPrefix() + "§aVous venez de rejoindre le jeu ! Faites de votre mieux !");
+		if (player.getAllowFlight()) {
+			player.setAllowFlight(false);
+			wasFlightAllowed.add(player);
+		}
 		return true;
 	}
 
@@ -268,6 +273,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 		player.getInventory().clear();
 		player.getInventory().setArmorContents(new ItemStack[] { null, null, null, null });
 		player.getInventory().setContents(players.remove(player));
+		if (wasFlightAllowed.remove(player)) player.setAllowFlight(true);
 		if (warpToSpawn)
 			player.teleport(startingLoc);
 		if (score == -1) {
