@@ -4,5 +4,5 @@ website: https://gitlab.com/olympa/olympahub
 version: @plugin_version@
 api-version: 1.16
 authors: [SkytAsul, Bullobily, Tristiisch]
-depend: [OlympaCore]
-softdepend: [Citizens, JukeBox]
+depend: [OlympaCore, Citizens]
+softdepend: [JukeBox]

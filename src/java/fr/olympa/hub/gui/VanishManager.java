@@ -1,10 +1,12 @@
 package fr.olympa.hub.gui;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -22,6 +24,7 @@ import fr.olympa.hub.OlympaHub;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import net.citizensnpcs.api.CitizensAPI;
 import net.minecraft.server.v1_16_R3.EntityHuman;
 import net.minecraft.server.v1_16_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_16_R3.PacketPlayOutNamedEntitySpawn;
@@ -31,8 +34,13 @@ public class VanishManager implements Listener {
 	private Set<Player> playersUsingVanish = new HashSet<>();
 	private Map<Player, Long> lastToogle = new HashMap<>();
 
-	public VanishManager() {
+	private Field uuidField;
+	
+	public VanishManager() throws ReflectiveOperationException {
 		OlympaHub.getInstance().getServer().getPluginManager().registerEvents(this, OlympaHub.getInstance());
+		
+		uuidField = PacketPlayOutNamedEntitySpawn.class.getDeclaredField("b");
+		uuidField.setAccessible(true);
 	}
 
 	public boolean isUsingVanish(Player p) {
@@ -64,7 +72,11 @@ public class VanishManager implements Listener {
 			((CraftPlayer) p).getHandle().playerConnection.networkManager.channel.pipeline().addBefore("packet_handler", "hub_vanish", new ChannelDuplexHandler() {
 				@Override
 				public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-					if (msg instanceof PacketPlayOutNamedEntitySpawn packet) return;
+					if (msg instanceof PacketPlayOutNamedEntitySpawn) {
+						UUID uuid = (UUID) uuidField.get(msg);
+						//if (CitizensAPI.getNPCRegistry().getByUniqueId(uuid) == null) return; //pas un NPC : cacher
+						if (!CitizensAPI.getNPCRegistry().isNPC(Bukkit.getEntity(uuid))) return;
+					}
 					super.write(ctx, msg, promise);
 				}
 			});
