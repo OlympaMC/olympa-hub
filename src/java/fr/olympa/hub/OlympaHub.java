@@ -28,6 +28,7 @@ import fr.olympa.hub.gui.VanishManager;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import fr.olympa.hub.pads.LaunchPadManager;
+import fr.olympa.hub.perks.PerksModule;
 import fr.olympa.hub.servers.ServerConfigCommand;
 import fr.olympa.hub.servers.ServerInfosListener;
 import fr.olympa.hub.servers.ServerTrait;
@@ -101,8 +102,15 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(VoteTrait.class).withName("vote"));
 
 			OlympaAPIPermissionsSpigot.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
-			OlympaAPIPermissionsSpigot.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
-
+			//OlympaAPIPermissionsSpigot.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER); bof non ?
+			
+			try {
+				new PerksModule(this);
+			}catch (Exception ex) {
+				ex.printStackTrace();
+				getLogger().severe("Une erreur est survenue lors du chargement des parachutes.");
+			}
+			
 			games = new MiniGamesManager(this);
 			vanishManager = new VanishManager();
 

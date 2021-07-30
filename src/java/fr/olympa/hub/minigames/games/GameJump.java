@@ -98,7 +98,7 @@ public class GameJump extends AGame {
 
 		if (playerLastCheckPoint.get(p) + 1 == check)
 			if (check == checkpoints.size() - 1)
-				endGame(AccountProviderAPI.getter().get(p.getUniqueId()), (playerLastCPTime.get(p) + getCurrentCPTime(p)) / 1000d, false);
+				endGame(OlympaPlayerHub.get(p), (playerLastCPTime.get(p) + getCurrentCPTime(p)) / 1000d, false);
 			else {
 				playerLastCPTime.put(p, playerLastCPTime.get(p) + getCurrentCPTime(p));
 				playerCPTimeInit.put(p, System.currentTimeMillis());

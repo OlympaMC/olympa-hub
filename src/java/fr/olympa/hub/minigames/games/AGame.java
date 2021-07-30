@@ -425,7 +425,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 	public void beginGame(Player p) {
 		p.teleport(startingLoc);
-		startGame((OlympaPlayerHub) AccountProviderAPI.getter().get(p.getUniqueId()));
+		startGame((OlympaPlayerHub) OlympaPlayerHub.get(p));
 	}
 
 	///////////////////////////////////////////////////////////
@@ -441,14 +441,14 @@ public abstract class AGame extends ComplexCommand implements Listener {
 			switch (e.getPlayer().getInventory().getHeldItemSlot()) {
 			case 7:
 				if (gameType.isRestartable() && !e.getPlayer().getLocation().getBlock().equals(startingLoc.getBlock())) {
-					restartGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()));
+					restartGame(OlympaPlayerHub.get(e.getPlayer()));
 
 					e.setCancelled(true);
 					return;
 				}
 				break;
 			case 8:
-				plugin.getTask().runTaskLater(() -> endGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()), -1, true), 1);
+				plugin.getTask().runTaskLater(() -> endGame(OlympaPlayerHub.get(e.getPlayer()), -1, true), 1);
 
 				e.setCancelled(true);
 				return;
@@ -493,7 +493,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 			if (!allowTp) {
 				e.getPlayer().sendMessage(gameType.getChatPrefix() + "§cVous téléporter pendant le jeu est interdit !");
-				endGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()), -1, false);
+				endGame(OlympaPlayerHub.get(e.getPlayer()), -1, false);
 			}
 		}
 	}
@@ -507,11 +507,11 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 		if (!players.containsKey(p)) {
 			if (e.getTo().getBlock().equals(startingLoc.getBlock()))
-				startGame((OlympaPlayerHub) AccountProviderAPI.getter().get(p.getUniqueId()));
+				startGame((OlympaPlayerHub) OlympaPlayerHub.get(p));
 
 		} else if (!allowFly && p.isFlying() || p.getGameMode() != GameMode.ADVENTURE) {
 			p.sendMessage(gameType.getChatPrefix() + "§cNe profitez pas de vos permissions pour vous mettre en fly !");
-			endGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()), -1, false);
+			endGame(OlympaPlayerHub.get(e.getPlayer()), -1, false);
 
 		} else
 			onMoveHandler(p, e.getFrom(), e.getTo());
@@ -543,7 +543,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
-		endGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()), -1, false);
+		endGame(OlympaPlayerHub.get(e.getPlayer()), -1, false);
 	}
 
 	/**
@@ -560,7 +560,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 	public void onChangeGamemode(PlayerGameModeChangeEvent e) {
 		if (players.containsKey(e.getPlayer())) {
 			e.getPlayer().sendMessage(gameType.getChatPrefix() + "§cNe profitez pas de vos permissions pour changer de gamemode !");
-			endGame(AccountProviderAPI.getter().get(e.getPlayer().getUniqueId()), 0, true);
+			endGame(OlympaPlayerHub.get(e.getPlayer()), 0, true);
 		}
 	}*/
 

@@ -106,7 +106,7 @@ public class GameElytra extends AGame {
 				getPlayers().forEach(p -> {
 					if (p.getLocation().distance(lastKnownLoc.get(p)) <= 0.5 && getPlayerTimeMillis(p) > 1500) {
 						p.sendMessage(gameType.getChatPrefix() + "§7Ne vous arrêtez pas de voler !");
-						restartGame(AccountProviderAPI.getter().get(p.getUniqueId()));
+						restartGame(OlympaPlayerHub.get(p));
 					}
 
 					lastKnownLoc.put(p, p.getLocation().clone());
@@ -208,7 +208,7 @@ public class GameElytra extends AGame {
 	@Override //relance le jeu pour le joueur s'il sort de la zone de jeu alors qu'il était en vol
 	protected boolean exitGameArea(Player p) {
 		if (getPlayerTimeMillis(p) > 0) {
-			restartGame(AccountProviderAPI.getter().get(p.getUniqueId()));
+			restartGame(OlympaPlayerHub.get(p));
 			return false;
 		} else
 			return super.exitGameArea(p);
@@ -243,7 +243,7 @@ public class GameElytra extends AGame {
 	}
 
 	private void fireEndGameWithSuccess(Player p) {
-		endGame(AccountProviderAPI.getter().get(p.getUniqueId()),
+		endGame(OlympaPlayerHub.get(p),
 				getPlayerTimeMillis(p) / 1000d, false);
 	}
 

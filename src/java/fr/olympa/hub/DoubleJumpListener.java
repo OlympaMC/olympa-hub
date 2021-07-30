@@ -31,7 +31,7 @@ public class DoubleJumpListener implements Listener {
 	
 	@EventHandler
 	public void onGroupChange(AsyncOlympaPlayerChangeGroupEvent e) {
-		e.getPlayer().setAllowFlight(HubPermissions.DOUBLE_JUMP.hasPermission(e.getOlympaPlayer()));
+		e.getPlayer().setAllowFlight(HubPermissions.DOUBLE_JUMP.hasPermission(e.<OlympaPlayer>getOlympaPlayer()));
 	}
 	
 	@EventHandler

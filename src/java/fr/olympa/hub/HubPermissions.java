@@ -14,4 +14,6 @@ public class HubPermissions {
 
 	public static final OlympaSpigotPermission DOUBLE_JUMP = new OlympaSpigotPermission(OlympaGroup.VIP);
 	
+	public static final OlympaSpigotPermission PERK_FOOT_CLOUD = new OlympaSpigotPermission(OlympaGroup.VIP);
+	
 }

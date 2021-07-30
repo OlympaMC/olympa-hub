@@ -139,7 +139,7 @@ public class GameArena extends AQueuedGame {
 		Player p = (Player) e.getEntity();
 
 		if (p.getHealth() <= e.getFinalDamage())
-			endGame(AccountProviderAPI.getter().get(p.getUniqueId()), 0, true);
+			endGame(OlympaPlayerHub.get(p), 0, true);
 		else
 			e.setCancelled(false);
 	}
