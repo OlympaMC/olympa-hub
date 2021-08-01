@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import fr.olympa.api.common.groups.OlympaGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -98,14 +99,16 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 	protected boolean allowFly = false; //if set to true, players will be allowed to use fly mode during the game
 
-	@SuppressWarnings("unchecked")
-	public AGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile) throws UnsupportedOperationException {
+	protected final OlympaGroup minGroup;
+
+	public AGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile, OlympaGroup minGroup) throws UnsupportedOperationException {
 		super(plugin, game.toString().toLowerCase(), "Accès à la config " + game.getNameWithArticle() + ".", HubPermissions.EDIT_MINIGAMES);
 
 		this.plugin = plugin;
 		instance = this;
 
 		gameType = game;
+		this.minGroup = minGroup;
 
 		world = Bukkit.getWorlds().get(0);
 		config = initConfig(configFromFile);
@@ -190,6 +193,11 @@ public abstract class AGame extends ComplexCommand implements Listener {
 		allowedTpLocs.add(startingLoc);
 	}
 
+	@SuppressWarnings("unchecked")
+	public AGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile) throws UnsupportedOperationException {
+		this(plugin, game, configFromFile, OlympaGroup.PLAYER);
+	}
+
 	public Set<Player> getPlayers() {
 		return Collections.unmodifiableSet(players.keySet());
 	}
@@ -237,6 +245,12 @@ public abstract class AGame extends ComplexCommand implements Listener {
 			player.sendMessage(gameType.getChatPrefix() + "§cVous devez être en gamemode aventure et sans fly pour pouvoir jouer !");
 			return false;
 		}
+
+		if (!p.hasGroup(minGroup)){
+			player.sendMessage(gameType.getChatPrefix() + "§cLe grade " + minGroup.getName(p.getGender()) + "§r§c est requis pour rejoindre le jeu.");
+			return false;
+		}
+
 		players.put(player, player.getInventory().getContents());
 		player.getInventory().clear();
 		player.getInventory().setContents(hotBarContent);

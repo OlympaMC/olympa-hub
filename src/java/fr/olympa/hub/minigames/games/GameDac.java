@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import fr.olympa.api.common.groups.OlympaGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -58,7 +59,7 @@ public class GameDac extends AQueuedGame {
 	private Map<Player, Material> woolColor = new HashMap<>();
 
 	public GameDac(OlympaHub plugin, ConfigurationSection configFromFile) throws UnsupportedOperationException {
-		super(plugin, GameType.DAC, configFromFile, 2, 10);
+		super(plugin, GameType.DAC, configFromFile, 2, 10, OlympaGroup.VIP);
 
 		jumpRegion = (Cuboid) config.get("jump_region");
 		minJumpY = config.getInt("min_jump_y");

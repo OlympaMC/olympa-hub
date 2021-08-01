@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import fr.olympa.api.common.groups.OlympaGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -31,10 +32,17 @@ public abstract class AQueuedGame extends AGame {
 	protected int winnerScore = 0;
 
 	public AQueuedGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile, int minPlayers, int maxPlayers) throws UnsupportedOperationException {
-		super(plugin, game, configFromFile);
+		this(plugin, game, configFromFile, minPlayers, maxPlayers, OlympaGroup.PLAYER);
+	}
+
+	public AQueuedGame(OlympaHub plugin, GameType game, ConfigurationSection configFromFile,
+					   int minPlayers, int maxPlayers, OlympaGroup minGroup) throws UnsupportedOperationException {
+		super(plugin, game, configFromFile, minGroup);
 		this.minPlayers = minPlayers;
 		this.maxPlayers = maxPlayers;
 	}
+
+
 
 	@Override
 	protected boolean startGame(OlympaPlayerHub p) {
