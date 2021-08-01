@@ -26,6 +26,7 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import fr.olympa.api.common.player.OlympaPlayer;
 import fr.olympa.api.spigot.customevents.OlympaPlayerLoadEvent;
 import fr.olympa.api.spigot.customevents.WorldTrackingEvent;
 import fr.olympa.api.spigot.item.ItemUtils;
@@ -103,11 +104,21 @@ public class HubListener implements Listener {
 
 	@EventHandler
 	public void onOlympaJoin(OlympaPlayerLoadEvent e) {
-		if (e.getOlympaPlayer().getGroup().isHighStaff())
+		OlympaPlayer player = e.getOlympaPlayer();
+		if (player.getGroup().isHighStaff())
 			Bukkit.getScheduler().runTask(OlympaHub.getInstance(), () -> OlympaHub.getInstance().lightning.getWorld().strikeLightningEffect(OlympaHub.getInstance().lightning));
 		else {
+			Sound sound;
+			float volume;
+			if (HubPermissions.SPECIAL_JOIN_SOUND.hasPermission(player)) {
+				sound = Sound.ENTITY_PLAYER_LEVELUP;
+				volume = 0.5f;
+			}else {
+				sound = Sound.ENTITY_ITEM_PICKUP;
+				volume = 0.14f;
+			}
 			Player p = e.getPlayer();
-			p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.1f, 1f);
+			p.getWorld().playSound(p.getLocation(), sound, volume, 1f);
 		}
 	}
 
