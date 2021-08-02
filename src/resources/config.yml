@@ -1,4 +1,4 @@
-version: 1.1
+version: 1.2
 servers:
   lobby_item:
     defaultServersName: "Lobbys"
@@ -19,7 +19,7 @@ servers:
       - zta1
   pvpfac_item:
     defaultServersName: "PvP Faction"
-    description: "Créez votre faction avec vos amis, fabriquez des usines, des équipements, les bases les plus impénétrables possible et attaquez celles des autres. Battez vos ennemis et construisez un véritable empire pour accumuler les richesses, et devenez la plus grande faction de ce monde !"
+    description: "Créez votre faction avec vos amis, fabriquez des usines, des équipements, les bases les plus impénétrables possible et attaquez celles des autres. Battez vos ennemis et construisez un véritable empire pour accumuler les richesses, et devenez la plus grande faction de ce monde !\n\n§6Actuellement en développement\nAucune date n'est encore prévue"
     item: CROSSBOW
     slot: 30
     isUniqueMultipleServers: false
