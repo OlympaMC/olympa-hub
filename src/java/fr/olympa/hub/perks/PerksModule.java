@@ -15,12 +15,13 @@ import fr.olympa.api.spigot.customevents.OlympaPlayerLoadEvent;
 import fr.olympa.hub.OlympaHub;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import fr.olympa.hub.perks.particles.PerkFootCloud;
+import fr.olympa.hub.perks.particles.PerkSurroundings;
 
 public class PerksModule implements ModuleApi<OlympaHub>, Listener {
 	
 	private OlympaHub plugin;
 	
-	private List<AbstractPerk> perks = Arrays.asList(new PerkFootCloud());
+	private List<AbstractPerk> perks = Arrays.asList(new PerkFootCloud(), new PerkSurroundings());
 	
 	public PerksModule(OlympaHub plugin) throws Exception {
 		SpigotModule<PerksModule, PerksModule, OlympaHub, OlympaCommand> module = new SpigotModule<>(plugin, "parachute", x -> this);

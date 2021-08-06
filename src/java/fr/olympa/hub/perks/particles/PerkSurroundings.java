@@ -3,30 +3,24 @@ package fr.olympa.hub.perks.particles;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.craftbukkit.v1_16_R3.CraftParticle;
-import org.bukkit.entity.Player;
 
 import fr.olympa.hub.HubPermissions;
 import net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles;
 
-public class PerkFootCloud extends ParticlePerk {
+public class PerkSurroundings extends ParticlePerk {
 	
-	public PerkFootCloud() {
+	public PerkSurroundings() {
 		super(HubPermissions.PERK_FOOT_CLOUD);
 	}
 	
 	@Override
 	protected int getPeriod() {
-		return 3;
-	}
-	
-	@Override
-	protected boolean isValid(Player p) {
-		return !p.isOnGround();
+		return 37;
 	}
 	
 	@Override
 	protected PacketPlayOutWorldParticles getParticlePacket(Location location) {
-		return new PacketPlayOutWorldParticles(CraftParticle.toNMS(Particle.CLOUD), false, location.getX(), location.getY() - 0.08, location.getZ(), 0.35f, 0.02f, 0.35f, 0.01f, 16);
+		return new PacketPlayOutWorldParticles(CraftParticle.toNMS(Particle.VILLAGER_HAPPY), false, location.getX(), location.getY() + 1, location.getZ(), 0.95f, 0.95f, 0.95f, 0.01f, 3);
 	}
 	
 }
