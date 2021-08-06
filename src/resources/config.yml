@@ -1,4 +1,4 @@
-version: 1.3
+version: 1.4
 servers:
   lobby_item:
     defaultServersName: "Lobbys"
@@ -16,7 +16,6 @@ servers:
       - lobby7
       - lobby8
       - lobby9
-      - lobby10
   zta_item:
     defaultServersName: "ZTA"
     description: "Découvrez un monde au bord du chaos, meurtri par des hordes de zombies. Votre mission : survivre coûte que coûte, défendre votre clan et attaquer ceux des autres. Farmez et devenez l'homme le plus puissant de Greenfield !"
