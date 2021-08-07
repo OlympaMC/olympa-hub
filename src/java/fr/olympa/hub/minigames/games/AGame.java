@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import fr.olympa.api.common.groups.OlympaGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -35,6 +34,7 @@ import org.bukkit.inventory.ItemStack;
 
 import fr.olympa.api.common.command.complex.Cmd;
 import fr.olympa.api.common.command.complex.CommandContext;
+import fr.olympa.api.common.groups.OlympaGroup;
 import fr.olympa.api.common.observable.SimpleObservable;
 import fr.olympa.api.common.player.OlympaPlayerInformations;
 import fr.olympa.api.common.provider.AccountProviderAPI;
@@ -246,7 +246,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 			return false;
 		}
 
-		if (!p.hasGroup(minGroup)){
+		if (p.getGroup().getPower() < minGroup.getPower()) {
 			player.sendMessage(gameType.getChatPrefix() + "§cLe grade " + minGroup.getName(p.getGender()) + "§r§c est requis pour rejoindre le jeu.");
 			return false;
 		}
@@ -439,7 +439,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 	public void beginGame(Player p) {
 		p.teleport(startingLoc);
-		startGame((OlympaPlayerHub) OlympaPlayerHub.get(p));
+		startGame(OlympaPlayerHub.get(p));
 	}
 
 	///////////////////////////////////////////////////////////
@@ -521,7 +521,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 
 		if (!players.containsKey(p)) {
 			if (e.getTo().getBlock().equals(startingLoc.getBlock()))
-				startGame((OlympaPlayerHub) OlympaPlayerHub.get(p));
+				startGame(OlympaPlayerHub.get(p));
 
 		} else if (!allowFly && p.isFlying() || p.getGameMode() != GameMode.ADVENTURE) {
 			p.sendMessage(gameType.getChatPrefix() + "§cNe profitez pas de vos permissions pour vous mettre en fly !");
