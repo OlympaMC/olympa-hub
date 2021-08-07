@@ -246,7 +246,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 			return false;
 		}
 
-		if (p.getGroup().getPower() < minGroup.getPower()) {
+		if (minGroup.getPower() != 0 && p.getGroup().getPower() < minGroup.getPower()) {
 			player.sendMessage(gameType.getChatPrefix() + "§cLe grade " + minGroup.getName(p.getGender()) + "§r§c est requis pour rejoindre le jeu.");
 			return false;
 		}
@@ -287,7 +287,8 @@ public abstract class AGame extends ComplexCommand implements Listener {
 		player.getInventory().clear();
 		player.getInventory().setArmorContents(new ItemStack[] { null, null, null, null });
 		player.getInventory().setContents(players.remove(player));
-		if (wasFlightAllowed.remove(player)) player.setAllowFlight(true);
+		if (wasFlightAllowed.remove(player))
+			player.setAllowFlight(true);
 		if (warpToSpawn)
 			player.teleport(startingLoc);
 		if (score == -1) {
@@ -370,8 +371,7 @@ public abstract class AGame extends ComplexCommand implements Listener {
 	public int getPlayerRank(OlympaPlayerInformations p) {
 		//return new ArrayList<OlympaPlayerInformations>(topScores.keySet()).indexOf(p.getInformation()) + 1;
 		List<OlympaPlayerInformations> list = new ArrayList<>(topScores.keySet());
-		for (int i =
-				0; i < list.size(); i++)
+		for (int i = 0; i < list.size(); i++)
 			if (list.get(i).getId() == p.getId())
 				return i + 1;
 
