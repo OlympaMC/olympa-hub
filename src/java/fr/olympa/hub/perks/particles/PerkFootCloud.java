@@ -21,7 +21,7 @@ public class PerkFootCloud extends ParticlePerk {
 	
 	@Override
 	protected boolean isValid(Player p) {
-		return !p.isOnGround();
+		return super.isValid(p) && !p.isOnGround();
 	}
 	
 	@Override

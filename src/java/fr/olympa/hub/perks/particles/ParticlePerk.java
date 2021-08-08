@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -27,7 +28,7 @@ public abstract class ParticlePerk extends AbstractPerk {
 	protected abstract PacketPlayOutWorldParticles getParticlePacket(Location location);
 	
 	protected boolean isValid(Player p) {
-		return true;
+		return p.getGameMode() != GameMode.SPECTATOR;
 	}
 	
 	@Override
