@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.bukkit.event.EventHandler;
 
+import fr.olympa.api.common.chat.TxtComponentBuilder;
 import fr.olympa.api.spigot.holograms.Hologram;
 import fr.olympa.api.spigot.lines.CyclingLine;
 import fr.olympa.api.spigot.lines.FixedLine;
@@ -31,8 +32,8 @@ public class VoteTrait extends Trait {
 		removeHologram();
 		OlympaCore.getInstance().getHologramsManager().createHologram(npc.getEntity().getLocation().add(0, npc.getEntity().getHeight() + 0.1, 0), false, true,
 				new CyclingLine<>(Arrays.asList("§6§lVote", "§e§lVote"), 50),
-				//FixedLine.EMPTY_LINE,
-				new FixedLine<>("§7Bientôt..."));
+				FixedLine.EMPTY_LINE,
+				new FixedLine<>("§7www.olympa.fr/vote"));
 	}
 
 	@Override
@@ -56,7 +57,9 @@ public class VoteTrait extends Trait {
 	@EventHandler
 	public void onRightClick(NPCRightClickEvent e) {
 		if (e.getNPC() != npc) return;
-		Prefix.DEFAULT.sendMessage(e.getClicker(), "Le système de vote arrive bientôt !");
+		e.getClicker().sendMessage(new TxtComponentBuilder(Prefix.DEFAULT, "&6Tu peux voter sur ").extra(new TxtComponentBuilder("&e&lhttps://olympa.fr/vote")
+				.onHoverText("&7Clique pour aller sur le site").onClickUrl("https://olympa.fr/vote"), new TxtComponentBuilder("&6.")).build());
+
 	}
 
 }
