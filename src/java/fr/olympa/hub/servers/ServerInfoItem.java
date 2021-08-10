@@ -30,8 +30,10 @@ import fr.olympa.api.common.match.MatcherPattern;
 import fr.olympa.api.common.observable.AbstractObservable;
 import fr.olympa.api.common.permission.OlympaPermission;
 import fr.olympa.api.common.player.OlympaPlayer;
+import fr.olympa.api.common.provider.AccountProviderAPI;
 import fr.olympa.api.common.redis.RedisClass;
 import fr.olympa.api.common.server.ServerInfoAdvanced;
+import fr.olympa.api.common.server.ServerInfoAdvanced.ConnectResult;
 import fr.olympa.api.common.server.ServerStatus;
 import fr.olympa.api.common.sort.Sorting;
 import fr.olympa.api.spigot.holograms.Hologram;
@@ -82,6 +84,10 @@ public class ServerInfoItem extends AbstractObservable {
 		return serversInfo.entrySet().stream().filter(e -> e.getKey().equals(servName)).findFirst();
 	}
 
+	public Set<Entry<String, ServerInfoAdvanced>> getServers() {
+		return serversInfo.entrySet();
+	}
+
 	public boolean containsMinimumOneServer(List<ServerInfoAdvanced> monitorInfos) {
 		return monitorInfos.stream().anyMatch(monitorInfo -> serversInfo.keySet().stream().anyMatch(bungeeServerName -> monitorInfo.getName().equals(bungeeServerName)));
 	}
@@ -120,6 +126,34 @@ public class ServerInfoItem extends AbstractObservable {
 		return b;
 	}
 
+	public List<ItemStack> getItemsSelect() {
+		List<ItemStack> items = new ArrayList<>();
+		for (ServerInfoAdvanced mi : serversInfo.values()) {
+			List<String> lore = new ArrayList<>();
+			lore.add(SEPARATOR);
+			lore.addAll(description);
+			lore.add(SEPARATOR);
+			if (mi != null && mi.hasMinimalInfo()) {
+				StringJoiner sj = new StringJoiner(" ");
+				ItemStack serverChooseItem;
+				sj.add("§7" + mi.getHumanName());
+				if (mi.getStatus() != ServerStatus.OPEN)
+					sj.add("(" + mi.getStatus().getNameColored() + "§7)");
+				if (mi.getOnlinePlayers() != null && mi.getOnlinePlayers() > 0) {
+					int online = mi.getOnlinePlayers();
+					sj.add(String.format("- %s joueur%s", online, Utils.withOrWithoutS(online)));
+				}
+				if (mi.hasInfoVersions())
+					sj.add(mi.getRangeVersionMinecraft());
+				lore.add(sj.toString());
+				serverChooseItem = ItemUtils.item(item, "§6§l" + getServerNameCaps(), lore.toArray(new String[0]));
+				ItemUtils.addEnchant(serverChooseItem, Enchantment.DURABILITY, 0);
+				items.add(serverChooseItem);
+			}
+		}
+		return items;
+	}
+
 	public void update(List<ServerInfoAdvanced> newMonitorInfo) {
 		tryUpdate(newMonitorInfo);
 		//		if (!tryUpdate(newMonitorInfo))
@@ -140,7 +174,7 @@ public class ServerInfoItem extends AbstractObservable {
 				sj.add("§7" + mi.getHumanName());
 				if (mi.getStatus() != ServerStatus.OPEN)
 					sj.add("(" + mi.getStatus().getNameColored() + "§7)");
-				if (mi.getOnlinePlayers() != null) {
+				if (mi.getOnlinePlayers() != null && mi.getOnlinePlayers() > 0) {
 					int online = mi.getOnlinePlayers();
 					sj.add(String.format("- %s joueur%s", online, Utils.withOrWithoutS(online)));
 				}
@@ -220,6 +254,30 @@ public class ServerInfoItem extends AbstractObservable {
 		Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", Utils.capitalize(serverInfo.getName()));
 		RedisClass.SERVER_SWITCH.sendServerSwitch(p, serverInfo.getName());
 		//		RedisSpigotSend.sendServerSwitch(p, serverInfo.getName());
+		return true;
+	}
+
+	public boolean connect(Player p, ServerInfoAdvanced serverInfo) {
+		OlympaPlayer olympaPlayer = AccountProviderAPI.getter().get(p.getUniqueId());
+		ConnectResult connectResult = serverInfo.canConnectNew(olympaPlayer);
+		switch (connectResult) {
+		case BAD_VERSION:
+			Prefix.DEFAULT_BAD.sendMessage(p, "Tu dois avoir une version dans &4%s&c. Tu utilise la version &4%s&c.", serverInfo.getRangeVersionMinecraft(), olympaPlayer.getProtocolName());
+			return false;
+		case NO_PERM:
+			Prefix.DEFAULT_BAD.sendMessage(p, "Tu n'as pas la permission de te connecter à ce serveur.");
+			return false;
+		case NO_PERM_STATUS:
+			Prefix.DEFAULT_BAD.sendMessage(p, "Ce serveur est actuellement en maintenance.");
+			return false;
+		case OFF, ERROR:
+			Prefix.DEFAULT_BAD.sendMessage(p, "Ce serveur est fermé. Réessaye plus tard !");
+			return false;
+		case GOOD:
+		default:
+			Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", Utils.capitalize(serverInfo.getName()));
+		}
+		RedisClass.SERVER_SWITCH.sendServerSwitch(p, serverInfo.getName());
 		return true;
 	}
 
