@@ -15,6 +15,7 @@ import fr.olympa.api.spigot.item.ItemUtils;
 import fr.olympa.api.utils.Prefix;
 import fr.olympa.hub.HubPermissions;
 import fr.olympa.hub.OlympaHub;
+import fr.olympa.hub.VoteTrait;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 
@@ -42,16 +43,16 @@ public class ServerConfigCommand extends ComplexCommand {
 			sendMessage(Prefix.DEFAULT, "Sélectionnez l'endroit où apparaîtra l'hologramme.");
 			new WaitBlockClick(p, block -> {
 				server.setPortal(region, block.getLocation().add(0.5, 1, 0.5));
-				sendSuccess("Vous avez créé le portail pour le serveur %s !", server.getItemServerNameKey());
+				sendSuccess("Tu as créé le portail pour le serveur %s !", server.getItemServerNameKey());
 			}, ItemUtils.item(Material.STICK, "§aCliquez sur le bloc")).enterOrLeave();
 		}).enterOrLeave();
 	}
 
 	@Cmd(player = true, min = 1, args = "SERVER", syntax = "<server>")
-	public void setupNPC(CommandContext cmd) {
+	public void setupNPCServer(CommandContext cmd) {
 		NPC npc = CitizensAPI.getDefaultNPCSelector().getSelected(sender);
 		if (npc == null) {
-			sendError("Vous devez sélectionner un NPC.");
+			sendError("Tu dois sélectionner un NPC.");
 			return;
 		}
 		ServerTrait trait = npc.getOrAddTrait(ServerTrait.class);
@@ -59,6 +60,18 @@ public class ServerConfigCommand extends ComplexCommand {
 		ServerInfoItem server = cmd.getArgument(0);
 		trait.setServer(server);
 		sendSuccess("Le NPC %d est maintenant associé aux serveurs %s.", npc.getId(), server.getItemServerNameKey());
+	}
+
+	@Cmd(player = true)
+	public void setupNPCVote(CommandContext cmd) {
+		NPC npc = CitizensAPI.getDefaultNPCSelector().getSelected(sender);
+		if (npc == null) {
+			sendError("Tu dois sélectionner un NPC.");
+			return;
+		}
+		npc.getOrAddTrait(VoteTrait.class);
+		npc.data().setPersistent(NPC.NAMEPLATE_VISIBLE_METADATA, false);
+		sendSuccess("Le NPC %d est maintenant associé au vote.", npc.getId());
 	}
 
 }

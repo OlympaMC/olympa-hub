@@ -8,10 +8,13 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 
 import fr.olympa.api.common.permission.OlympaSpigotPermission;
+import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.OlympaHub;
+import fr.olympa.hub.gui.VanishManager;
 import fr.olympa.hub.perks.AbstractPerk;
 import net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles;
 
@@ -28,7 +31,7 @@ public abstract class ParticlePerk extends AbstractPerk {
 	protected abstract PacketPlayOutWorldParticles getParticlePacket(Location location);
 	
 	protected boolean isValid(Player p) {
-		return p.getGameMode() != GameMode.SPECTATOR;
+		return !OlympaCore.getInstance().getVanishApi().isVanished(p) && p.getGameMode() != GameMode.SPECTATOR && p.getPotionEffect(PotionEffectType.INVISIBILITY) == null;
 	}
 	
 	@Override
