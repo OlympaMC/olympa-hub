@@ -130,7 +130,7 @@ public class MenuGUI extends OlympaGUI {
 		}
 		if (ClickType.RIGHT == click) {
 			Optional<ServerInfoItem> serverTarget = instanceHub.serversInfos.getServersInfo().values().stream().filter(e -> e.slot == slot).findFirst();
-			if (serverTarget != null) {
+			if (serverTarget.isPresent()) {
 				new ChooseServersGui(olympaPlayer, serverTarget.get()).create(p);
 				return true;
 			}
