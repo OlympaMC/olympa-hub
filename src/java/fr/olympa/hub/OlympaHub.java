@@ -74,7 +74,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			PluginManager pm = getServer().getPluginManager();
 			pm.registerEvents(new HubListener(), this);
 			pm.registerEvents(new DoubleJumpListener(), this);
-			
+
 			pm.registerEvents(new LaunchPadManager(this, "launchpads.yml"), this);
 
 			new SpawnCommand(this).register();
@@ -102,15 +102,15 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(VoteTrait.class).withName("vote"));
 
 			OlympaAPIPermissionsSpigot.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
-			//OlympaAPIPermissionsSpigot.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER); bof non ?
-			
+			OlympaAPIPermissionsSpigot.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+
 			try {
 				new PerksModule(this);
 			}catch (Exception ex) {
 				ex.printStackTrace();
 				getLogger().severe("Une erreur est survenue lors du chargement des parachutes.");
 			}
-			
+
 			games = new MiniGamesManager(this);
 			vanishManager = new VanishManager();
 
