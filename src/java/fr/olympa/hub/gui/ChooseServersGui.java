@@ -21,7 +21,7 @@ public class ChooseServersGui extends OlympaGUI {
 	private OlympaPlayer player;
 
 	public ChooseServersGui(OlympaPlayer player, ServerInfoItem serverInfoItem) {
-		super(serverInfoItem.getServers().size() + 1, "Serveurs " + serverInfoItem.getServerNameCaps());
+		super(serverInfoItem.getServers().size() + 1, "Choix " + serverInfoItem.getServerNameCaps());
 		this.serverInfoItem = serverInfoItem;
 		this.player = player;
 		int i = 0;
