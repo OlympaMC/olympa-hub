@@ -19,15 +19,17 @@ public class ChooseServersGui extends OlympaGUI {
 	private OlympaPlayer player;
 
 	public ChooseServersGui(OlympaPlayer player, ServerInfoItem serverInfoItem) {
-		super("Serveurs " + serverInfoItem.getServerNameCaps(), serverInfoItem.getServers().size() / 9);
+		super(serverInfoItem.getServers().size(), "Serveurs " + serverInfoItem.getServerNameCaps());
 		this.serverInfoItem = serverInfoItem;
 		this.player = player;
 		int i = 0;
 		for (Entry<String, ServerInfoAdvanced> serv : serverInfoItem.getServers())
 			servers.put(i++, serv.getValue());
 		i = 0;
-		for (ItemStack serv : serverInfoItem.getItemsSelect())
-			inv.setItem(i++, serv);
+		for (ServerInfoAdvanced server : serverInfoItem.getServersInfo())
+			serverInfoItem.printItemChooseItem(player, inv, i++, server, true);
+		//		for (ItemStack serv : serverInfoItem.getItemsSelect())
+		//			inv.setItem(i++, serv);
 	}
 
 	@Override

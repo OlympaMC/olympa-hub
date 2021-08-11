@@ -64,6 +64,7 @@ public class ServerInfoItem extends AbstractObservable {
 	public int slot;
 
 	private ItemStack menuItem = ItemUtils.error;
+	private List<ItemStack> items = new ArrayList<>();
 	private Portal portal;
 	@Nonnull
 	private ConfigurationSection config;
@@ -86,6 +87,10 @@ public class ServerInfoItem extends AbstractObservable {
 
 	public Set<Entry<String, ServerInfoAdvanced>> getServers() {
 		return serversInfo.entrySet();
+	}
+
+	public Collection<ServerInfoAdvanced> getServersInfo() {
+		return serversInfo.values();
 	}
 
 	public boolean containsMinimumOneServer(List<ServerInfoAdvanced> monitorInfos) {
@@ -126,8 +131,12 @@ public class ServerInfoItem extends AbstractObservable {
 		return b;
 	}
 
-	public List<ItemStack> getItemsSelect() {
-		List<ItemStack> items = new ArrayList<>();
+	//	public List<ItemStack> getItemsSelect() {
+	//		return items;
+	//	}
+
+	public void createMenuChooseItem() {
+		items.clear();
 		for (ServerInfoAdvanced mi : serversInfo.values()) {
 			List<String> lore = new ArrayList<>();
 			lore.add(SEPARATOR);
@@ -136,28 +145,24 @@ public class ServerInfoItem extends AbstractObservable {
 			if (mi != null && mi.hasMinimalInfo()) {
 				StringJoiner sj = new StringJoiner(" ");
 				ItemStack serverChooseItem;
-				sj.add("§7" + mi.getHumanName());
+				lore.add(sj.toString());
 				if (mi.getStatus() != ServerStatus.OPEN)
-					sj.add("(" + mi.getStatus().getNameColored() + "§7)");
+					lore.add(mi.getStatus().getNameColored());
 				if (mi.getOnlinePlayers() != null && mi.getOnlinePlayers() > 0) {
 					int online = mi.getOnlinePlayers();
-					sj.add(String.format("- %s joueur%s", online, Utils.withOrWithoutS(online)));
+					lore.add(String.format("%s joueur%s", online, Utils.withOrWithoutS(online)));
 				}
 				if (mi.hasInfoVersions())
 					sj.add(mi.getRangeVersionMinecraft());
 				lore.add(sj.toString());
-				serverChooseItem = ItemUtils.item(item, "§6§l" + getServerNameCaps(), lore.toArray(new String[0]));
+				serverChooseItem = ItemUtils.item(item, "§6§l" + mi.getHumanName(), lore.toArray(new String[0]));
 				ItemUtils.addEnchant(serverChooseItem, Enchantment.DURABILITY, 0);
 				items.add(serverChooseItem);
 			}
 		}
-		return items;
 	}
 
-	public void update(List<ServerInfoAdvanced> newMonitorInfo) {
-		tryUpdate(newMonitorInfo);
-		//		if (!tryUpdate(newMonitorInfo))
-		//			return;
+	public void createMenuItem() {
 		Collection<ServerInfoAdvanced> monitorInfo = serversInfo.values();
 		List<String> lore = new ArrayList<>();
 		lore.add(SEPARATOR);
@@ -183,8 +188,19 @@ public class ServerInfoItem extends AbstractObservable {
 				lore.add(sj.toString());
 			}
 		});
+		lore.add("");
+		lore.add("&3[&bCLIQUE GAUCHE&2] &bConnexion directe");
+		lore.add("&8[&7CLIQUE DROIT&8] &7Choix du serveur");
 		menuItem = ItemUtils.item(item, "§6§l" + getServerNameCaps(), lore.toArray(new String[0]));
 		ItemUtils.addEnchant(menuItem, Enchantment.DURABILITY, 0);
+	}
+
+	public void update(List<ServerInfoAdvanced> newMonitorInfo) {
+		tryUpdate(newMonitorInfo);
+		//		if (!tryUpdate(newMonitorInfo))
+		//			return;
+		createMenuItem();
+		createMenuChooseItem();
 		update();
 	}
 
@@ -272,7 +288,7 @@ public class ServerInfoItem extends AbstractObservable {
 			return false;
 		case OFF, ERROR:
 			Prefix.DEFAULT_BAD.sendMessage(p, "Ce serveur est fermé. Réessaye plus tard !");
-			return false;
+		return false;
 		case GOOD:
 		default:
 			Prefix.DEFAULT_GOOD.sendMessage(p, "Tu vas être transféré au serveur %s sous peu !", Utils.capitalize(serverInfo.getName()));
@@ -339,7 +355,7 @@ public class ServerInfoItem extends AbstractObservable {
 		return minitorServer.getOlympaServer().canConnect(player);
 	}
 
-	private void setServerItem(OlympaPlayer player, Inventory inv) {
+	private void setServerMenuItem(OlympaPlayer player, Inventory inv) {
 		//		ItemStack menuItem = getMenuItem();
 		//		ItemStack currentItem = inv.getItem(slot);
 		//		if (currentItem != null)
@@ -354,12 +370,25 @@ public class ServerInfoItem extends AbstractObservable {
 			inv.setItem(slot, new ItemStack(Material.AIR));
 	}
 
-	private void printItem(OlympaPlayer player, Inventory inv) {
-		setServerItem(player, inv);
-		observe("gui_" + slot + itemServerKey + player.getUniqueId(), () -> setServerItem(player, inv));
+	private void setServerChooseItem(OlympaPlayer player, Inventory inv, int slot, ServerInfoAdvanced server) {
+		boolean hasPerm = hasPermissionToJoin(player, server);
+		if (hasPerm)
+			inv.setItem(slot, items.get(slot));
+		else
+			inv.setItem(slot, new ItemStack(Material.AIR));
 	}
 
-	public void printItem(OlympaPlayer player, Inventory inv, boolean isInstantData) {
+	private void printItem(OlympaPlayer player, Inventory inv) {
+		setServerMenuItem(player, inv);
+		observe("gui_" + slot + itemServerKey + player.getUniqueId(), () -> setServerMenuItem(player, inv));
+	}
+
+	public void printItemChooseItem(OlympaPlayer player, Inventory inv, int slot, ServerInfoAdvanced server, boolean isInstantData) {
+		setServerChooseItem(player, inv, slot, server);
+		observe("gui_" + slot + server.getName() + player.getUniqueId(), () -> setServerChooseItem(player, inv, slot, server));
+	}
+
+	public void printMenuItem(OlympaPlayer player, Inventory inv, boolean isInstantData) {
 		//		if (!isInstantData)
 		//		return;
 		//		Boolean canJoin = this.hasPermissionToJoin(player);

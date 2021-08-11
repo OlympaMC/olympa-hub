@@ -1,8 +1,8 @@
-version: 1.4
+version: 1.5
 servers:
   lobby_item:
     defaultServersName: "Lobbys"
-    description: "Lobbys"
+    description: "Serveur d'accueil avec mini jeux"
     item: BLACK_TERRACOTTA
     isUniqueMultipleServers: true
     slot: 45
