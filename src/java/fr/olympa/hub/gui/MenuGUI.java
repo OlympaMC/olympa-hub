@@ -128,25 +128,27 @@ public class MenuGUI extends OlympaGUI {
 			p.spigot().sendMessage(link);
 			return true;
 		}
-		if (ClickType.RIGHT == click)
-			new ChooseServersGui(olympaPlayer, instanceHub.serversInfos.getServersInfo().values().stream().filter(e -> e.slot == slot).findFirst().orElse(null)).create(p);
-		else {
-			Optional<Entry<String, ServerInfoItem>> server = instanceHub.serversInfos.getServersInfo().entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().connect(p)).findFirst();
-			if (server.isPresent())
-				p.closeInventory();
-			else if (minigames.keySet().contains(slot))
-				if (minigames.get(slot) == GameType.LABY) {
-					if (!config.getKeys(false).contains("laby_tp_loc")) {
-						config.set("laby_tp_loc", new Location(instanceHub.spawn.getWorld(), 0, 0, 0));
-						instanceHub.saveConfig();
-					}
-					p.teleport(config.getLocation("laby_tp_loc"));
-				} else if (instanceHub.games.getGame(minigames.get(slot)) != null)
-					instanceHub.games.getGame(minigames.get(slot)).beginGame(p);
-				else
-					p.sendMessage(instanceHub.getPrefixConsole() + "§cUne erreur est survenue, veuillez contacter un membre du staff.");
+		if (ClickType.RIGHT == click) {
+			Optional<ServerInfoItem> serverTarget = instanceHub.serversInfos.getServersInfo().values().stream().filter(e -> e.slot == slot).findFirst();
+			if (serverTarget != null) {
+				new ChooseServersGui(olympaPlayer, serverTarget.get()).create(p);
+				return true;
+			}
 		}
-
+		Optional<Entry<String, ServerInfoItem>> server = instanceHub.serversInfos.getServersInfo().entrySet().stream().filter(e -> e.getValue().slot == slot && e.getValue().connect(p)).findFirst();
+		if (server.isPresent())
+			p.closeInventory();
+		else if (minigames.keySet().contains(slot))
+			if (minigames.get(slot) == GameType.LABY) {
+				if (!config.getKeys(false).contains("laby_tp_loc")) {
+					config.set("laby_tp_loc", new Location(instanceHub.spawn.getWorld(), 0, 0, 0));
+					instanceHub.saveConfig();
+				}
+				p.teleport(config.getLocation("laby_tp_loc"));
+			} else if (instanceHub.games.getGame(minigames.get(slot)) != null)
+				instanceHub.games.getGame(minigames.get(slot)).beginGame(p);
+			else
+				p.sendMessage(instanceHub.getPrefixConsole() + "§cUne erreur est survenue, veuillez contacter un membre du staff.");
 
 		return true;
 	}
