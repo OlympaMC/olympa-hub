@@ -101,7 +101,7 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(ServerTrait.class).withName("server"));
 			CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(VoteTrait.class).withName("vote"));
 
-			OlympaAPIPermissionsSpigot.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+			OlympaAPIPermissionsSpigot.FLY_COMMAND.setMinGroup(OlympaGroup.VIP);
 			OlympaAPIPermissionsSpigot.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
 
 			try {
