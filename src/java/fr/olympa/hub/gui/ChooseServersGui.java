@@ -1,5 +1,6 @@
 package fr.olympa.hub.gui;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -13,7 +14,7 @@ import fr.olympa.hub.servers.ServerInfoItem;
 
 public class ChooseServersGui extends OlympaGUI {
 
-	private Map<Integer, ServerInfoAdvanced> servers;
+	private Map<Integer, ServerInfoAdvanced> servers = new HashMap<>();
 	private ServerInfoItem serverInfoItem;
 	private OlympaPlayer player;
 
