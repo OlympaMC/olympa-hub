@@ -131,10 +131,6 @@ public class ServerInfoItem extends AbstractObservable {
 		return b;
 	}
 
-	//	public List<ItemStack> getItemsSelect() {
-	//		return items;
-	//	}
-
 	public void createMenuChooseItem() {
 		items.clear();
 		for (ServerInfoAdvanced mi : serversInfo.values()) {
@@ -150,11 +146,10 @@ public class ServerInfoItem extends AbstractObservable {
 					lore.add(mi.getStatus().getNameColored());
 				if (mi.getOnlinePlayers() != null && mi.getOnlinePlayers() > 0) {
 					int online = mi.getOnlinePlayers();
-					lore.add(String.format("%s joueur%s", online, Utils.withOrWithoutS(online)));
+					lore.add(String.format("§7%s joueur%s", online, Utils.withOrWithoutS(online)));
 				}
 				if (mi.hasInfoVersions())
-					sj.add(mi.getRangeVersionMinecraft());
-				lore.add(sj.toString());
+					lore.add("§7" + mi.getRangeVersionMinecraft());
 				serverChooseItem = ItemUtils.item(item, "§6§l" + mi.getHumanName(), lore.toArray(new String[0]));
 				ItemUtils.addEnchant(serverChooseItem, Enchantment.DURABILITY, 0);
 				items.add(serverChooseItem);
@@ -189,8 +184,8 @@ public class ServerInfoItem extends AbstractObservable {
 			}
 		});
 		lore.add("");
-		lore.add("&3[&bCLIQUE GAUCHE&2] &bConnexion directe");
-		lore.add("&8[&7CLIQUE DROIT&8] &7Choix du serveur");
+		lore.add("§3[§bCLIQUE GAUCHE§2] §bConnexion directe");
+		lore.add("§8[§7CLIQUE DROIT§8] §7Choix du serveur");
 		menuItem = ItemUtils.item(item, "§6§l" + getServerNameCaps(), lore.toArray(new String[0]));
 		ItemUtils.addEnchant(menuItem, Enchantment.DURABILITY, 0);
 	}

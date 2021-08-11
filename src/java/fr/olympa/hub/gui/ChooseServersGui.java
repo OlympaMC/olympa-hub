@@ -50,6 +50,7 @@ public class ChooseServersGui extends OlympaGUI {
 
 	@Override
 	public boolean onClose(Player p) {
+		new MenuGUI(player).create(p);
 		return super.onClose(p);
 	}
 

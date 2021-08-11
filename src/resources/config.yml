@@ -1,8 +1,8 @@
-version: 1.5
+version: 1.6
 servers:
   lobby_item:
     defaultServersName: "Lobbys"
-    description: "Serveur d'accueil avec mini jeux"
+    description: "Serveurs d'accueil avec mini-jeux"
     item: BLACK_TERRACOTTA
     isUniqueMultipleServers: true
     slot: 45
@@ -52,7 +52,7 @@ servers:
       - creatif2
   buildeur_item:
     defaultServersName: "Buildeurs"
-    description: "§cServeur staff : §abuildeurs"
+    description: "Serveurs pour les buildeurs avec tous les plugins nécessaire "
     item: DIAMOND_PICKAXE
     isUniqueMultipleServers: true
     slot: 53
