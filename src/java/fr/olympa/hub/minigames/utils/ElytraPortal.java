@@ -6,8 +6,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-import fr.olympa.api.region.Region;
-import fr.olympa.api.region.shapes.Cuboid;
+import fr.olympa.api.spigot.region.Region;
+import fr.olympa.api.spigot.region.shapes.Cuboid;
 
 public class ElytraPortal implements ConfigurationSerializable {
 

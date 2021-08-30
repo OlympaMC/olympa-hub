@@ -1,6 +1,7 @@
+version: 1.1
 elytra:
   area:
-    ==: fr.olympa.api.region.shapes.Cuboid
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 2947
     yMin: 0
     zMax: 3113
@@ -27,13 +28,13 @@ elytra:
   tp_loc:
     ==: org.bukkit.Location
     world: world
-    x: 1.529444077478682
-    y: 248.0
-    z: 3000.514052630011
-    pitch: 26.249922
-    yaw: -88.7998
+    x: -4.615957327642608
+    y: 249.03895024216317
+    z: 3000.484234280143
+    pitch: 20.700056
+    yaw: -88.80029
   portals_locs:
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 2996
     yMin: 240
     zMax: 3004
@@ -41,7 +42,7 @@ elytra:
     yMax: 248
     xMax: 3
     xMin: 3
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 2996
     yMin: 226
     zMax: 3004
@@ -49,7 +50,7 @@ elytra:
     yMax: 234
     xMax: 35
     xMin: 35
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 2997
     yMin: 223
     zMax: 3005
@@ -57,7 +58,7 @@ elytra:
     yMax: 231
     xMax: 58
     xMin: 58
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 2997
     yMin: 222
     zMax: 3005
@@ -65,7 +66,7 @@ elytra:
     yMax: 230
     xMax: 80
     xMin: 80
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3001
     yMin: 211
     zMax: 3007
@@ -73,7 +74,7 @@ elytra:
     yMax: 211
     xMax: 105
     xMin: 95
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3001
     yMin: 179
     zMax: 3010
@@ -81,7 +82,7 @@ elytra:
     yMax: 180
     xMax: 115
     xMin: 106
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3006
     yMin: 146
     zMax: 3014
@@ -89,7 +90,7 @@ elytra:
     yMax: 154
     xMax: 141
     xMin: 141
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3034
     yMin: 141
     zMax: 3042
@@ -97,7 +98,7 @@ elytra:
     yMax: 149
     xMax: 245
     xMin: 245
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3005
     yMin: 129
     zMax: 3005
@@ -105,7 +106,7 @@ elytra:
     yMax: 137
     xMax: 292
     xMin: 284
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 2978
     yMin: 124
     zMax: 2986
@@ -113,7 +114,7 @@ elytra:
     yMax: 132
     xMax: 305
     xMin: 305
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3011
     yMin: 117
     zMax: 3011
@@ -121,7 +122,7 @@ elytra:
     yMax: 126
     xMax: 320
     xMin: 313
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3034
     yMin: 110
     zMax: 3042
@@ -129,7 +130,7 @@ elytra:
     yMax: 118
     xMax: 326
     xMin: 326
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3040
     yMin: 93
     zMax: 3048
@@ -137,7 +138,7 @@ elytra:
     yMax: 99
     xMax: 348
     xMin: 348
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3032
     yMin: 81
     zMax: 3038
@@ -145,7 +146,7 @@ elytra:
     yMax: 81
     xMax: 404
     xMin: 398
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3037
     yMin: 20
     zMax: 3043
@@ -153,7 +154,7 @@ elytra:
     yMax: 26
     xMax: 423
     xMin: 417
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3042
     yMin: 77
     zMax: 3049
@@ -161,7 +162,7 @@ elytra:
     yMax: 85
     xMax: 374
     xMin: 374
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3038
     yMin: 74
     zMax: 3047
@@ -169,7 +170,7 @@ elytra:
     yMax: 82
     xMax: 385
     xMin: 385
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3045
     yMin: 21
     zMax: 3053
@@ -177,7 +178,7 @@ elytra:
     yMax: 29
     xMax: 464
     xMin: 464
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3049
     yMin: 15
     zMax: 3057
@@ -185,7 +186,7 @@ elytra:
     yMax: 23
     xMax: 498
     xMin: 498
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3050
     yMin: 14
     zMax: 3058
@@ -193,7 +194,7 @@ elytra:
     yMax: 22
     xMax: 506
     xMin: 506
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3055
     yMin: 10
     zMax: 3063
@@ -201,7 +202,7 @@ elytra:
     yMax: 18
     xMax: 547
     xMin: 547
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3062
     yMin: 6
     zMax: 3070
@@ -209,7 +210,7 @@ elytra:
     yMax: 14
     xMax: 598
     xMin: 598
-  - ==: fr.olympa.api.region.shapes.Cuboid
+  - ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 3067
     yMin: 5
     zMax: 3075
@@ -258,7 +259,15 @@ elytra:
     z: 3077.631514447201
     pitch: 5.249986
     yaw: 109.35037
-
+  portal_region:
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
+    zMin: 0
+    yMin: 0
+    zMax: 1
+    world: world
+    yMax: 1
+    xMax: 1
+    xMin: 0
 dac:
   holo_loc:
     ==: org.bukkit.Location
@@ -277,7 +286,7 @@ dac:
     pitch: 0.0
     yaw: 0.0
   jump_region:
-    ==: fr.olympa.api.region.shapes.Cuboid
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 145
     yMin: 74
     zMax: 153
@@ -286,7 +295,7 @@ dac:
     xMax: -59
     xMin: -69
   barrier_region:
-    ==: fr.olympa.api.region.shapes.Cuboid
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 147
     yMin: 90
     zMax: 151
@@ -302,10 +311,10 @@ dac:
     z: 149.50986304363758
     pitch: 1.6502429
     yaw: 90.59991
-  minJumpY: 88
+  minJumpY: 90
   isEnabled: true
   area:
-    ==: fr.olympa.api.region.shapes.Cuboid
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: 0
     yMin: 0
     zMax: 1
@@ -313,11 +322,20 @@ dac:
     yMax: 1
     xMax: 1
     xMin: 0
-
+  min_jump_y: 90
+  portal_region:
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
+    zMin: 0
+    yMin: 0
+    zMax: 1
+    world: world
+    yMax: 1
+    xMax: 1
+    xMin: 0
 jump:
   isEnabled: true
   area:
-    ==: fr.olympa.api.region.shapes.Cuboid
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: -108
     yMin: 6
     zMax: 63
@@ -386,11 +404,19 @@ jump:
     pitch: 8.849901
     yaw: -10.499898
   tp_loc: *id001
-
+  portal_region:
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
+    zMin: 0
+    yMin: 0
+    zMax: 1
+    world: world
+    yMax: 1
+    xMax: 1
+    xMin: 0
 arena:
   isEnabled: true
   area:
-    ==: fr.olympa.api.region.shapes.Cuboid
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
     zMin: -95
     yMin: 7
     zMax: 12
@@ -431,7 +457,7 @@ arena:
     pitch: -9.068102E-5
     yaw: -89.549576
   arena:
-    ==: fr.olympa.api.region.shapes.Polygon
+    ==: fr.olympa.api.spigot.region.shapes.Polygon
     world: world
     minY: 0
     maxY: 256
@@ -479,3 +505,57 @@ arena:
     - 119|-93
     - 120|-92
     - 121|-91
+  portal_region:
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
+    zMin: 0
+    yMin: 0
+    zMax: 1
+    world: world
+    yMax: 1
+    xMax: 1
+    xMin: 0
+trident:
+  isEnabled: false
+  area:
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
+    zMin: -34
+    yMin: 10
+    zMax: 20
+    world: world
+    yMax: 119
+    xMax: 158
+    xMin: 62
+  holo_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: 90.5
+    y: 29.0
+    z: -0.5
+    pitch: 0.0
+    yaw: 0.0
+  start_loc:
+    ==: org.bukkit.Location
+    world: world
+    x: 91.5
+    y: 29.0
+    z: -3.5
+    pitch: 0.0
+    yaw: 0.0
+  fly_region:
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
+    zMin: -25
+    yMin: 29
+    zMax: 8
+    world: world
+    yMax: 108
+    xMax: 138
+    xMin: 90
+  portal_region:
+    ==: fr.olympa.api.spigot.region.shapes.Cuboid
+    zMin: 0
+    yMin: 0
+    zMax: 1
+    world: world
+    yMax: 1
+    xMax: 1
+    xMin: 0

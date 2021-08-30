@@ -1,0 +1,3 @@
+rootProject.name = 'olympa-hub'
+
+includeFlat 'olympa-api'

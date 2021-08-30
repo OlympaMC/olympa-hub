@@ -1,40 +1,34 @@
 package fr.olympa.hub;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
-
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.PluginManager;
 
-import fr.olympa.api.groups.OlympaGroup;
-import fr.olympa.api.lines.CyclingLine;
-import fr.olympa.api.lines.DynamicLine;
-import fr.olympa.api.lines.FixedLine;
-import fr.olympa.api.lines.TimerLine;
-import fr.olympa.api.permission.OlympaAPIPermissions;
-import fr.olympa.api.permission.OlympaPermission;
-import fr.olympa.api.player.OlympaPlayer;
-import fr.olympa.api.plugin.OlympaAPIPlugin;
-import fr.olympa.api.provider.AccountProvider;
-import fr.olympa.api.redis.RedisAccess;
-import fr.olympa.api.redis.RedisChannel;
-import fr.olympa.api.region.Region;
-import fr.olympa.api.region.tracking.ActionResult;
-import fr.olympa.api.region.tracking.TrackedRegion;
-import fr.olympa.api.region.tracking.flags.Flag;
-import fr.olympa.api.scoreboard.sign.ScoreboardManager;
-import fr.olympa.api.server.OlympaServer;
-import fr.olympa.api.server.ServerStatus;
+import fr.olympa.api.common.groups.OlympaGroup;
+import fr.olympa.api.common.permission.OlympaPermission;
+import fr.olympa.api.common.permission.list.OlympaAPIPermissionsSpigot;
+import fr.olympa.api.common.player.OlympaPlayer;
+import fr.olympa.api.common.plugin.OlympaAPIPlugin;
+import fr.olympa.api.common.provider.AccountProviderAPI;
+import fr.olympa.api.common.server.OlympaServer;
+import fr.olympa.api.common.server.ServerStatus;
+import fr.olympa.api.spigot.lines.CyclingLine;
+import fr.olympa.api.spigot.lines.DynamicLine;
+import fr.olympa.api.spigot.lines.FixedLine;
+import fr.olympa.api.spigot.lines.TimerLine;
+import fr.olympa.api.spigot.region.Region;
+import fr.olympa.api.spigot.region.tracking.ActionResult;
+import fr.olympa.api.spigot.region.tracking.RegionEvent.ExitEvent;
+import fr.olympa.api.spigot.region.tracking.flags.Flag;
+import fr.olympa.api.spigot.scoreboard.sign.ScoreboardManager;
 import fr.olympa.core.spigot.OlympaCore;
 import fr.olympa.hub.gui.VanishManager;
-import fr.olympa.hub.minigames.utils.GameType;
 import fr.olympa.hub.minigames.utils.MiniGamesManager;
 import fr.olympa.hub.minigames.utils.OlympaPlayerHub;
 import fr.olympa.hub.pads.LaunchPadManager;
+import fr.olympa.hub.perks.PerksModule;
 import fr.olympa.hub.servers.ServerConfigCommand;
 import fr.olympa.hub.servers.ServerInfosListener;
 import fr.olympa.hub.servers.ServerTrait;
@@ -67,38 +61,39 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 		try {
 			instance = this;
 			super.onEnable();
-
 			OlympaCore.getInstance().setOlympaServer(OlympaServer.LOBBY);
-			AccountProvider.setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
-			for (GameType game : GameType.values())
-				game.initBddStatement();
+			AccountProviderAPI.getter().setPlayerProvider(OlympaPlayerHub.class, OlympaPlayerHub::new, "lobby", OlympaPlayerHub.COLUMNS);
 			OlympaPermission.registerPermissions(HubPermissions.class);
 
-			spawn = getConfig().getLocation("spawn");
-			lightning = getConfig().getLocation("lightning");
+			getConfig().addTask("olympaHubMain", config -> {
+				lightning = config.getLocation("lightning");
+				spawn = config.getLocation("spawn");
+				OlympaCore.getInstance().setSpawn(spawn);
+			});
 
-			getServer().getPluginManager().registerEvents(new HubListener(), this);
+			PluginManager pm = getServer().getPluginManager();
+			pm.registerEvents(new HubListener(), this);
+			pm.registerEvents(new DoubleJumpListener(), this);
 
-			try {
-				getServer().getPluginManager().registerEvents(new LaunchPadManager(new File(getDataFolder(), "launchpads.yml")), this);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			pm.registerEvents(new LaunchPadManager(this, "launchpads.yml"), this);
 
 			new SpawnCommand(this).register();
 			new ServerConfigCommand(this).register();
 
 			OlympaGroup.PLAYER.setRuntimePermission("jumppads.use");
 			OlympaGroup.PLAYER.setRuntimePermission("music.favorites", false);
+			OlympaGroup.PLAYER.setRuntimePermission("music.save-datas", false);
+			OlympaGroup.VIP.setRuntimePermission("music.favorites", true);
+			OlympaGroup.VIP.setRuntimePermission("music.save-datas", true);
 
-			OlympaCore.getInstance().registerRedisSub(RedisAccess.INSTANCE.connect(), serversInfos = new ServerInfosListener(getConfig().getConfigurationSection("servers")), RedisChannel.BUNGEE_SEND_SERVERSINFOS.name());
-			//RedisAccess.INSTANCE.disconnect();
+			serversInfos = new ServerInfosListener(config);
+			pm.registerEvents(serversInfos, this);
 
 			OlympaCore.getInstance().getRegionManager().registerRegion(getConfig().getSerializable("zone", Region.class), "zone", EventPriority.HIGH, new Flag() {
 				@Override
-				public ActionResult leaves(Player p, Set<TrackedRegion> to) {
-					super.leaves(p, to);
-					p.teleport(spawn);
+				public ActionResult leaves(ExitEvent event) {
+					super.leaves(event);
+					event.getPlayer().teleport(spawn);
 					return ActionResult.TELEPORT_ELSEWHERE;
 				}
 			}.setMessages(null, "§cNe vous égarez pas !", ChatMessageType.ACTION_BAR));
@@ -106,8 +101,15 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 			CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(ServerTrait.class).withName("server"));
 			CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(VoteTrait.class).withName("vote"));
 
-			OlympaAPIPermissions.FLY_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
-			OlympaAPIPermissions.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+			OlympaAPIPermissionsSpigot.FLY_COMMAND.setMinGroup(OlympaGroup.VIP);
+			OlympaAPIPermissionsSpigot.GAMEMODE_COMMAND.setMinGroup(OlympaGroup.MINI_YOUTUBER);
+
+			try {
+				new PerksModule(this);
+			}catch (Exception ex) {
+				ex.printStackTrace();
+				getLogger().severe("Une erreur est survenue lors du chargement des parachutes.");
+			}
 
 			games = new MiniGamesManager(this);
 			vanishManager = new VanishManager();
@@ -136,15 +138,18 @@ public class OlympaHub extends OlympaAPIPlugin implements Listener {
 					new FixedLine<>("§a§lServeur:"),
 					new DynamicLine<>(x -> "§7● " + OlympaCore.getInstance().getServerName()));
 			scoreboards.addFooters(FixedLine.EMPTY_LINE, CyclingLine.olympaAnimation());
-		} catch (Exception e) {
+		} catch (Error | Exception e) {
 			OlympaCore.getInstance().setStatus(ServerStatus.MAINTENANCE);
+			getLogger().severe(String.format("Une erreur est survenu lors du chargement de %s. Le serveur est désormais en maintenance.", this.getClass().getSimpleName()));
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void onDisable() {
-		MiniGamesManager.getInstance().saveConfig(MiniGamesManager.getInstance().getConfig());
+		MiniGamesManager miniGameManager = MiniGamesManager.getInstance();
+		if (miniGameManager != null)
+			miniGameManager.saveConfig();
 	}
 
 }

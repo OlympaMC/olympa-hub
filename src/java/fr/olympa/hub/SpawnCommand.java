@@ -6,7 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
-import fr.olympa.api.command.OlympaCommand;
+import fr.olympa.api.spigot.command.OlympaCommand;
 
 public class SpawnCommand extends OlympaCommand {
 

@@ -1,42 +1,54 @@
 package fr.olympa.hub.servers;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.event.Listener;
 
-import fr.olympa.api.server.OlympaServer;
-import fr.olympa.api.server.ServerStatus;
-import redis.clients.jedis.JedisPubSub;
+import fr.olympa.api.common.redis.RedisClass;
+import fr.olympa.api.common.server.ServerInfoAdvanced;
+import fr.olympa.api.spigot.config.CustomConfig;
+import fr.olympa.core.spigot.OlympaCore;
 
-public class ServerInfosListener extends JedisPubSub {
+public class ServerInfosListener implements Listener {
 
-	public List<ServerInfo> servers = new ArrayList<>();
+	private Map<String, ServerInfoItem> servers = new HashMap<>();
 
-	public ServerInfosListener(ConfigurationSection serversConfig) {
-		for (String serverName : serversConfig.getKeys(false)) {
-			ConfigurationSection server = serversConfig.getConfigurationSection(serverName);
-			servers.add(new ServerInfo(OlympaServer.valueOf(serverName), server));
-		}
+	public ServerInfosListener(CustomConfig config) {
+		config.addTask(this.getClass().getName(), configTask -> {
+			OlympaCore.getInstance().retreiveMonitorInfos((serverInfoBasic, isInstantData) -> {
+				ConfigurationSection serversConfig = configTask.getConfigurationSection("servers");
+				servers.clear();
+				for (String itemServerConfigKeyName : serversConfig.getKeys(false)) {
+					ConfigurationSection configSection = serversConfig.getConfigurationSection(itemServerConfigKeyName);
+					ServerInfoItem servInfoItem = new ServerInfoItem(itemServerConfigKeyName, configSection);
+					servInfoItem.update(serverInfoBasic);
+					servers.put(itemServerConfigKeyName, servInfoItem);
+				}
+			}, false);
+		});
+		RedisClass.SERVER_INFO_ADVANCED.registerCallback(mis -> updateData(mis));
 	}
 
-	public ServerInfo getServer(OlympaServer olympaServer) {
-		return servers.stream().filter(x -> x.getServer() == olympaServer).findAny().orElse(null);
+	ServerInfoItem getServer(String itemServerConfigKeyName) {
+		return servers.get(itemServerConfigKeyName);
 	}
 
-	@Override
-	public void onMessage(String channel, String message) {
-		String[] infos = message.split(":");
-		ServerInfo info = getServer(OlympaServer.valueOf(infos[0]));
-		if (info == null) return;
-		info.update(parseInt(infos[1]), ServerStatus.get(Integer.parseInt(infos[2])));
+	public Collection<ServerInfoItem> getServers() {
+		return servers.values();
 	}
 
-	private int parseInt(String str) {
-		try {
-			return Integer.parseInt(str);
-		}catch (NumberFormatException ex) {
-			return -1;
-		}
+	public Map<String, ServerInfoItem> getServersInfo() {
+		return servers;
 	}
+
+	private void updateData(List<ServerInfoAdvanced> newServers) {
+		for (Entry<String, ServerInfoItem> entry : servers.entrySet())
+			entry.getValue().update(newServers);
+	}
+
 }

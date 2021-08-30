@@ -9,8 +9,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import fr.olympa.api.provider.OlympaPlayerObject;
-import fr.olympa.api.sql.SQLColumn;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import fr.olympa.api.common.provider.AccountProviderAPI;
+import fr.olympa.api.common.provider.OlympaPlayerObject;
+import fr.olympa.api.common.sql.SQLColumn;
 
 public class OlympaPlayerHub extends OlympaPlayerObject {
 	
@@ -51,6 +55,10 @@ public class OlympaPlayerHub extends OlympaPlayerObject {
 	public void setScore(GameType game, double score) {
 		scores.put(game, score);
 		game.getScoreColumn().updateAsync(this, score, null, null);
+	}
+	
+	public static OlympaPlayerHub get(@NotNull Player player) {
+		return AccountProviderAPI.getter().get(player.getUniqueId());
 	}
 }
 

@@ -3,9 +3,9 @@ package fr.olympa.hub.pads;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
 
-import fr.olympa.api.command.complex.Cmd;
-import fr.olympa.api.command.complex.CommandContext;
-import fr.olympa.api.command.complex.ComplexCommand;
+import fr.olympa.api.common.command.complex.Cmd;
+import fr.olympa.api.common.command.complex.CommandContext;
+import fr.olympa.api.spigot.command.ComplexCommand;
 import fr.olympa.hub.HubPermissions;
 import fr.olympa.hub.OlympaHub;
 

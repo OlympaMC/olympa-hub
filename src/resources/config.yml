@@ -1,25 +1,64 @@
+version: 1.6
 servers:
-  ZTA:
+  lobby_item:
+    defaultServersName: "Lobbys"
+    description: "Serveurs d'accueil avec mini-jeux"
+    item: BLACK_TERRACOTTA
+    isUniqueMultipleServers: true
+    slot: 45
+    bungeeServersNames:
+      - lobby1
+      - lobby2
+      - lobby3
+      - lobby4
+      - lobby5
+      - lobby6
+      - lobby7
+      - lobby8
+      - lobby9
+  zta_item:
+    defaultServersName: "ZTA"
     description: "Découvrez un monde au bord du chaos, meurtri par des hordes de zombies. Votre mission : survivre coûte que coûte, défendre votre clan et attaquer ceux des autres. Farmez et devenez l'homme le plus puissant de Greenfield !"
     item: ZOMBIE_HEAD
-    slot: 29
-  PVPFAC:
-    description: "Créez votre faction avec vos amis, fabriquez des usines, des équipements, les bases les plus impénétrables possible et attaquez celles des autres. Battez vos ennemis et construisez un véritable empire pour accumuler les richesses, et devenez la plus grande faction de ce monde !"
+    slot: 28
+    isUniqueMultipleServers: false
+    bungeeServersNames:
+      - zta1
+  pvpfac_item:
+    defaultServersName: "PvP Faction"
+    description: "Créez votre faction avec vos amis, fabriquez des usines, des équipements, les bases les plus impénétrables possible et attaquez celles des autres. Battez vos ennemis et construisez un véritable empire pour accumuler les richesses, et devenez la plus grande faction de ce monde !\n\n§6Actuellement en développement\nAucune date n'est encore prévue"
     item: CROSSBOW
-    slot: 31
-  CREATIF:
-    description: "Le créatif est un mode de jeux vous permettant d'exprimer au plus profond votre imagination. Créez des constructions toujours plus grandes et plus belles les unes que les autres, jouez avec vos amis en incarnant des personnages et en créant vos propres histoires."
-    item: CRAFTING_TABLE
-    slot: 33
-  PVPKIT:
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec sodales odio. Etiam porttitor magna eget ante euismod elementum. Fusce lacinia fringilla velit vestibulum hendrerit. Proin gravida diam quam, vitae convallis felis congue vitae. Morbi."
+    slot: 30
+    isUniqueMultipleServers: false
+    bungeeServersNames:
+      - pvpfac1
+      - pvpfac2
+  pvpkit_item:
+    defaultServersName: "PvP Kit"
+    description: "Battez-vous, apprenez à maîtriser vos armes puis terrassez vos adversaires et montez de niveau pour accéder à des kits toujours plus passionnants. Devenez le maître de l'arène et surpassez les autres joueurs."
     item: IRON_SWORD
     slot: 32
-#   BUILDEUR:
-#     description: "§cServeur staff : §abuildeurs"
-#     item: DIAMOND_PICKAXE
-#     slot: 43
-
+    isUniqueMultipleServers: false
+    bungeeServersNames:
+      - pvpkit1
+  creatif_item:
+    defaultServersName: "Créatif"
+    description: "Le créatif est un mode de jeux vous permettant d'exprimer au plus profond votre imagination. Créez des constructions toujours plus grandes et plus belles les unes que les autres, jouez avec vos amis en incarnant des personnages et en créant vos propres histoires. §lTaille des plots: 256x256"
+    item: CRAFTING_TABLE
+    isUniqueMultipleServers: true
+    slot: 34
+    bungeeServersNames:
+      - creatif1
+      - creatif2
+  buildeur_item:
+    defaultServersName: "Buildeurs"
+    description: "Serveurs pour les buildeurs avec tous les plugins nécessaire "
+    item: DIAMOND_PICKAXE
+    isUniqueMultipleServers: true
+    slot: 53
+    bungeeServersNames:
+      - buildeur
+      - buildeur2
 minigames:
   JUMP:
     description: "§cSautez partout !"
@@ -35,7 +74,7 @@ minigames:
     slot: 49
   DAC:
     description: "§cSautez dans le vide... Et visez juste !"
-    item: TNT
+    item: LIGHT_BLUE_WOOL
     slot: 50
   ARENA:
     description: "§cTapez vous dessus !"
@@ -43,7 +82,7 @@ minigames:
     slot: 51
 
 zone:
-  ==: fr.olympa.api.region.shapes.Cuboid
+  ==: fr.olympa.api.spigot.region.shapes.Cuboid
   world: "world"
   xMin: -10000
   yMin: 0
