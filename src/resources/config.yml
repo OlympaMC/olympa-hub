@@ -1,4 +1,4 @@
-version: 1.6
+version: 1.7
 servers:
   lobby_item:
     defaultServersName: "Lobbys"
@@ -20,7 +20,7 @@ servers:
     defaultServersName: "ZTA"
     description: "Découvrez un monde au bord du chaos, meurtri par des hordes de zombies. Votre mission : survivre coûte que coûte, défendre votre clan et attaquer ceux des autres. Farmez et devenez l'homme le plus puissant de Greenfield !"
     item: ZOMBIE_HEAD
-    slot: 28
+    slot: 27
     isUniqueMultipleServers: false
     bungeeServersNames:
       - zta1
@@ -28,28 +28,46 @@ servers:
     defaultServersName: "PvP Faction"
     description: "Créez votre faction avec vos amis, fabriquez des usines, des équipements, les bases les plus impénétrables possible et attaquez celles des autres. Battez vos ennemis et construisez un véritable empire pour accumuler les richesses, et devenez la plus grande faction de ce monde !\n\n§6Actuellement en développement\nAucune date n'est encore prévue"
     item: CROSSBOW
-    slot: 30
+    slot: 29
     isUniqueMultipleServers: false
     bungeeServersNames:
       - pvpfac1
       - pvpfac2
-  pvpkit_item:
-    defaultServersName: "PvP Kit"
-    description: "Battez-vous, apprenez à maîtriser vos armes puis terrassez vos adversaires et montez de niveau pour accéder à des kits toujours plus passionnants. Devenez le maître de l'arène et surpassez les autres joueurs."
-    item: IRON_SWORD
-    slot: 32
-    isUniqueMultipleServers: false
-    bungeeServersNames:
-      - pvpkit1
   creatif_item:
     defaultServersName: "Créatif"
     description: "Le créatif est un mode de jeux vous permettant d'exprimer au plus profond votre imagination. Créez des constructions toujours plus grandes et plus belles les unes que les autres, jouez avec vos amis en incarnant des personnages et en créant vos propres histoires. §lTaille des plots: 256x256"
     item: CRAFTING_TABLE
     isUniqueMultipleServers: true
-    slot: 34
+    slot: 31
     bungeeServersNames:
       - creatif1
       - creatif2
+  pvpkit_item:
+    defaultServersName: "PvP Kit"
+    description: "Battez-vous, apprenez à maîtriser vos armes puis terrassez vos adversaires et montez de niveau pour accéder à des kits toujours plus passionnants. Devenez le maître de l'arène et surpassez les autres joueurs."
+    item: IRON_SWORD
+    slot: 33
+    isUniqueMultipleServers: false
+    bungeeServersNames:
+      - pvpkit1
+  warfare_item:
+    defaultServersName: "Warfare"
+    description: "Surprise ..."
+    item: GOLDEN_CHESTPLATE
+    isUniqueMultipleServers: false
+    slot: 35
+    bungeeServersNames:
+      - warfare1
+  dev_item:
+    defaultServersName: "Serveur de test"
+    description: "Serveurs pour les développeurs"
+    item: COMMAND_BLOCK
+    isUniqueMultipleServers: true
+    slot: 44
+    bungeeServersNames:
+      - dev1
+      - dev2
+      - dev3
   buildeur_item:
     defaultServersName: "Buildeurs"
     description: "Serveurs pour les buildeurs avec tous les plugins nécessaire "
